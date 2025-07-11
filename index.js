@@ -1,53 +1,46 @@
-app.post("/webhook", async (req, res) => {
-  const id = req.body.queryResult.queryText;
-  const opcion = req.body.queryResult.parameters?.opcion;
+const express = require('express');
+const bodyParser = require('body-parser');
+const fs = require('fs');
+const csv = require('csv-parser');
 
-  const estudiantes = await cargarDatosCSV(); // ya definido previamente
-  const estudiante = estudiantes.find((e) => e.Identificación === id);
+const app = express();
+app.use(bodyParser.json());
 
-  if (!estudiante) {
-    return res.json({ fulfillmentText: "No se encontró tu información 😓" });
+let students = [];
+
+fs.createReadStream('estudiantes_info.csv')
+  .pipe(csv())
+  .on('data', (data) => students.push(data))
+  .on('end', () => {
+    console.log('Datos de estudiantes cargados.');
+  });
+
+app.post('/webhook', (req, res) => {
+  const parameters = req.body.queryResult.parameters;
+  const cedula = parameters['cedula'];
+  const opcion = parameters['opcion']; // letra a-f
+
+  const student = students.find(s => s.Cedula === cedula);
+
+  if (!student) {
+    return res.json({
+      fulfillmentText: 'No se encontró información para esa cédula. Verifica e intenta nuevamente.'
+    });
   }
 
-  // Si no se ha seleccionado opción aún, muestra los datos básicos y el submenú
-  if (!opcion) {
-    const respuesta = `
-📌 Aquí tienes tu información:
-Apellidos: ${estudiante.Apellidos}
-Nombres: ${estudiante.Nombres}
-Maestría: ${estudiante.Maestría}
-Cohorte: ${estudiante.Cohorte}
-
-Selecciona una opción:
-a) Nombre del proyecto
-b) Estado actual del proyecto
-c) Plazos presentar propuesta
-d) Miembros del Tribunal de sustentación
-e) Plazos para sustentar y costos
-f) Fecha planificada de sustentación
-(Ingresa solo la letra correspondiente)
-    `;
-    return res.json({ fulfillmentText: respuesta });
-  }
-
-  // Procesar opción
-  const opciones = {
-    a: `📚 Nombre del proyecto: ${estudiante["Nombre del proyecto"]}`,
-    b: `📌 Estado actual: ${estudiante["Estado del proyecto"]}`,
-    c: `📆 Plazos presentar propuesta: ${estudiante["Plazos presentar  propuesta"]}`,
-    d: `👨‍🏫 Tribunal: 
-Miembro 1: ${estudiante["Miembro Tribunal 1"]}
-Miembro 2: ${estudiante["Miembro Tribunal 2"]}`,
-    e: `💵 Plazos y costos:
-Sin prórroga: ${estudiante["Plazos para sustentar sin prórrogas"]}
-1ra prórroga: ${estudiante["Primera prórroga"]} - $${estudiante["Valores asociados a la primer prórroga"]}
-2da prórroga: ${estudiante["Segunda prórroga"]} - $${estudiante["Valores asociados a la segunda prórroga"]}
->3 períodos: ${estudiante["Más de 3 periodos académicos"]} - $${estudiante["Valores asociados cuando han pasado 3 o más periodos"]}`,
-    f: `📅 Fecha planificada de sustentación: ${estudiante["Fecha planificada de sustentación"]}`,
+  const info = {
+    a: `📘 Nombre del proyecto:\n${student['Nombre del Proyecto']}`,
+    b: `📊 Estado actual del proyecto:\n${student['Estado Actual']}`,
+    c: `📆 Plazos para presentar propuesta:\n${student['Plazos para presentar Propuesta']}`,
+    d: `👩‍🏫 Tribunal:\nTutor: ${student['Tutor']}\nVocal: ${student['Vocal']}`,
+    e: `🕒 Plazos y costos:\n- Periodo: ${student['Periodo Académico Correspondiente']}\n- Sin prórroga: ${student['Plazos para sustentar sin prórrogas']}\n- Primera prórroga: ${student['Primera prórroga']} - $${student['Valores asociados a la primer prórroga']}\n- Segunda prórroga: ${student['Segunda prórroga']} - $${student['Valores asociados a la segunda prórroga']}\n- Más de 3 períodos: ${student['Más de 3 periodos académicos']} - $${student['Valores asociados cuando han pasado 3 o más periodos']}`,
+    f: `📅 Fecha planificada de sustentación:\n${student['Fecha Planificada de Sustentación']}`
   };
 
-  const seleccion = opciones[opcion.toLowerCase()];
-  const respuesta = seleccion || "❌ Opción inválida. Por favor elige una letra de la a a la f.";
+  const respuesta = info[opcion.toLowerCase()] || 'Letra inválida. Solo puedes ingresar opciones de la a a la f.';
 
   return res.json({ fulfillmentText: respuesta });
 });
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));
