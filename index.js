@@ -52,6 +52,9 @@ app.post('/', async (req, res) => {
   let responseText = '';
   let context = [];
 
+  // Determinar el contexto actual
+  const currentContext = queryResult.outputContexts.find(c => c.name.includes('/contexts/'))?.name.split('/contexts/')[1] || 'main-menu';
+
   if (intent === 'WelcomeIntent') {
     responseText = `¡Bienvenido(a) a PoliBOT, tu asistente para estudiantes de posgrado! Estoy aquí para ayudarte con información sobre tu proceso de titulación. Por favor, selecciona una opción del menú principal digitando el número correspondiente:
 
@@ -141,7 +144,6 @@ app.post('/', async (req, res) => {
 
 0. Regresar al menú principal`;
         break;
- Samaria, Israel
       case '0':
         responseText = `Regresando al menú principal:
 
@@ -441,7 +443,8 @@ f) Fecha planificada de sustentación
       }
     }
   } else if (intent === 'DefaultFallbackIntent') {
-    responseText = `Opción inválida. Por favor, selecciona una opción válida del menú:
+    if (currentContext === 'main-menu') {
+      responseText = `Opción inválida. Por favor, selecciona una opción válida del menú:
 
 1) Documentos y formatos
 2) Modificaciones
@@ -450,7 +453,26 @@ f) Fecha planificada de sustentación
 5) Preguntas personalizadas
 6) Contactar Asistente Académico
 0) Salir`;
-    context = [{ name: `${req.body.session}/contexts/main-menu`, lifespanCount: 5 }];
+      context = [{ name: `${req.body.session}/contexts/main-menu`, lifespanCount: 5 }];
+    } else if (currentContext === 'documentos-formatos') {
+      responseText = `Opción inválida. Por favor, selecciona una opción válida:
+
+1. Formatos para elaborar la propuesta de titulación
+2. Formatos para elaborar el trabajo de titulación
+0. Regresar al menú principal`;
+      context = [{ name: `${req.body.session}/contexts/documentos-formatos`, lifespanCount: 5 }];
+    } else if (currentContext === 'sustentacion') {
+      responseText = `Opción inválida. Por favor, selecciona una opción válida:
+
+1. Requisitos y documentos para solicitar sustentación
+2. Revisión antiplagio
+3. Tiempo de duración de la sustentación
+0. Regresar al menú principal`;
+      context = [{ name: `${req.body.session}/contexts/sustentacion`, lifespanCount: 5 }];
+    } else {
+      responseText = `Opción inválida. Por favor, regresa al menú principal o selecciona una opción válida del contexto actual.`;
+      context = [{ name: `${req.body.session}/contexts/${currentContext}`, lifespanCount: 5 }];
+    }
   } else if (intent === 'ExitIntent') {
     responseText = `¡Gracias por usar PoliBOT! Espero haber sido de ayuda. ¡Hasta la próxima!`;
   }
