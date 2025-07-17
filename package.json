@@ -1,14 +1,15 @@
-
 {
   "name": "polibot-webhook",
   "version": "1.0.0",
+  "description": "Webhook para PoliBOT",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "csv-parser": "^3.0.0",
-    "express": "^4.18.2",
-    "body-parser": "^1.20.2"
+    "express": "^4.17.1",
+    "body-parser": "^1.19.0",
+    "axios": "^0.21.1",
+    "papaparse": "^5.3.0"
   }
 }
