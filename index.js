@@ -67,7 +67,7 @@ app.post('/', async (req, res) => {
 0) Salir`;
     context = [{ name: `${req.body.session}/contexts/main-menu`, lifespanCount: 5 }];
   } else if (intent === 'MainMenuIntent') {
-    const option = queryResult.parameters['main-menu-option'];
+    const option = queryResult.parameters['mainmenuoption']; // Ajuste para coincidir con la API
     switch (option) {
       case '1':
         responseText = `Has seleccionado Documentos y formatos. Por favor, selecciona una opción:
