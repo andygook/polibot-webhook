@@ -42,6 +42,7 @@ const mainMenuResponse = `Por favor, selecciona una opción del menú principal:
 app.post('/', async (req, res) => {
   const { queryResult } = req.body;
   const intent = queryResult.intent.displayName;
+  const outputContexts = queryResult.outputContexts || [];
   let responseText = '';
 
   if (intent === 'Welcome Intent') {
@@ -92,7 +93,7 @@ app.post('/', async (req, res) => {
           break;
       }
     }
-  } else if (intent === 'SubmenuDocuments') {
+  } else if (intent === 'SubmenuDocuments' || outputContexts.some(c => c.name.includes('submenu-documents'))) {
     const suboption = queryResult.parameters.suboption;
     if (!['1', '2', '0'].includes(suboption)) {
       responseText = `Opción inválida. Submenú Documentos y Formatos:
@@ -114,7 +115,7 @@ app.post('/', async (req, res) => {
           break;
       }
     }
-  } else if (intent === 'SubmenuModifications') {
+  } else if (intent === 'SubmenuModifications' || outputContexts.some(c => c.name.includes('submenu-modifications'))) {
     const suboption = queryResult.parameters.suboption;
     if (!['1', '2', '0'].includes(suboption)) {
       responseText = `Opción inválida. Submenú Modificaciones:
@@ -144,7 +145,7 @@ app.post('/', async (req, res) => {
           break;
       }
     }
-  } else if (intent === 'SubmenuSustentation') {
+  } else if (intent === 'SubmenuSustentation' || outputContexts.some(c => c.name.includes('submenu-sustentation'))) {
     const suboption = queryResult.parameters.suboption;
     if (!['1', '2', '3', '0'].includes(suboption)) {
       responseText = `Opción inválida. Submenú Proceso de Sustentación:
@@ -193,7 +194,7 @@ app.post('/', async (req, res) => {
           break;
       }
     }
-  } else if (intent === 'SubmenuTitle') {
+  } else if (intent === 'SubmenuTitle' || outputContexts.some(c => c.name.includes('submenu-title'))) {
     const suboption = queryResult.parameters.suboption;
     if (!['1', '2', '3', '0'].includes(suboption)) {
       responseText = `Opción inválida. Submenú Obtención del Título:
@@ -306,8 +307,11 @@ app.post('/', async (req, res) => {
 
   res.json({
     fulfillmentText: responseText,
-    outputContexts: intent === 'MainMenu' && option === '1' ? [
-      { name: `${req.body.session}/contexts/submenu-documents`, lifespanCount: 2 }
+    outputContexts: intent === 'MainMenu' ? [
+      option === '1' ? { name: `${req.body.session}/contexts/submenu-documents`, lifespanCount: 2 } :
+      option === '2' ? { name: `${req.body.session}/contexts/submenu-modifications`, lifespanCount: 2 } :
+      option === '3' ? { name: `${req.body.session}/contexts/submenu-sustentation`, lifespanCount: 2 } :
+      option === '4' ? { name: `${req.body.session}/contexts/submenu-title`, lifespanCount: 2 } : {}
     ] : (intent === 'PersonalizedQuestionsID' && queryResult.parameters.Identification ? [
       {
         name: `${req.body.session}/contexts/personalized-questions`,
