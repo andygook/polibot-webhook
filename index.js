@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const axios = require('axios');
-const Papa = require('papaparse');
+const { parse } = require('csv-parse');
+const fetch = require('node-fetch');
 
 const app = express();
 app.use(bodyParser.json());
@@ -9,228 +9,172 @@ app.use(bodyParser.json());
 const PORT = process.env.PORT || 3000;
 const CSV_URL = 'https://raw.githubusercontent.com/andygook/polibot-webhook/main/estudiantes_info.csv';
 
-let studentData = [];
+let estudiantes = [];
 
-async function loadStudentData() {
+async function loadCSVData() {
   try {
-    const response = await axios.get(CSV_URL);
-    Papa.parse(response.data, {
-      header: true,
-      skipEmptyLines: true,
-      transformHeader: (header) => header.trim().replace(/^"|"$/g, ''),
-      transform: (value, header) => value.trim().replace(/^"|"$/g, ''),
-      complete: (results) => {
-        studentData = results.data.map(row => ({
-          Identificación: row['Identificación'],
-          Apellidos: row['Apellidos'],
-          Nombres: row['Nombres'],
-          Maestría: row['Maestría'],
-          Cohorte: row['Cohorte'],
-          NombreProyecto: row['Nombre del proyecto'],
-          EstadoProyecto: row['Estado del proyecto'],
-          PlazoPropuesta: row['Plazos presentar propuesta'],
-          Tutor: row['Tutor'],
-          Vocal: row['Vocal'],
-          PlazosSustentar: row['Plazos para sustentar sin prórrogas'],
-          CostosPrimeraProrroga: row['Valores asociados a la primer prórroga'],
-          CostosSegundaProrroga: row['Valores asociados a la segunda prórroga'],
-          FechaSustentacion: row['Fecha planificada de sustentación'] || 'NO TIENE'
-        }));
-      },
-      error: (err) => console.error('Error al analizar CSV:', err)
+    const response = await fetch(CSV_URL);
+    const csvData = await response.text();
+    parse(csvData, { columns: true, trim: true, skip_empty_lines: true }, (err, records) => {
+      if (err) {
+        console.error('Error parsing CSV:', err);
+        return;
+      }
+      estudiantes = records;
     });
   } catch (error) {
-    console.error('Error al obtener CSV:', error);
+    console.error('Error fetching CSV:', error);
   }
 }
 
-loadStudentData();
+loadCSVData();
+
+const mainMenuResponse = `Por favor, selecciona una opción del menú principal:
+
+1) Documentos y formatos
+2) Modificaciones
+3) Proceso de sustentación
+4) Obtención del título
+5) Preguntas personalizadas
+6) Contactar Asistente Académico
+0) Salir`;
 
 app.post('/', async (req, res) => {
   const { queryResult } = req.body;
   const intent = queryResult.intent.displayName;
   let responseText = '';
-  let context = [];
 
-  // Determinar el contexto actual
-  const currentContext = queryResult.outputContexts.find(c => c.name.includes('/contexts/'))?.name.split('/contexts/')[1] || 'main-menu';
-
-  if (intent === 'WelcomeIntent') {
-    responseText = `¡Bienvenido(a) a PoliBOT, tu asistente para estudiantes de posgrado! Estoy aquí para ayudarte con información sobre tu proceso de titulación. Por favor, selecciona una opción del menú principal digitando el número correspondiente:
-
-1) Documentos y formatos
-2) Modificaciones
-3) Proceso de sustentación
-4) Obtención del título
-5) Preguntas personalizadas
-6) Contactar Asistente Académico
-0) Salir`;
-    context = [{ name: `${req.body.session}/contexts/main-menu`, lifespanCount: 5 }];
-  } else if (intent === 'MainMenuIntent') {
-    const option = queryResult.parameters['mainmenuoption']; // Ajuste para coincidir con la API
-    switch (option) {
-      case '1':
-        responseText = `Has seleccionado Documentos y formatos. Por favor, selecciona una opción:
-
+  if (intent === 'Welcome Intent') {
+    responseText = mainMenuResponse;
+  } else if (intent === 'MainMenu') {
+    const option = queryResult.parameters.option;
+    if (!['0', '1', '2', '3', '4', '5', '6'].includes(option)) {
+      responseText = `Opción inválida. ${mainMenuResponse}`;
+    } else {
+      switch (option) {
+        case '1':
+          responseText = `Submenú Documentos y Formatos:
 1. Formatos para elaborar la propuesta de titulación
 2. Formatos para elaborar el trabajo de titulación
 0. Regresar al menú principal`;
-        context = [{ name: `${req.body.session}/contexts/documentos-formatos`, lifespanCount: 5 }];
-        break;
-      case '2':
-        responseText = `Has seleccionado Modificaciones. Por favor, selecciona una opción:
-
+          break;
+        case '2':
+          responseText = `Submenú Modificaciones:
 1. Cambios en la propuesta (requisitos)
 2. Cambios de miembros del tribunal (requisitos)
 0. Regresar al menú principal`;
-        context = [{ name: `${req.body.session}/contexts/modificaciones`, lifespanCount: 5 }];
-        break;
-      case '3':
-        responseText = `Has seleccionado Proceso de sustentación. Por favor, selecciona una opción:
-
+          break;
+        case '3':
+          responseText = `Submenú Proceso de Sustentación:
 1. Requisitos y documentos para solicitar sustentación
 2. Revisión antiplagio
 3. Tiempo de duración de la sustentación
 0. Regresar al menú principal`;
-        context = [{ name: `${req.body.session}/contexts/sustentacion`, lifespanCount: 5 }];
-        break;
-      case '4':
-        responseText = `Has seleccionado Obtención del título. Por favor, selecciona una opción:
-
+          break;
+        case '4':
+          responseText = `Submenú Obtención del Título:
 1. Registro del título en el Senescyt (tiempos)
 2. Entrega física del título (tiempos)
 3. Retiro del título (lugar y requisitos)
 0. Regresar al menú principal`;
-        context = [{ name: `${req.body.session}/contexts/obtencion-titulo`, lifespanCount: 5 }];
-        break;
-      case '5':
-        responseText = `Por favor ingresa tu número de identificación (sin puntos ni guiones).`;
-        context = [{ name: `${req.body.session}/contexts/personalized-query`, lifespanCount: 5 }];
-        break;
-      case '6':
-        responseText = `Puedes contactar al Asistente Académico en:
-
-📧 **e-mail**: [administración@ies.edu.ec](mailto:administración@ies.edu.ec)
-📱 **cel**: [0987406011](tel:0987406011)
-
-0. Regresar al menú principal`;
-        context = [{ name: `${req.body.session}/contexts/main-menu`, lifespanCount: 5 }];
-        break;
-      case '0':
-        responseText = `¡Gracias por usar PoliBOT! Espero haber sido de ayuda. ¡Hasta la próxima!`;
-        break;
-      default:
-        responseText = `Opción inválida. Por favor, selecciona una opción válida del menú:
-
-1) Documentos y formatos
-2) Modificaciones
-3) Proceso de sustentación
-4) Obtención del título
-5) Preguntas personalizadas
-6) Contactar Asistente Académico
-0) Salir`;
-        context = [{ name: `${req.body.session}/contexts/main-menu`, lifespanCount: 5 }];
+          break;
+        case '5':
+          responseText = 'Por favor ingresa tu número de identificación (sin puntos ni guiones).';
+          break;
+        case '6':
+          responseText = `Para contactar al Asistente Académico, utiliza los siguientes datos:
+- E-mail: administración@ies.edu.ec
+- Cel: 0987406011
+Digite 0 para regresar al menú principal.`;
+          break;
+        case '0':
+          responseText = '¡Gracias por usar PoliBOT! Espero haberte ayudado. ¡Hasta la próxima!';
+          break;
+      }
     }
-  } else if (intent === 'DocumentosFormatosIntent') {
-    const option = queryResult.parameters['documentos-option'];
-    switch (option) {
-      case '1':
-        responseText = `Documento disponible aquí: [Formatos para elaborar la propuesta de titulación](https://docs.google.com/document/d/1toHHm36VScxfI7YbgGnVf9lvW4Ca8SE0/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)
-
-0. Regresar al menú principal`;
-        break;
-      case '2':
-        responseText = `Documento disponible aquí: [Formatos para elaborar el trabajo de titulación](https://docs.google.com/document/d/16w1HRQ5LBNqLesaZdDJiJQdS98-GCupa/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)
-
-0. Regresar al menú principal`;
-        break;
-      case '0':
-        responseText = `Regresando al menú principal:
-
-1) Documentos y formatos
-2) Modificaciones
-3) Proceso de sustentación
-4) Obtención del título
-5) Preguntas personalizadas
-6) Contactar Asistente Académico
-0) Salir`;
-        context = [{ name: `${req.body.session}/contexts/main-menu`, lifespanCount: 5 }];
-        break;
-      default:
-        responseText = `Opción inválida. Por favor, selecciona una opción válida:
-
+  } else if (intent === 'SubmenuDocuments') {
+    const suboption = queryResult.parameters.suboption;
+    if (!['1', '2', '0'].includes(suboption)) {
+      responseText = `Opción inválida. Submenú Documentos y Formatos:
 1. Formatos para elaborar la propuesta de titulación
 2. Formatos para elaborar el trabajo de titulación
 0. Regresar al menú principal`;
-        context = [{ name: `${req.body.session}/contexts/documentos-formatos`, lifespanCount: 5 }];
+    } else {
+      switch (suboption) {
+        case '1':
+          responseText = `Documento disponible aquí: https://docs.google.com/document/d/1toHHm36VScxfI7YbgGnVf9lvW4Ca8SE0/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true
+Digite 0 para regresar al menú principal.`;
+          break;
+        case '2':
+          responseText = `Documento disponible aquí: https://docs.google.com/document/d/16w1HRQ5LBNqLesaZdDJiJQdS98-GCupa/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true
+Digite 0 para regresar al menú principal.`;
+          break;
+        case '0':
+          responseText = mainMenuResponse;
+          break;
+      }
     }
-  } else if (intent === 'ModificacionesIntent') {
-    const option = queryResult.parameters['modificaciones-option'];
-    switch (option) {
-      case '1':
-        responseText = `Los requisitos para cambios en la propuesta de titulación son:
+  } else if (intent === 'SubmenuModifications') {
+    const suboption = queryResult.parameters.suboption;
+    if (!['1', '2', '0'].includes(suboption)) {
+      responseText = `Opción inválida. Submenú Modificaciones:
+1. Cambios en la propuesta (requisitos)
+2. Cambios de miembros del tribunal (requisitos)
+0. Regresar al menú principal`;
+    } else {
+      switch (suboption) {
+        case '1':
+          responseText = `Los requisitos para cambios en la propuesta de titulación son:
 1️⃣ Realizar solicitud indicando el motivo por el cambio en la propuesta.
 2️⃣ Nueva propuesta firmada por los miembros de tribunal de titulación (tutor y vocal).
 3️⃣ Enviar al coordinador de la maestría con copia personal administrativo.
 4️⃣ Inicia nuevamente el proceso de revisión y aprobación de la propuesta de trabajo de titulación.
-
-0. Regresar al menú principal`;
-        break;
-      case '2':
-        responseText = `Los requisitos para cambios de miembros del tribunal de sustentación:
+Digite 0 para Regresar al menú principal.`;
+          break;
+        case '2':
+          responseText = `Los requisitos para cambios de miembros del tribunal de sustentación:
 1️⃣ Realizar solicitud indicando el motivo por el cual solicita el cambio de los miembros de tribunal (tutor y/o vocal), en el caso de tener los nuevos nombres indicarlo, caso contrario solicitar reunión previa con el coordinador para la designación del o de los nuevos miembros del tribunal de sustentación.
 2️⃣ Nueva propuesta firmada por los miembros de tribunal de titulación (tutor y vocal).
 3️⃣ Enviar al coordinador de la maestría con copia personal administrativo.
 4️⃣ Inicia nuevamente el proceso de revisión y aprobación de la propuesta del trabajo de titulación.
-
-0. Regresar al menú principal`;
-        break;
-      case '0':
-        responseText = `Regresando al menú principal:
-
-1) Documentos y formatos
-2) Modificaciones
-3) Proceso de sustentación
-4) Obtención del título
-5) Preguntas personalizadas
-6) Contactar Asistente Académico
-0) Salir`;
-        context = [{ name: `${req.body.session}/contexts/main-menu`, lifespanCount: 5 }];
-        break;
-      default:
-        responseText = `Opción inválida. Por favor, selecciona una opción válida:
-
-1. Cambios en la propuesta (requisitos)
-2. Cambios de miembros del tribunal (requisitos)
-0. Regresar al menú principal`;
-        context = [{ name: `${req.body.session}/contexts/modificaciones`, lifespanCount: 5 }];
+Digite 0 para Regresar al menú principal.`;
+          break;
+        case '0':
+          responseText = mainMenuResponse;
+          break;
+      }
     }
-  } else if (intent === 'SustentacionIntent') {
-    const option = queryResult.parameters['sustentacion-option'];
-    switch (option) {
-      case '1':
-        responseText = `Los requisitos y documentos para solicitar fecha de sustentación son:
-1️⃣ Carta de aprobación firmada del tutor y revisor, donde indique que ambos firman el documento de conformidad con el trabajo desarrollado. Dirigido al Subdecano de la facultad. ([Modelo](https://docs.google.com/document/d/1pHAoCHePsnKROQmkUrSxMvdtqHfbfOMr/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)).
+  } else if (intent === 'SubmenuSustentation') {
+    const suboption = queryResult.parameters.suboption;
+    if (!['1', '2', '3', '0'].includes(suboption)) {
+      responseText = `Opción inválida. Submenú Proceso de Sustentación:
+1. Requisitos y documentos para solicitar sustentación
+2. Revisión antiplagio
+3. Tiempo de duración de la sustentación
+0. Regresar al menú principal`;
+    } else {
+      switch (suboption) {
+        case '1':
+          responseText = `Los requisitos y documentos para solicitar fecha de sustentación son:
+1️⃣ Carta de aprobación firmada del tutor y revisor, donde indique que ambos firman el documento de conformidad con el trabajo desarrollado. Dirigido al Subdecano de la facultad. (Se envía el modelo)(https://docs.google.com/document/d/1pHAoCHePsnKROQmkUrSxMvdtqHfbfOMr/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true).
 2️⃣ Evidencia del Análisis Antiplagio. (Solicitarle al director de su trabajo de titulación).
-3️⃣ Oficio dirigido al Subdecano de la facultad, en el cual el estudiante solicita fecha y hora de sustentación. ([Modelo](https://docs.google.com/document/d/1xct0rM4dXtE5I-LPf1YYhE9JXT8DXPhz/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)).
+3️⃣ Oficio dirigido al Subdecano de la facultad, en el cual el estudiante solicita fecha y hora de sustentación. (Se envía el modelo)(https://docs.google.com/document/d/1xct0rM4dXtE5I-LPf1YYhE9JXT8DXPhz/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true).
 4️⃣ Copia de cédula y certificado de votación a color actualizado.
-5️⃣ Documento de declaración de datos personales ([Modelo](https://docs.google.com/document/d/1ulgWeN6Jk0ltoNXhaCk1J5wKD8tDikKE/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)).
+5️⃣ Documento de declaración de datos personales (Se envía el modelo)(https://docs.google.com/document/d/1ulgWeN6Jk0ltoNXhaCk1J5wKD8tDikKE/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true).
 6️⃣ Certificado de no adeudar a la universidad (Solicitado al departamento de contabilidad).
 7️⃣ Entregar el documento del trabajo de titulación o tesis, firmado por los miembros del tribunal de sustentación y por el estudiante.
-
-0. Regresar al menú principal`;
-        break;
-      case '2':
-        responseText = `Revisión antiplagio:
+Digite 0 para Regresar al menú principal.`;
+          break;
+        case '2':
+          responseText = `Revisión antiplagio:
 1️⃣ Se envía al tutor, para que suba el documento final de trabajo de titulación al sistema de revisión del antiplagio.
-2️⃣ Si el resultado es menor al 10%, entonces el estudiante continúa con el proceso de solicitud de fecha de sustentación.
+2️⃣ Si el resultado es menor al 10%, entonces el estudiante continua con el proceso de solicitud de fecha de sustentación.
 3️⃣ Si el resultado es mayor al 10%, entonces se regresa el trabajo al estudiante para que revise y realice los cambios respectivos.
 4️⃣ El nuevo documento se sube nuevamente para revisión en el sistema.
-
-0. Regresar al menú principal`;
-        break;
-      case '3':
-        responseText = `Tiempo de duración de la sustentación:
+Digite 0 para Regresar al menú principal.`;
+          break;
+        case '3':
+          responseText = `Tiempo de duración de la sustentación:
 Detalles a Considerar:
 1️⃣ Vestir formalmente.
 2️⃣ Material visual, no debe ser sobrecargado de información.
@@ -241,48 +185,34 @@ Detalles a Considerar:
 7️⃣ Deliberación de los miembros del tribunal de sustentación.
 8️⃣ Ingresan los estudiantes nuevamente a la sala de sustentación presencial o virtual.
 9️⃣ Lectura del acta de sustentación.
-🔟 Envestidura grado de magister.
-
-0. Regresar al menú principal`;
-        break;
-      case '0':
-        responseText = `Regresando al menú principal:
-
-1) Documentos y formatos
-2) Modificaciones
-3) Proceso de sustentación
-4) Obtención del título
-5) Preguntas personalizadas
-6) Contactar Asistente Académico
-0) Salir`;
-        context = [{ name: `${req.body.session}/contexts/main-menu`, lifespanCount: 5 }];
-        break;
-      default:
-        responseText = `Opción inválida. Por favor, selecciona una opción válida:
-
-1. Requisitos y documentos para solicitar sustentación
-2. Revisión antiplagio
-3. Tiempo de duración de la sustentación
-0. Regresar al menú principal`;
-        context = [{ name: `${req.body.session}/contexts/sustentacion`, lifespanCount: 5 }];
+10️⃣ Envestidura grado de magister.
+Digite 0 para Regresar al menú principal.`;
+          break;
+        case '0':
+          responseText = mainMenuResponse;
+          break;
+      }
     }
-  } else if (intent === 'ObtencionTituloIntent') {
-    const option = queryResult.parameters['obtencion-titulo-option'];
-    switch (option) {
-      case '1':
-        responseText = `Los tiempos del registro del título en el Senescyt:
-Aproximadamente entre 15 y 30 días, este trámite es realizado por otro departamento de la IES.
-
+  } else if (intent === 'SubmenuTitle') {
+    const suboption = queryResult.parameters.suboption;
+    if (!['1', '2', '3', '0'].includes(suboption)) {
+      responseText = `Opción inválida. Submenú Obtención del Título:
+1. Registro del título en el Senescyt (tiempos)
+2. Entrega física del título (tiempos)
+3. Retiro del título (lugar y requisitos)
 0. Regresar al menú principal`;
-        break;
-      case '2':
-        responseText = `Tiempos de entrega física del título:
-Aproximadamente entre 15 y 30 días, este trámite es realizado por otro departamento de la IES, cuando el título ya se encuentra registrado en el Senescyt entonces el estudiante se debe acercar a la secretaría técnica de la IES.
-
-0. Regresar al menú principal`;
-        break;
-      case '3':
-        responseText = `Lugar y requisitos para el retiro del título:
+    } else {
+      switch (suboption) {
+        case '1':
+          responseText = `Los tiempos del registro del título en el Senescyt: Aproximadamente entre 15 y 30 días, este trámite es realizado por otro departamento de la IES.
+Digite 0 para Regresar al menú principal.`;
+          break;
+        case '2':
+          responseText = `Tiempos de entrega física del título: Aproximadamente entre 15 y 30 días, este trámite es realizado por otro departamento de la IES, cuando el título ya se encuentra registrado en el Senescyt entonces el estudiante se debe acercar a la secretaría técnica de la IES.
+Digite 0 para Regresar al menú principal.`;
+          break;
+        case '3':
+          responseText = `Lugar y requisitos para el retiro del título:
 TRÁMITE PERSONAL:
 - Acercarse a la secretaría técnica de la IES, en horario de 08h00 a 15h30 de lunes a viernes.
 - Presentar original de cédula.
@@ -290,148 +220,24 @@ TRÁMITE REALIZADO POR TERCERO:
 - Realizar una declaración notarizada que indique quién va a retirar el título con firma y copia de cédula del graduado y de la persona que va a retirar el título.
 - Acercarse a la secretaría técnica de la IES, en horario de 08h00 a 15h30 de lunes a viernes.
 - Presentar la cédula del quien retira el título y entregar la declaración notarizada.
-
-0. Regresar al menú principal`;
-        break;
-      case '0':
-        responseText = `Regresando al menú principal:
-
-1) Documentos y formatos
-2) Modificaciones
-3) Proceso de sustentación
-4) Obtención del título
-5) Preguntas personalizadas
-6) Contactar Asistente Académico
-0) Salir`;
-        context = [{ name: `${req.body.session}/contexts/main-menu`, lifespanCount: 5 }];
-        break;
-      default:
-        responseText = `Opción inválida. Por favor, selecciona una opción válida:
-
-1. Registro del título en el Senescyt (tiempos)
-2. Entrega física del título (tiempos)
-3. Retiro del título (lugar y requisitos)
-0. Regresar al menú principal`;
-        context = [{ name: `${req.body.session}/contexts/obtencion-titulo`, lifespanCount: 5 }];
-    }
-  } else if (intent === 'PersonalizedQueryIdentificationIntent') {
-    const identification = queryResult.parameters['identification'];
-    const student = studentData.find(s => s.Identificación === identification);
-    if (student) {
-      responseText = `Información encontrada para ${student.Nombres} ${student.Apellidos} (${student.Maestría}, Cohorte ${student.Cohorte}). Por favor, selecciona una opción:
-
-a) Nombre del proyecto
-b) Estado actual del proyecto
-c) Plazos presentar propuesta
-d) Miembros del tribunal de sustentación
-e) Plazos para sustentar y costos
-f) Fecha planificada de sustentación
-0) Regresar al menú principal`;
-      context = [
-        { name: `${req.body.session}/contexts/personalized-query-submenu`, lifespanCount: 5 },
-        { name: `${req.body.session}/contexts/identification`, lifespanCount: 5, parameters: { identification } }
-      ];
-    } else {
-      responseText = `No se encontró información para el número de identificación proporcionado. Por favor, verifica e ingresa nuevamente tu número de identificación (sin puntos ni guiones).`;
-      context = [{ name: `${req.body.session}/contexts/personalized-query`, lifespanCount: 5 }];
-    }
-  } else if (intent === 'PersonalizedQuerySubmenuIntent') {
-    const option = queryResult.parameters['query-option'];
-    const identificationContext = queryResult.outputContexts.find(c => c.name.includes('identification'));
-    const identification = identificationContext ? identificationContext.parameters.identification : null;
-    const student = studentData.find(s => s.Identificación === identification);
-
-    if (!student) {
-      responseText = `Error: No se encontró información. Por favor, ingresa nuevamente tu número de identificación (sin puntos ni guiones).`;
-      context = [{ name: `${req.body.session}/contexts/personalized-query`, lifespanCount: 5 }];
-    } else {
-      switch (option) {
-        case 'a':
-          responseText = `Nombre del proyecto: ${student.NombreProyecto}
-
-a) Nombre del proyecto
-b) Estado actual del proyecto
-c) Plazos presentar propuesta
-d) Miembros del tribunal de sustentación
-e) Plazos para sustentar y costos
-f) Fecha planificada de sustentación
-0) Regresar al menú principal`;
-          break;
-        case 'b':
-          responseText = `Estado actual del proyecto: ${student.EstadoProyecto}
-
-a) Nombre del proyecto
-b) Estado actual del proyecto
-c) Plazos presentar propuesta
-d) Miembros del tribunal de sustentación
-e) Plazos para sustentar y costos
-f) Fecha planificada de sustentación
-0) Regresar al menú principal`;
-          break;
-        case 'c':
-          responseText = `Plazos para presentar propuesta: ${student.PlazoPropuesta}
-
-a) Nombre del proyecto
-b) Estado actual del proyecto
-c) Plazos presentar propuesta
-d) Miembros del tribunal de sustentación
-e) Plazos para sustentar y costos
-f) Fecha planificada de sustentación
-0) Regresar al menú principal`;
-          break;
-        case 'd':
-          responseText = `Miembros del tribunal de sustentación:
-- Tutor: ${student.Tutor}
-- Vocal: ${student.Vocal}
-
-a) Nombre del proyecto
-b) Estado actual del proyecto
-c) Plazos presentar propuesta
-d) Miembros del tribunal de sustentación
-e) Plazos para sustentar y costos
-f) Fecha planificada de sustentación
-0) Regresar al menú principal`;
-          break;
-        case 'e':
-          responseText = `Plazos para sustentar y costos:
-- Plazo sin prórrogas: ${student.PlazosSustentar}
-- Primera prórroga: ${student.CostosPrimeraProrroga}
-- Segunda prórroga: ${student.CostosSegundaProrroga}
-
-a) Nombre del proyecto
-b) Estado actual del proyecto
-c) Plazos presentar propuesta
-d) Miembros del tribunal de sustentación
-e) Plazos para sustentar y costos
-f) Fecha planificada de sustentación
-0) Regresar al menú principal`;
-          break;
-        case 'f':
-          responseText = `Fecha planificada de sustentación: ${student.FechaSustentacion}
-
-a) Nombre del proyecto
-b) Estado actual del proyecto
-c) Plazos presentar propuesta
-d) Miembros del tribunal de sustentación
-e) Plazos para sustentar y costos
-f) Fecha planificada de sustentación
-0) Regresar al menú principal`;
+Digite 0 para Regresar al menú principal.`;
           break;
         case '0':
-          responseText = `Regresando al menú principal:
-
-1) Documentos y formatos
-2) Modificaciones
-3) Proceso de sustentación
-4) Obtención del título
-5) Preguntas personalizadas
-6) Contactar Asistente Académico
-0) Salir`;
-          context = [{ name: `${req.body.session}/contexts/main-menu`, lifespanCount: 5 }];
+          responseText = mainMenuResponse;
           break;
-        default:
-          responseText = `Opción inválida. Por favor, selecciona una opción válida:
-
+      }
+    }
+  } else if (intent === 'PersonalizedQuestionsID') {
+    const id = queryResult.parameters.Identification;
+    if (!id || !/^[0-9]{10}$/.test(id)) {
+      responseText = 'Número de identificación inválido. Por favor ingresa un número de 10 dígitos sin puntos ni guiones.';
+    } else {
+      const estudiante = estudiantes.find(e => e.Identificación === id);
+      if (!estudiante) {
+        responseText = 'No se encontró información para el número de identificación proporcionado. Por favor verifica e intenta nuevamente.';
+      } else {
+        responseText = `Información encontrada para ${estudiante.Nombres} ${estudiante.Apellidos}, Maestría: ${estudiante.Maestría}, Cohorte: ${estudiante.Cohorte}.
+Selecciona una opción:
 a) Nombre del proyecto
 b) Estado actual del proyecto
 c) Plazos presentar propuesta
@@ -439,42 +245,77 @@ d) Miembros del tribunal de sustentación
 e) Plazos para sustentar y costos
 f) Fecha planificada de sustentación
 0) Regresar al menú principal`;
-          context = [{ name: `${req.body.session}/contexts/personalized-query-submenu`, lifespanCount: 5 }];
       }
     }
-  } else if (intent === 'DefaultFallbackIntent') {
-    if (currentContext === 'main-menu') {
-      responseText = `Opción inválida. Por favor, selecciona una opción válida del menú:
-
-1) Documentos y formatos
-2) Modificaciones
-3) Proceso de sustentación
-4) Obtención del título
-5) Preguntas personalizadas
-6) Contactar Asistente Académico
-0) Salir`;
-      context = [{ name: `${req.body.session}/contexts/main-menu`, lifespanCount: 5 }];
-    } else if (currentContext === 'documentos-formatos') {
-      responseText = `Opción inválida. Por favor, selecciona una opción válida:
-
-1. Formatos para elaborar la propuesta de titulación
-2. Formatos para elaborar el trabajo de titulación
-0. Regresar al menú principal`;
-      context = [{ name: `${req.body.session}/contexts/documentos-formatos`, lifespanCount: 5 }];
+  } else if (intent === 'PersonalizedQuestionsSubmenu') {
+    const suboption = queryResult.parameters.suboption.toLowerCase();
+    const id = queryResult.parameters.Identification || queryResult.outputContexts.find(c => c.parameters && c.parameters.Identification)?.parameters.Identification;
+    if (!id) {
+      responseText = 'Por favor ingresa tu número de identificación (sin puntos ni guiones).';
+    } else if (!['a', 'b', 'c', 'd', 'e', 'f', '0'].includes(suboption)) {
+      responseText = `Opción inválida. Selecciona una opción válida:
+a) Nombre del proyecto
+b) Estado actual del proyecto
+c) Plazos presentar propuesta
+d) Miembros del tribunal de sustentación
+e) Plazos para sustentar y costos
+f) Fecha planificada de sustentación
+0) Regresar al menú principal`;
     } else {
-      responseText = `Opción inválida. Por favor, regresa al menú principal o selecciona una opción válida del contexto actual.`;
-      context = [{ name: `${req.body.session}/contexts/${currentContext}`, lifespanCount: 5 }];
+      const estudiante = estudiantes.find(e => e.Identificación === id);
+      if (!estudiante) {
+        responseText = 'No se encontró información para el número de identificación proporcionado. Por favor verifica e intenta nuevamente.';
+      } else {
+        switch (suboption) {
+          case 'a':
+            responseText = `Nombre del proyecto: ${estudiante['Nombre del proyecto']}
+Digite 0 para regresar al menú principal.`;
+            break;
+          case 'b':
+            responseText = `Estado actual del proyecto: ${estudiante['Estado del proyecto']}
+Digite 0 para regresar al menú principal.`;
+            break;
+          case 'c':
+            responseText = `Plazos para presentar propuesta: ${estudiante['Plazos presentar  propuesta']}
+Digite 0 para regresar al menú principal.`;
+            break;
+          case 'd':
+            responseText = `Miembros del tribunal de sustentación: ${estudiante.Tutor} (Tutor), ${estudiante.Vocal} (Vocal)
+Digite 0 para regresar al menú principal.`;
+            break;
+          case 'e':
+            responseText = `Plazos para sustentar y costos:
+- Sin prórrogas: ${estudiante['Plazos para sustentar sin prórrogas']} (${estudiante['Periodo Académico Correspondiente']})
+- Primera prórroga: ${estudiante['Primera prórroga']} (Costo: ${estudiante['Valores asociados a la primer prórroga']})
+- Segunda prórroga: ${estudiante['Segunda prórroga']} (Costo: ${estudiante['Valores asociados a la segunda prórroga']})
+Digite 0 para regresar al menú principal.`;
+            break;
+          case 'f':
+            responseText = `Fecha planificada de sustentación: ${estudiante['Fecha planificada de sustentación'] || 'No definida'}
+Digite 0 para regresar al menú principal.`;
+            break;
+          case '0':
+            responseText = mainMenuResponse;
+            break;
+        }
+      }
     }
-  } else if (intent === 'ExitIntent') {
-    responseText = `¡Gracias por usar PoliBOT! Espero haber sido de ayuda. ¡Hasta la próxima!`;
+  } else if (intent === 'Default Fallback Intent') {
+    responseText = `Opción inválida. ${mainMenuResponse}`;
   }
 
   res.json({
     fulfillmentText: responseText,
-    outputContexts: context
+    outputContexts: intent === 'PersonalizedQuestionsID' && queryResult.parameters.Identification ? [
+      {
+        name: `${req.body.session}/contexts/personalized-questions`,
+        lifespanCount: 5,
+        parameters: { Identification: queryResult.parameters.Identification }
+      }
+    ] : []
   });
 });
 
 app.listen(PORT, () => {
-  console.log(`El servidor está corriendo en el puerto ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
