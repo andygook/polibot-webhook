@@ -461,14 +461,6 @@ f) Fecha planificada de sustentación
 2. Formatos para elaborar el trabajo de titulación
 0. Regresar al menú principal`;
       context = [{ name: `${req.body.session}/contexts/documentos-formatos`, lifespanCount: 5 }];
-    } else if (currentContext === 'sustentacion') {
-      responseText = `Opción inválida. Por favor, selecciona una opción válida:
-
-1. Requisitos y documentos para solicitar sustentación
-2. Revisión antiplagio
-3. Tiempo de duración de la sustentación
-0. Regresar al menú principal`;
-      context = [{ name: `${req.body.session}/contexts/sustentacion`, lifespanCount: 5 }];
     } else {
       responseText = `Opción inválida. Por favor, regresa al menú principal o selecciona una opción válida del contexto actual.`;
       context = [{ name: `${req.body.session}/contexts/${currentContext}`, lifespanCount: 5 }];
