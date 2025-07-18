@@ -47,13 +47,14 @@ app.post('/', async (req, res) => {
   const { queryResult } = req.body;
   const intent = queryResult.intent.displayName;
   const outputContexts = queryResult.outputContexts || [];
+  const parameters = queryResult.parameters || {};
   let responseText = '';
 
   if (intent === 'Welcome Intent') {
     responseText = mainMenuResponse;
   } else if (intent === 'MainMenu') {
-    const option = queryResult.parameters.option;
-    if (!['0', '1', '2', '3', '4', '5', '6'].includes(option)) {
+    const option = parameters.option;
+    if (!option || !['0', '1', '2', '3', '4', '5', '6'].includes(option)) {
       responseText = `Opción inválida. ${mainMenuResponse}`;
     } else {
       switch (option) {
@@ -97,8 +98,8 @@ app.post('/', async (req, res) => {
           break;
       }
     }
-  } else if (intent === 'SubmenuDocuments' || outputContexts.some(c => c.name.includes('submenu-documents'))) {
-    const suboption = queryResult.parameters.suboption;
+  } else if ((intent === 'SubmenuDocuments' || outputContexts.some(c => c.name.includes('submenu-documents'))) && parameters.suboption) {
+    const suboption = parameters.suboption;
     if (!['1', '2', '0'].includes(suboption)) {
       responseText = `Opción inválida. Submenú Documentos y Formatos:
       1. Formatos para elaborar la propuesta de titulación
@@ -119,8 +120,8 @@ app.post('/', async (req, res) => {
           break;
       }
     }
-  } else if (intent === 'SubmenuModifications' || outputContexts.some(c => c.name.includes('submenu-modifications'))) {
-    const suboption = queryResult.parameters.suboption;
+  } else if ((intent === 'SubmenuModifications' || outputContexts.some(c => c.name.includes('submenu-modifications'))) && parameters.suboption) {
+    const suboption = parameters.suboption;
     if (!['1', '2', '0'].includes(suboption)) {
       responseText = `Opción inválida. Submenú Modificaciones:
       1. Cambios en la propuesta (requisitos)
@@ -149,8 +150,8 @@ app.post('/', async (req, res) => {
           break;
       }
     }
-  } else if (intent === 'SubmenuSustentation' || outputContexts.some(c => c.name.includes('submenu-sustentation'))) {
-    const suboption = queryResult.parameters.suboption;
+  } else if ((intent === 'SubmenuSustentation' || outputContexts.some(c => c.name.includes('submenu-sustentation'))) && parameters.suboption) {
+    const suboption = parameters.suboption;
     if (!['1', '2', '3', '0'].includes(suboption)) {
       responseText = `Opción inválida. Submenú Proceso de Sustentación:
       1. Requisitos y documentos para solicitar sustentación
@@ -198,8 +199,8 @@ app.post('/', async (req, res) => {
           break;
       }
     }
-  } else if (intent === 'SubmenuTitle' || outputContexts.some(c => c.name.includes('submenu-title'))) {
-    const suboption = queryResult.parameters.suboption;
+  } else if ((intent === 'SubmenuTitle' || outputContexts.some(c => c.name.includes('submenu-title'))) && parameters.suboption) {
+    const suboption = parameters.suboption;
     if (!['1', '2', '3', '0'].includes(suboption)) {
       responseText = `Opción inválida. Submenú Obtención del Título:
       1. Registro del título en el Senescyt (tiempos)
@@ -233,7 +234,7 @@ app.post('/', async (req, res) => {
       }
     }
   } else if (intent === 'PersonalizedQuestionsID') {
-    const id = queryResult.parameters.Identification;
+    const id = parameters.Identification;
     if (!id || !/^[0-9]{10}$/.test(id)) {
       responseText = 'Número de identificación inválido. Por favor ingresa un número de 10 dígitos sin puntos ni guiones.';
     } else {
@@ -253,8 +254,8 @@ app.post('/', async (req, res) => {
       }
     }
   } else if (intent === 'PersonalizedQuestionsSubmenu') {
-    const suboption = queryResult.parameters.suboption.toLowerCase();
-    const id = queryResult.parameters.Identification || queryResult.outputContexts.find(c => c.parameters && c.parameters.Identification)?.parameters.Identification;
+    const suboption = (parameters.suboption || '').toLowerCase();
+    const id = parameters.Identification || outputContexts.find(c => c.parameters && c.parameters.Identification)?.parameters.Identification;
     if (!id) {
       responseText = 'Por favor ingresa tu número de identificación (sin puntos ni guiones).';
     } else if (!['a', 'b', 'c', 'd', 'e', 'f', '0'].includes(suboption)) {
@@ -307,6 +308,8 @@ app.post('/', async (req, res) => {
     }
   } else if (intent === 'Default Fallback Intent') {
     responseText = `Opción inválida. ${mainMenuResponse}`;
+  } else {
+    responseText = `No se reconoció la intención. ${mainMenuResponse}`;
   }
 
   res.json({
@@ -317,11 +320,11 @@ app.post('/', async (req, res) => {
       option === '3' ? { name: `${req.body.session}/contexts/submenu-sustentation`, lifespanCount: 2 } :
       option === '4' ? { name: `${req.body.session}/contexts/submenu-title`, lifespanCount: 2 } :
       option === '5' ? { name: `${req.body.session}/contexts/personalized-questions`, lifespanCount: 5 } : {}
-    ] : (intent === 'PersonalizedQuestionsID' && queryResult.parameters.Identification ? [
+    ] : (intent === 'PersonalizedQuestionsID' && parameters.Identification ? [
       {
         name: `${req.body.session}/contexts/personalized-questions`,
         lifespanCount: 5,
-        parameters: { Identification: queryResult.parameters.Identification }
+        parameters: { Identification: parameters.Identification }
       }
     ] : [])
   });
