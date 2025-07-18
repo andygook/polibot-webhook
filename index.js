@@ -40,6 +40,10 @@ const mainMenuResponse = `Por favor, selecciona una opción del menú principal:
 0) Salir`;
 
 app.post('/', async (req, res) => {
+  console.log('Received intent:', req.body.queryResult.intent.displayName);
+  console.log('Parameters:', req.body.queryResult.parameters);
+  console.log('Output Contexts:', req.body.queryResult.outputContexts);
+
   const { queryResult } = req.body;
   const intent = queryResult.intent.displayName;
   const outputContexts = queryResult.outputContexts || [];
@@ -311,7 +315,8 @@ app.post('/', async (req, res) => {
       option === '1' ? { name: `${req.body.session}/contexts/submenu-documents`, lifespanCount: 2 } :
       option === '2' ? { name: `${req.body.session}/contexts/submenu-modifications`, lifespanCount: 2 } :
       option === '3' ? { name: `${req.body.session}/contexts/submenu-sustentation`, lifespanCount: 2 } :
-      option === '4' ? { name: `${req.body.session}/contexts/submenu-title`, lifespanCount: 2 } : {}
+      option === '4' ? { name: `${req.body.session}/contexts/submenu-title`, lifespanCount: 2 } :
+      option === '5' ? { name: `${req.body.session}/contexts/personalized-questions`, lifespanCount: 5 } : {}
     ] : (intent === 'PersonalizedQuestionsID' && queryResult.parameters.Identification ? [
       {
         name: `${req.body.session}/contexts/personalized-questions`,
