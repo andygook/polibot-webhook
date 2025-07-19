@@ -48,6 +48,14 @@ app.post('/', (req, res) => {
                       'Por favor, selecciona una opción (0-2).');
             agent.setContext({ name: 'documents_menu', lifespan: 5 });
             agent.setContext({ name: 'main_menu', lifespan: 0 });
+        } else if (input === '2') {
+            agent.add('Submenú - Ajustes en propuesta:\n' +
+                      '1. Cambios en la propuesta (requisitos)\n' +
+                      '2. Cambios de miembros del tribunal (requisitos)\n' +
+                      '0. Regresar al menú principal\n\n' +
+                      'Por favor, selecciona una opción (0-2).');
+            agent.setContext({ name: 'adjustments_menu', lifespan: 5 });
+            agent.setContext({ name: 'main_menu', lifespan: 0 });
         } else if (input === '0') {
             agent.add('Gracias por usar PoliBOT. ¡Espero verte pronto para más consultas!');
             agent.setContext({ name: 'main_menu', lifespan: 0 });
@@ -94,6 +102,46 @@ app.post('/', (req, res) => {
         }
     }
 
+    function adjustmentsMenuHandler(agent) {
+        let input = agent.parameters.option;
+        if (!input || typeof input !== 'string' || !['0', '1', '2'].includes(input)) {
+            agent.add('Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
+                      'Submenú - Ajustes en propuesta:\n' +
+                      '1. Cambios en la propuesta (requisitos)\n' +
+                      '2. Cambios de miembros del tribunal (requisitos)\n' +
+                      '0. Regresar al menú principal');
+            return;
+        }
+
+        if (input === '1') {
+            agent.add('Los requisitos para cambios en la propuesta de titulación son:\n' +
+                      '1️- Realizar solicitud indicando el motivo por el cambio en la propuesta.\n' +
+                      '2️- Nueva propuesta firmada por los miembros de tribunal de titulación (tutor y vocal).\n' +
+                      '3️- Enviar al coordinador de la maestría con copia personal administrativo.\n' +
+                      '4️- Inicia nuevamente el proceso de revisión y aprobación de la propuesta de trabajo de titulación.\n' +
+                      'Digite 0 para regresar al menú principal');
+        } else if (input === '2') {
+            agent.add('Los requisitos para cambios de miembros del tribunal de sustentación:\n' +
+                      '1️- Realizar solicitud indicando el motivo por el cual solicita el cambio de los miembros de tribunal (tutor y/o vocal), en el caso de tener los nuevos nombres indicarlo, caso contrario solicitar reunión previa con el coordinador para la designación del o de los nuevos miembros del tribunal de sustentación.\n' +
+                      '2️- Nueva propuesta firmada por los miembros de tribunal de titulación (tutor y vocal).\n' +
+                      '3️- Enviar al coordinador de la maestría con copia personal administrativo.\n' +
+                      '4️- Inicia nuevamente el proceso de revisión y aprobación de la propuesta del trabajo de titulación.\n' +
+                      'Digite 0 para regresar al menú principal');
+        } else if (input === '0') {
+            agent.add('Menú Principal:\n' +
+                      `1) Documentos y formatos\n` +
+                      `2) Ajustes en propuesta\n` +
+                      `3) Proceso de sustentación\n` +
+                      `4) Gestión del título\n` +
+                      `5) Preguntas personalizadas\n` +
+                      `6) Contactar Asistente Académico\n` +
+                      `0) Salir\n\n` +
+                      'Por favor, selecciona una opción (0-6).');
+            agent.setContext({ name: 'adjustments_menu', lifespan: 0 });
+            agent.setContext({ name: 'main_menu', lifespan: 5 });
+        }
+    }
+
     function fallbackHandler(agent) {
         agent.add('Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n\n' +
                   'Menú Principal:\n' +
@@ -110,6 +158,7 @@ app.post('/', (req, res) => {
     intentMap.set('Default Welcome Intent', welcomeHandler);
     intentMap.set('Main Menu', mainMenuHandler);
     intentMap.set('Documents Menu', documentsMenuHandler);
+    intentMap.set('Adjustments Menu', adjustmentsMenuHandler); // Nueva intención añadida
     intentMap.set('Default Fallback Intent', fallbackHandler);
     agent.handleRequest(intentMap);
 });
