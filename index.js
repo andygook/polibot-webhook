@@ -8,6 +8,8 @@ app.use(express.json());
 app.post('/', (req, res) => {
     const agent = new WebhookClient({ request: req, response: res });
 
+    console.log('Intención recibida:', agent.intent);
+
     function welcomeHandler(agent) {
         const message = `¡Bienvenido(a) a PoliBOT! Soy el asistente virtual para estudiantes de posgrado. ¿Cómo puedo ayudarte hoy?\n\n` +
                         `Menú Principal:\n` +
@@ -31,7 +33,7 @@ app.post('/', (req, res) => {
                       '1) Documentos y formatos\n' +
                       '2) Modificaciones\n' +
                       '3) Proceso de sustentación\n' +
-                      '4) Obención del título\n' +
+                      '4) Obtención del título\n' +
                       '5) Preguntas personalizadas\n' +
                       '6) Contactar Asistente Académico\n' +
                       '0) Salir');
@@ -74,9 +76,9 @@ app.post('/', (req, res) => {
         }
 
         if (input === '1') {
-            agent.add('Documento disponible aquí: [Formatos para la propuesta de titulación](https://docs.google.com/document/d/1toHHm36VScxfI7YbgGnVf9lvW4Ca8SE0/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)');
+            agent.add('Documento disponible aquí: [Formatos para la propuesta de titulación](https://docs.google.com/document/d/1toHHm36VScxfI7YbgGnVf9lvW4Ca8SE0/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)\n\nDigite 0 para regresar al menú principal');
         } else if (input === '2') {
-            agent.add('Documento disponible aquí: [Formatos para el trabajo de titulación](https://docs.google.com/document/d/16w1HRQ5LBNqLesaZdDJiJQdS98-GCupa/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)');
+            agent.add('Documento disponible aquí: [Formatos para el trabajo de titulación](https://docs.google.com/document/d/16w1HRQ5LBNqLesaZdDJiJQdS98-GCupa/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)\n\nDigite 0 para regresar al menú principal');
         } else if (input === '0') {
             agent.add('Menú Principal:\n' +
                       '1) Documentos y formatos\n' +
@@ -114,5 +116,5 @@ app.post('/', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
