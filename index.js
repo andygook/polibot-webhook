@@ -5,7 +5,7 @@ const axios = require('axios');
 const app = express();
 app.use(express.json());
 
-// Datos simulados desde estudiantes_info.csv (reemplazar con lógica para leer desde archivo en producción)
+// Datos simulados desde estudiantes_info.csv
 const studentsData = [
     { id: "0123456789", apellidos: "Carrera Aguirre", nombres: "Gabriela Eliza", maestria: "MSI", cohorte: "11" },
     { id: "1234567890", apellidos: "Abrigo Sánchez", nombres: "Darwin Alberto", maestria: "MACI", cohorte: "4" },
@@ -93,7 +93,7 @@ app.post('/', (req, res) => {
             agent.setContext({ name: 'main_menu', lifespan: 0 });
         } else if (input === '5') {
             agent.add('Por favor ingresa tu número de identificación (sin puntos ni guiones).');
-            agent.setContext({ name: 'awaiting_id', lifespan: 1 });
+            agent.setContext({ name: 'awaiting_id', lifespan: 1 }); // Contexto de salida para esperar ID
             agent.setContext({ name: 'main_menu', lifespan: 0 });
         } else if (input === '6') {
             agent.add('Para contactar al Asistente Académico, por favor envía un correo a asistente.academico@ies.edu.ec o llama al +593 2 123 4567. Digite 0 para regresar al menú principal.');
@@ -283,11 +283,12 @@ app.post('/', (req, res) => {
     }
 
     function personalizedQueriesMenuHandler(agent) {
-        let input = agent.parameters.option || agent.parameters.id; // Maneja tanto la identificación como las opciones del submenú
+        let input = agent.parameters.option || agent.parameters.id; // Captura ID o opción
         const awaitingId = agent.getContext('awaiting_id');
 
-        if (awaitingId && awaitingId.parameters && !input) {
+        if (awaitingId && !input) {
             agent.add('Por favor ingresa tu número de identificación (sin puntos ni guiones).');
+            agent.setContext({ name: 'awaiting_id', lifespan: 1 }); // Refuerza el contexto
             return;
         }
 
@@ -362,7 +363,7 @@ app.post('/', (req, res) => {
     intentMap.set('Adjustments Menu', adjustmentsMenuHandler);
     intentMap.set('Sustenance Menu', sustenanceMenuHandler);
     intentMap.set('Title Management Menu', titleManagementMenuHandler);
-    intentMap.set('Personalized Queries Menu', personalizedQueriesMenuHandler); // Nueva intención añadida
+    intentMap.set('Personalized Queries Menu', personalizedQueriesMenuHandler);
     intentMap.set('Default Fallback Intent', fallbackHandler);
     agent.handleRequest(intentMap);
 });
