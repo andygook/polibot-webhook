@@ -1,9 +1,12 @@
-const functions = require('firebase-functions');
+const express = require('express');
 const { WebhookClient } = require('dialogflow-fulfillment');
 const axios = require('axios');
 
-exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
-    const agent = new WebhookClient({ request, response });
+const app = express();
+app.use(express.json());
+
+app.post('/', (req, res) => {
+    const agent = new WebhookClient({ request: req, response: res });
 
     function welcomeHandler(agent) {
         const message = `¡Bienvenido(a) a PoliBOT! Soy el asistente virtual para estudiantes de posgrado. ¿Cómo puedo ayudarte hoy?\n\n` +
@@ -28,7 +31,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                       '1) Documentos y formatos\n' +
                       '2) Modificaciones\n' +
                       '3) Proceso de sustentación\n' +
-                      '4) Obtención del título\n' +
+                      '4) Obención del título\n' +
                       '5) Preguntas personalizadas\n' +
                       '6) Contactar Asistente Académico\n' +
                       '0) Salir');
@@ -107,4 +110,9 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     intentMap.set('Documents Menu', documentsMenuHandler);
     intentMap.set('Default Fallback Intent', fallbackHandler);
     agent.handleRequest(intentMap);
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
