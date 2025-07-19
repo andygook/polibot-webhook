@@ -5,6 +5,23 @@ const axios = require('axios');
 const app = express();
 app.use(express.json());
 
+// Datos simulados desde estudiantes_info.csv (reemplazar con lógica para leer desde archivo en producción)
+const studentsData = [
+    { id: "0123456789", apellidos: "Carrera Aguirre", nombres: "Gabriela Eliza", maestria: "MSI", cohorte: "11" },
+    { id: "1234567890", apellidos: "Abrigo Sánchez", nombres: "Darwin Alberto", maestria: "MACI", cohorte: "4" },
+    { id: "2345678901", apellidos: "Santos Zapatier", nombres: "Mery Estefanía", maestria: "MSEP", cohorte: "6" },
+    { id: "3456789012", apellidos: "Rodríguez Pimentel", nombres: "Oscar Miguel", maestria: "MSIG", cohorte: "25" },
+    { id: "4567890123", apellidos: "Morales Macas", nombres: "José Daniel", maestria: "MIB", cohorte: "4" }
+];
+
+const projectData = [
+    { id: "0123456789", projectName: "Evaluación del sistema de cyberseguridad de un banco del Ecuador.", status: "Propuesta en Elaboración", proposalDeadline: "30-07-2025", tutor: "Tutor 1", vocal: "Vocal 1", sustenanceDeadlines: "10-02-2026 (0), PAO 2-2026 (300), PAO 1-2027 (850)", plannedSustenance: "NO TIENE" },
+    { id: "1234567890", projectName: "Desarrollo de un sistema de control automatico industrial para una refinería del Ecuador", status: "Propuesta Presentada", proposalDeadline: "30-03-2025", tutor: "Tutor 1", vocal: "Vocal 2", sustenanceDeadlines: "10-09-2025 (0), PAO 1-2026 (300), PAO 2-2026 (850)", plannedSustenance: "NO TIENE" },
+    { id: "2345678901", projectName: "Balanco de cargas en una central eléctrica del país.", status: "Propuesta Aprobada", proposalDeadline: "30-05-2024", tutor: "Tutor 2", vocal: "Vocal 2", sustenanceDeadlines: "10-02-2025 (0), PAO 2-2025 (300), PAO 1-2026 (850)", plannedSustenance: "NO TIENE" },
+    { id: "3456789012", projectName: "Mejoramiento del proceso de ventas en una empresa retail de Ecuador", status: "Trabajo de Tilación en Elaboración", proposalDeadline: "20-10-2023", tutor: "Tutor 3", vocal: "Vocal 3", sustenanceDeadlines: "20-09-2024 (0), PAO 1-2025 (300), PAO 2-2025 (850)", plannedSustenance: "20-08-2025" },
+    { id: "4567890123", projectName: "Desarrollo de dispositivo para mejorar los resultados de las imágenes de los ecógrafos", status: "Trabajo de Titulación Terminado", proposalDeadline: "30-07-2023", tutor: "Tutor 4", vocal: "Vocal 4", sustenanceDeadlines: "10-02-2024 (0), PAO 2-2024 (300), PAO 1-2025 (850)", plannedSustenance: "15-07-2025" }
+];
+
 app.post('/', (req, res) => {
     const agent = new WebhookClient({ request: req, response: res });
 
@@ -74,6 +91,12 @@ app.post('/', (req, res) => {
                       'Por favor, selecciona una opción (0-3).');
             agent.setContext({ name: 'title_management_menu', lifespan: 5 });
             agent.setContext({ name: 'main_menu', lifespan: 0 });
+        } else if (input === '5') {
+            agent.add('Por favor ingresa tu número de identificación (sin puntos ni guiones).');
+            agent.setContext({ name: 'awaiting_id', lifespan: 1 });
+            agent.setContext({ name: 'main_menu', lifespan: 0 });
+        } else if (input === '6') {
+            agent.add('Para contactar al Asistente Académico, por favor envía un correo a asistente.academico@ies.edu.ec o llama al +593 2 123 4567. Digite 0 para regresar al menú principal.');
         } else if (input === '0') {
             agent.add('Gracias por usar PoliBOT. ¡Espero verte pronto para más consultas!');
             agent.setContext({ name: 'main_menu', lifespan: 0 });
@@ -259,6 +282,67 @@ app.post('/', (req, res) => {
         }
     }
 
+    function personalizedQueriesMenuHandler(agent) {
+        let input = agent.parameters.option || agent.parameters.id; // Maneja tanto la identificación como las opciones del submenú
+        const awaitingId = agent.getContext('awaiting_id');
+
+        if (awaitingId && awaitingId.parameters && !input) {
+            agent.add('Por favor ingresa tu número de identificación (sin puntos ni guiones).');
+            return;
+        }
+
+        if (awaitingId && input && /^\d{10}$/.test(input)) {
+            const student = studentsData.find(s => s.id === input);
+            const project = projectData.find(p => p.id === input);
+            if (student) {
+                agent.add(`Apellidos: ${student.apellidos}\nNombres: ${student.nombres}\nMaestría: ${student.maestria}\nCohorte: ${student.cohorte}\n\nSubmenú - Preguntas personalizadas:\n1) Nombre del proyecto\n2) Estado actual del proyecto\n3) Plazos presentar propuesta\n4) Miembros del tribunal de sustentación\n5) Plazos para sustentar y costos\n6) Fecha planificada de sustentación\n0) Regresar al menú principal\n\nPor favor, selecciona una opción (0-6).`);
+                agent.setContext({ name: 'personalized_queries_menu', lifespan: 5, parameters: { id: input } });
+                agent.setContext({ name: 'awaiting_id', lifespan: 0 });
+            } else {
+                agent.add('Número de identificación no encontrado. Por favor, ingresa un número válido (sin puntos ni guiones).');
+                agent.setContext({ name: 'awaiting_id', lifespan: 1 });
+            }
+            return;
+        }
+
+        if (agent.getContext('personalized_queries_menu') && input) {
+            const studentId = agent.getContext('personalized_queries_menu').parameters.id;
+            const project = projectData.find(p => p.id === studentId);
+
+            if (input === '1') {
+                agent.add(`Nombre del proyecto: ${project.projectName}\nDigite 0 para regresar al menú anterior o 5 para volver al menú principal.`);
+            } else if (input === '2') {
+                agent.add(`Estado actual del proyecto: ${project.status}\nDigite 0 para regresar al menú anterior o 5 para volver al menú principal.`);
+            } else if (input === '3') {
+                agent.add(`Plazos presentar propuesta: ${project.proposalDeadline}\nDigite 0 para regresar al menú anterior o 5 para volver al menú principal.`);
+            } else if (input === '4') {
+                agent.add(`Miembros del tribunal de sustentación: ${project.tutor} (Miembro 1), ${project.vocal} (Miembro 2)\nDigite 0 para regresar al menú anterior o 5 para volver al menú principal.`);
+            } else if (input === '5') {
+                agent.add(`Plazos para sustentar y costos: ${project.sustenanceDeadlines}\nDigite 0 para regresar al menú anterior o 5 para volver al menú principal.`);
+            } else if (input === '6') {
+                agent.add(`Fecha planificada de sustentación: ${project.plannedSustenance}\nDigite 0 para regresar al menú anterior o 5 para volver al menú principal.`);
+            } else if (input === '0') {
+                agent.add('Menú Principal:\n' +
+                          `1) Documentos y formatos\n` +
+                          `2) Ajustes en propuesta\n` +
+                          `3) Proceso de sustentación\n` +
+                          `4) Gestión del título\n` +
+                          `5) Preguntas personalizadas\n` +
+                          `6) Contactar Asistente Académico\n` +
+                          `0) Salir\n\n` +
+                          'Por favor, selecciona una opción (0-6).');
+                agent.setContext({ name: 'personalized_queries_menu', lifespan: 0 });
+                agent.setContext({ name: 'main_menu', lifespan: 5 });
+            } else {
+                agent.add('Opción inválida. Por favor, selecciona una opción válida (0-6).\n\n' +
+                          'Submenú - Preguntas personalizadas:\n1) Nombre del proyecto\n2) Estado actual del proyecto\n3) Plazos presentar propuesta\n4) Miembros del tribunal de sustentación\n5) Plazos para sustentar y costos\n6) Fecha planificada de sustentación\n0) Regresar al menú principal');
+            }
+            return;
+        }
+
+        agent.add('Ha ocurrido un error. Por favor, selecciona la opción 5 nuevamente para ingresar tu identificación.');
+    }
+
     function fallbackHandler(agent) {
         agent.add('Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n\n' +
                   'Menú Principal:\n' +
@@ -277,7 +361,8 @@ app.post('/', (req, res) => {
     intentMap.set('Documents Menu', documentsMenuHandler);
     intentMap.set('Adjustments Menu', adjustmentsMenuHandler);
     intentMap.set('Sustenance Menu', sustenanceMenuHandler);
-    intentMap.set('Title Management Menu', titleManagementMenuHandler); // Nueva intención añadida
+    intentMap.set('Title Management Menu', titleManagementMenuHandler);
+    intentMap.set('Personalized Queries Menu', personalizedQueriesMenuHandler); // Nueva intención añadida
     intentMap.set('Default Fallback Intent', fallbackHandler);
     agent.handleRequest(intentMap);
 });
