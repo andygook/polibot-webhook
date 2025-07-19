@@ -39,7 +39,7 @@ app.post('/', (req, res) => {
                         `0) Salir\n\n` +
                         `Por favor, selecciona una opción (0-6).`;
         agent.add(message);
-        agent.setContext({ name: 'main_menu', lifespan: 5 });
+        agent.context.set({ name: 'main_menu', lifespan: 5 }); // Usar context.set
     }
 
     function mainMenuHandler(agent) {
@@ -63,16 +63,16 @@ app.post('/', (req, res) => {
                       '2. Formatos para elaborar el trabajo de titulación\n' +
                       '0. Regresar al menú principal\n\n' +
                       'Por favor, selecciona una opción (0-2).');
-            agent.setContext({ name: 'documents_menu', lifespan: 5 });
-            agent.setContext({ name: 'main_menu', lifespan: 0 });
+            agent.context.set({ name: 'documents_menu', lifespan: 5 });
+            agent.context.set({ name: 'main_menu', lifespan: 0 });
         } else if (input === '2') {
             agent.add('Submenú - Ajustes en propuesta:\n' +
                       '1. Cambios en la propuesta (requisitos)\n' +
                       '2. Cambios de miembros del tribunal (requisitos)\n' +
                       '0. Regresar al menú principal\n\n' +
                       'Por favor, selecciona una opción (0-2).');
-            agent.setContext({ name: 'adjustments_menu', lifespan: 5 });
-            agent.setContext({ name: 'main_menu', lifespan: 0 });
+            agent.context.set({ name: 'adjustments_menu', lifespan: 5 });
+            agent.context.set({ name: 'main_menu', lifespan: 0 });
         } else if (input === '3') {
             agent.add('Submenú - Proceso de sustentación:\n' +
                       '1. Requisitos y documentos para solicitar sustentación\n' +
@@ -80,8 +80,8 @@ app.post('/', (req, res) => {
                       '3. Tiempo de duración de la sustentación\n' +
                       '0. Regresar al menú principal\n\n' +
                       'Por favor, selecciona una opción (0-3).');
-            agent.setContext({ name: 'sustenance_menu', lifespan: 5 });
-            agent.setContext({ name: 'main_menu', lifespan: 0 });
+            agent.context.set({ name: 'sustenance_menu', lifespan: 5 });
+            agent.context.set({ name: 'main_menu', lifespan: 0 });
         } else if (input === '4') {
             agent.add('Submenú - Gestión del título:\n' +
                       '1. Registro del título en el Senescyt (tiempos)\n' +
@@ -89,17 +89,17 @@ app.post('/', (req, res) => {
                       '3. Retiro del título (lugar y requisitos)\n' +
                       '0. Regresar al menú principal\n\n' +
                       'Por favor, selecciona una opción (0-3).');
-            agent.setContext({ name: 'title_management_menu', lifespan: 5 });
-            agent.setContext({ name: 'main_menu', lifespan: 0 });
+            agent.context.set({ name: 'title_management_menu', lifespan: 5 });
+            agent.context.set({ name: 'main_menu', lifespan: 0 });
         } else if (input === '5') {
             agent.add('Por favor ingresa tu número de identificación (sin puntos ni guiones).');
-            agent.setContext({ name: 'awaiting_id', lifespan: 1 }); // Contexto de salida para esperar ID
-            agent.setContext({ name: 'main_menu', lifespan: 0 });
+            agent.context.set({ name: 'awaiting_id', lifespan: 1 });
+            agent.context.set({ name: 'main_menu', lifespan: 0 });
         } else if (input === '6') {
             agent.add('Para contactar al Asistente Académico, por favor envía un correo a asistente.academico@ies.edu.ec o llama al +593 2 123 4567. Digite 0 para regresar al menú principal.');
         } else if (input === '0') {
             agent.add('Gracias por usar PoliBOT. ¡Espero verte pronto para más consultas!');
-            agent.setContext({ name: 'main_menu', lifespan: 0 });
+            agent.context.set({ name: 'main_menu', lifespan: 0 });
         } else {
             agent.add('Esta opción aún no está implementada. Por favor, selecciona otra opción.\n\n' +
                       'Menú Principal:\n' +
@@ -138,8 +138,8 @@ app.post('/', (req, res) => {
                       `6) Contactar Asistente Académico\n` +
                       `0) Salir\n\n` +
                       'Por favor, selecciona una opción (0-6).');
-            agent.setContext({ name: 'documents_menu', lifespan: 0 });
-            agent.setContext({ name: 'main_menu', lifespan: 5 });
+            agent.context.set({ name: 'documents_menu', lifespan: 0 });
+            agent.context.set({ name: 'main_menu', lifespan: 5 });
         }
     }
 
@@ -178,8 +178,8 @@ app.post('/', (req, res) => {
                       `6) Contactar Asistente Académico\n` +
                       `0) Salir\n\n` +
                       'Por favor, selecciona una opción (0-6).');
-            agent.setContext({ name: 'adjustments_menu', lifespan: 0 });
-            agent.setContext({ name: 'main_menu', lifespan: 5 });
+            agent.context.set({ name: 'adjustments_menu', lifespan: 0 });
+            agent.context.set({ name: 'main_menu', lifespan: 5 });
         }
     }
 
@@ -236,8 +236,8 @@ app.post('/', (req, res) => {
                       `6) Contactar Asistente Académico\n` +
                       `0) Salir\n\n` +
                       'Por favor, selecciona una opción (0-6).');
-            agent.setContext({ name: 'sustenance_menu', lifespan: 0 });
-            agent.setContext({ name: 'main_menu', lifespan: 5 });
+            agent.context.set({ name: 'sustenance_menu', lifespan: 0 });
+            agent.context.set({ name: 'main_menu', lifespan: 5 });
         }
     }
 
@@ -277,18 +277,18 @@ app.post('/', (req, res) => {
                       `6) Contactar Asistente Académico\n` +
                       `0) Salir\n\n` +
                       'Por favor, selecciona una opción (0-6).');
-            agent.setContext({ name: 'title_management_menu', lifespan: 0 });
-            agent.setContext({ name: 'main_menu', lifespan: 5 });
+            agent.context.set({ name: 'title_management_menu', lifespan: 0 });
+            agent.context.set({ name: 'main_menu', lifespan: 5 });
         }
     }
 
     function personalizedQueriesMenuHandler(agent) {
-        let input = agent.parameters.option || agent.parameters.id; // Captura ID o opción
-        const awaitingId = agent.getContext('awaiting_id');
+        let input = agent.parameters.option || agent.parameters.id;
+        const awaitingId = agent.context.get('awaiting_id');
 
         if (awaitingId && !input) {
             agent.add('Por favor ingresa tu número de identificación (sin puntos ni guiones).');
-            agent.setContext({ name: 'awaiting_id', lifespan: 1 }); // Refuerza el contexto
+            agent.context.set({ name: 'awaiting_id', lifespan: 1 });
             return;
         }
 
@@ -297,17 +297,17 @@ app.post('/', (req, res) => {
             const project = projectData.find(p => p.id === input);
             if (student) {
                 agent.add(`Apellidos: ${student.apellidos}\nNombres: ${student.nombres}\nMaestría: ${student.maestria}\nCohorte: ${student.cohorte}\n\nSubmenú - Preguntas personalizadas:\n1) Nombre del proyecto\n2) Estado actual del proyecto\n3) Plazos presentar propuesta\n4) Miembros del tribunal de sustentación\n5) Plazos para sustentar y costos\n6) Fecha planificada de sustentación\n0) Regresar al menú principal\n\nPor favor, selecciona una opción (0-6).`);
-                agent.setContext({ name: 'personalized_queries_menu', lifespan: 5, parameters: { id: input } });
-                agent.setContext({ name: 'awaiting_id', lifespan: 0 });
+                agent.context.set({ name: 'personalized_queries_menu', lifespan: 5, parameters: { id: input } });
+                agent.context.set({ name: 'awaiting_id', lifespan: 0 });
             } else {
                 agent.add('Número de identificación no encontrado. Por favor, ingresa un número válido (sin puntos ni guiones).');
-                agent.setContext({ name: 'awaiting_id', lifespan: 1 });
+                agent.context.set({ name: 'awaiting_id', lifespan: 1 });
             }
             return;
         }
 
-        if (agent.getContext('personalized_queries_menu') && input) {
-            const studentId = agent.getContext('personalized_queries_menu').parameters.id;
+        if (agent.context.get('personalized_queries_menu') && input) {
+            const studentId = agent.context.get('personalized_queries_menu').parameters.id;
             const project = projectData.find(p => p.id === studentId);
 
             if (input === '1') {
@@ -332,8 +332,8 @@ app.post('/', (req, res) => {
                           `6) Contactar Asistente Académico\n` +
                           `0) Salir\n\n` +
                           'Por favor, selecciona una opción (0-6).');
-                agent.setContext({ name: 'personalized_queries_menu', lifespan: 0 });
-                agent.setContext({ name: 'main_menu', lifespan: 5 });
+                agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 });
+                agent.context.set({ name: 'main_menu', lifespan: 5 });
             } else {
                 agent.add('Opción inválida. Por favor, selecciona una opción válida (0-6).\n\n' +
                           'Submenú - Preguntas personalizadas:\n1) Nombre del proyecto\n2) Estado actual del proyecto\n3) Plazos presentar propuesta\n4) Miembros del tribunal de sustentación\n5) Plazos para sustentar y costos\n6) Fecha planificada de sustentación\n0) Regresar al menú principal');
@@ -368,7 +368,7 @@ app.post('/', (req, res) => {
     agent.handleRequest(intentMap);
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000; // Ajustar al puerto usado en Render
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
