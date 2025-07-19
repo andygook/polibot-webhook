@@ -14,9 +14,9 @@ app.post('/', (req, res) => {
         const message = `¡Bienvenido(a) a PoliBOT! Soy el asistente virtual para estudiantes de posgrado. ¿Cómo puedo ayudarte hoy?\n\n` +
                         `Menú Principal:\n` +
                         `1) Documentos y formatos\n` +
-                        `2) Modificaciones\n` +
+                        `2) Ajustes en propuesta\n` +
                         `3) Proceso de sustentación\n` +
-                        `4) Obtención del título\n` +
+                        `4) Gestión del título\n` +
                         `5) Preguntas personalizadas\n` +
                         `6) Contactar Asistente Académico\n` +
                         `0) Salir\n\n` +
@@ -30,13 +30,13 @@ app.post('/', (req, res) => {
         if (!input || typeof input !== 'string' || !['0', '1', '2', '3', '4', '5', '6'].includes(input)) {
             agent.add('Opción inválida. Por favor, selecciona una opción válida (0-6).\n\n' +
                       'Menú Principal:\n' +
-                      '1) Documentos y formatos\n' +
-                      '2) Modificaciones\n' +
-                      '3) Proceso de sustentación\n' +
-                      '4) Obtención del título\n' +
-                      '5) Preguntas personalizadas\n' +
-                      '6) Contactar Asistente Académico\n' +
-                      '0) Salir');
+                      `1) Documentos y formatos\n` +
+                      `2) Ajustes en propuesta\n` +
+                      `3) Proceso de sustentación\n` +
+                      `4) Gestión del título\n` +
+                      `5) Preguntas personalizadas\n` +
+                      `6) Contactar Asistente Académico\n` +
+                      `0) Salir`);
             return;
         }
 
@@ -54,13 +54,13 @@ app.post('/', (req, res) => {
         } else {
             agent.add('Esta opción aún no está implementada. Por favor, selecciona otra opción.\n\n' +
                       'Menú Principal:\n' +
-                      '1) Documentos y formatos\n' +
-                      '2) Modificaciones\n' +
-                      '3) Proceso de sustentación\n' +
-                      '4) Obtención del título\n' +
-                      '5) Preguntas personalizadas\n' +
-                      '6) Contactar Asistente Académico\n' +
-                      '0) Salir');
+                      `1) Documentos y formatos\n` +
+                      `2) Ajustes en propuesta\n` +
+                      `3) Proceso de sustentación\n` +
+                      `4) Gestión del título\n` +
+                      `5) Preguntas personalizadas\n` +
+                      `6) Contactar Asistente Académico\n` +
+                      `0) Salir`);
         }
     }
 
@@ -81,13 +81,13 @@ app.post('/', (req, res) => {
             agent.add('Documento disponible aquí: [Formatos para el trabajo de titulación](https://docs.google.com/document/d/16w1HRQ5LBNqLesaZdDJiJQdS98-GCupa/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)\n\nDigite 0 para regresar al menú principal');
         } else if (input === '0') {
             agent.add('Menú Principal:\n' +
-                      '1) Documentos y formatos\n' +
-                      '2) Modificaciones\n' +
-                      '3) Proceso de sustentación\n' +
-                      '4) Obtención del título\n' +
-                      '5) Preguntas personalizadas\n' +
-                      '6) Contactar Asistente Académico\n' +
-                      '0) Salir\n\n' +
+                      `1) Documentos y formatos\n` +
+                      `2) Ajustes en propuesta\n` +
+                      `3) Proceso de sustentación\n` +
+                      `4) Gestión del título\n` +
+                      `5) Preguntas personalizadas\n` +
+                      `6) Contactar Asistente Académico\n` +
+                      `0) Salir\n\n` +
                       'Por favor, selecciona una opción (0-6).');
             agent.setContext({ name: 'documents_menu', lifespan: 0 });
             agent.setContext({ name: 'main_menu', lifespan: 5 });
@@ -97,13 +97,13 @@ app.post('/', (req, res) => {
     function fallbackHandler(agent) {
         agent.add('Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n\n' +
                   'Menú Principal:\n' +
-                  '1) Documentos y formatos\n' +
-                  '2) Modificaciones\n' +
-                  '3) Proceso de sustentación\n' +
-                  '4) Obtención del título\n' +
-                  '5) Preguntas personalizadas\n' +
-                  '6) Contactar Asistente Académico\n' +
-                  '0) Salir');
+                  `1) Documentos y formatos\n` +
+                  `2) Ajustes en propuesta\n` +
+                  `3) Proceso de sustentación\n` +
+                  `4) Gestión del título\n` +
+                  `5) Preguntas personalizadas\n` +
+                  `6) Contactar Asistente Académico\n` +
+                  `0) Salir`);
     }
 
     let intentMap = new Map();
