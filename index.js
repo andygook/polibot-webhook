@@ -56,6 +56,15 @@ app.post('/', (req, res) => {
                       'Por favor, selecciona una opción (0-2).');
             agent.setContext({ name: 'adjustments_menu', lifespan: 5 });
             agent.setContext({ name: 'main_menu', lifespan: 0 });
+        } else if (input === '3') {
+            agent.add('Submenú - Proceso de sustentación:\n' +
+                      '1. Requisitos y documentos para solicitar sustentación\n' +
+                      '2. Revisión antiplagio\n' +
+                      '3. Tiempo de duración de la sustentación\n' +
+                      '0. Regresar al menú principal\n\n' +
+                      'Por favor, selecciona una opción (0-3).');
+            agent.setContext({ name: 'sustenance_menu', lifespan: 5 });
+            agent.setContext({ name: 'main_menu', lifespan: 0 });
         } else if (input === '0') {
             agent.add('Gracias por usar PoliBOT. ¡Espero verte pronto para más consultas!');
             agent.setContext({ name: 'main_menu', lifespan: 0 });
@@ -142,6 +151,64 @@ app.post('/', (req, res) => {
         }
     }
 
+    function sustenanceMenuHandler(agent) {
+        let input = agent.parameters.option;
+        if (!input || typeof input !== 'string' || !['0', '1', '2', '3'].includes(input)) {
+            agent.add('Opción inválida. Por favor, selecciona una opción válida (0-3).\n\n' +
+                      'Submenú - Proceso de sustentación:\n' +
+                      '1. Requisitos y documentos para solicitar sustentación\n' +
+                      '2. Revisión antiplagio\n' +
+                      '3. Tiempo de duración de la sustentación\n' +
+                      '0. Regresar al menú principal');
+            return;
+        }
+
+        if (input === '1') {
+            agent.add('Los requisitos y documentos para solicitar fecha de sustentación son:\n' +
+                      '1️- Carta de aprobación firmada del tutor y revisor, donde indique que ambos firman el documento de conformidad con el trabajo desarrollado. Dirigido al Subdecano de la facultad. (Se envía el modelo)(https://docs.google.com/document/d/1pHAoCHePsnKROQmkUrSxMvdtqHfbfOMr/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true).\n' +
+                      '2️- Evidencia del Análisis Antiplagio. (Solicitarle al director de su trabajo de titulación).\n' +
+                      '3️- Oficio dirigido al Subdecano de la facultad, en el cual el estudiante solicita fecha y hora de sustentación. (Se envía el modelo)(https://docs.google.com/document/d/1xct0rM4dXtE5I-LPf1YYhE9JXT8DXPhz/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true).\n' +
+                      '4️- Copia de cédula y certificado de votación a color actualizado.\n' +
+                      '5️- Documento de declaración de datos personales (Se envía el modelo)(https://docs.google.com/document/d/1ulgWeN6Jk0ltoNXhaCk1J5wKD8tDikKE/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true).\n' +
+                      '6️- Certificado de no adeudar a la universidad (Solicitado al departamento de contabilidad).\n' +
+                      '7️- Entregar el documento del trabajo de titulación o tesis, firmado por los miembros del tribunal de sustentación y por el estudiante.\n' +
+                      'Digite 0 para regresar al menú principal');
+        } else if (input === '2') {
+            agent.add('Revisión antiplagio:\n' +
+                      '1️- Se envía al tutor, para que suba el documento final de trabajo de titulación al sistema de revisión del antiplagio.\n' +
+                      '2️- Si el resultado es menor al 10%, entonces el estudiante continua con el proceso de solicitud de fecha de sustentación.\n' +
+                      '3️- Si el resultado es mayor al 10%, entonces se regresa el trabajo al estudiante para que revise y realice los cambios respectivos.\n' +
+                      '4️- El nuevo documento se sube nuevamente para revisión en el sistema.\n' +
+                      'Digite 0 para regresar al menú principal');
+        } else if (input === '3') {
+            agent.add('Tiempo de duración de la sustentación:\n' +
+                      'Detalles a Considerar:\n' +
+                      '1️- Vestir formalmente.\n' +
+                      '2️- Material visual, no debe ser sobrecargado de información.\n' +
+                      '3️- Se espera 15 minutos máximo de espera para iniciar la sustentación, si alguno de los involucrados no asiste se suspende y se genera nuevamente fecha de sustentación.\n' +
+                      '4️- Una vez iniciada la sustentación, en 20 minutos máximo el o los estudiante(s) deben presentar su trabajo.\n' +
+                      '5️- Ronda de preguntas aproximadamente 10 minutos.\n' +
+                      '6️- Los estudiantes abandonan la sala de sustentación presencial o virtual.\n' +
+                      '7️- Deliberación de los miembros del tribunal de sustentación.\n' +
+                      '8️- Ingresan los estudiantes nuevamente a la sala de sustentación presencial o virtual.\n' +
+                      '9️- Lectura del acta de sustentación.\n' +
+                      '10- Envestidura grado de magister.\n' +
+                      'Digite 0 para regresar al menú principal');
+        } else if (input === '0') {
+            agent.add('Menú Principal:\n' +
+                      `1) Documentos y formatos\n` +
+                      `2) Ajustes en propuesta\n` +
+                      `3) Proceso de sustentación\n` +
+                      `4) Gestión del título\n` +
+                      `5) Preguntas personalizadas\n` +
+                      `6) Contactar Asistente Académico\n` +
+                      `0) Salir\n\n` +
+                      'Por favor, selecciona una opción (0-6).');
+            agent.setContext({ name: 'sustenance_menu', lifespan: 0 });
+            agent.setContext({ name: 'main_menu', lifespan: 5 });
+        }
+    }
+
     function fallbackHandler(agent) {
         agent.add('Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n\n' +
                   'Menú Principal:\n' +
@@ -158,7 +225,8 @@ app.post('/', (req, res) => {
     intentMap.set('Default Welcome Intent', welcomeHandler);
     intentMap.set('Main Menu', mainMenuHandler);
     intentMap.set('Documents Menu', documentsMenuHandler);
-    intentMap.set('Adjustments Menu', adjustmentsMenuHandler); // Nueva intención añadida
+    intentMap.set('Adjustments Menu', adjustmentsMenuHandler);
+    intentMap.set('Sustenance Menu', sustenanceMenuHandler); // Nueva intención añadida
     intentMap.set('Default Fallback Intent', fallbackHandler);
     agent.handleRequest(intentMap);
 });
