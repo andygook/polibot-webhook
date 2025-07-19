@@ -17,11 +17,12 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         `0) Salir\n\n` +
                         `Por favor, selecciona una opción (0-6).`;
         agent.add(message);
+        agent.setContext({ name: 'main_menu', lifespan: 5 });
     }
 
     function mainMenuHandler(agent) {
-        const input = agent.parameters.option;
-        if (!input || !['0', '1', '2', '3', '4', '5', '6'].includes(input)) {
+        let input = agent.parameters.option;
+        if (!input || typeof input !== 'string' || !['0', '1', '2', '3', '4', '5', '6'].includes(input)) {
             agent.add('Opción inválida. Por favor, selecciona una opción válida (0-6).\n\n' +
                       'Menú Principal:\n' +
                       '1) Documentos y formatos\n' +
@@ -41,6 +42,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                       '0. Regresar al menú principal\n\n' +
                       'Por favor, selecciona una opción (0-2).');
             agent.setContext({ name: 'documents_menu', lifespan: 5 });
+            agent.setContext({ name: 'main_menu', lifespan: 0 });
         } else if (input === '0') {
             agent.add('Gracias por usar PoliBOT. ¡Espero verte pronto para más consultas!');
             agent.setContext({ name: 'main_menu', lifespan: 0 });
@@ -58,8 +60,8 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     }
 
     function documentsMenuHandler(agent) {
-        const input = agent.parameters.option;
-        if (!input || !['0', '1', '2'].includes(input)) {
+        let input = agent.parameters.option;
+        if (!input || typeof input !== 'string' || !['0', '1', '2'].includes(input)) {
             agent.add('Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
                       'Submenú - Documentos y formatos:\n' +
                       '1. Formatos para elaborar la propuesta de titulación\n' +
