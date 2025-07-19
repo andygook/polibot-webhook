@@ -65,6 +65,15 @@ app.post('/', (req, res) => {
                       'Por favor, selecciona una opción (0-3).');
             agent.setContext({ name: 'sustenance_menu', lifespan: 5 });
             agent.setContext({ name: 'main_menu', lifespan: 0 });
+        } else if (input === '4') {
+            agent.add('Submenú - Gestión del título:\n' +
+                      '1. Registro del título en el Senescyt (tiempos)\n' +
+                      '2. Entrega física del título (tiempos)\n' +
+                      '3. Retiro del título (lugar y requisitos)\n' +
+                      '0. Regresar al menú principal\n\n' +
+                      'Por favor, selecciona una opción (0-3).');
+            agent.setContext({ name: 'title_management_menu', lifespan: 5 });
+            agent.setContext({ name: 'main_menu', lifespan: 0 });
         } else if (input === '0') {
             agent.add('Gracias por usar PoliBOT. ¡Espero verte pronto para más consultas!');
             agent.setContext({ name: 'main_menu', lifespan: 0 });
@@ -209,6 +218,47 @@ app.post('/', (req, res) => {
         }
     }
 
+    function titleManagementMenuHandler(agent) {
+        let input = agent.parameters.option;
+        if (!input || typeof input !== 'string' || !['0', '1', '2', '3'].includes(input)) {
+            agent.add('Opción inválida. Por favor, selecciona una opción válida (0-3).\n\n' +
+                      'Submenú - Gestión del título:\n' +
+                      '1. Registro del título en el Senescyt (tiempos)\n' +
+                      '2. Entrega física del título (tiempos)\n' +
+                      '3. Retiro del título (lugar y requisitos)\n' +
+                      '0. Regresar al menú principal');
+            return;
+        }
+
+        if (input === '1') {
+            agent.add('Los tiempos del registro del título en el Senescyt: Aproximadamente entre 15 y 30 días, este trámite es realizado por otro departamento de la IES.\n\nDigite 0 para regresar al menú principal');
+        } else if (input === '2') {
+            agent.add('Tiempos de entrega física del título: Aproximadamente entre 15 y 30 días, este trámite es realizado por otro departamento de la IES, cuando el título ya se encuentra registrado en el Senescyt entonces el estudiante se debe acercar a la secretaría técnica de la IES.\n\nDigite 0 para regresar al menú principal');
+        } else if (input === '3') {
+            agent.add('Lugar y requisitos para el retiro del título:\n' +
+                      'TRÁMITE PERSONAL:\n' +
+                      '- Acercarse a la secretaría técnica de la IES, en horario de 08h00 a 15h30 de lunes a viernes.\n' +
+                      '- Presentar original de cédula.\n' +
+                      'TRÁMITE REALIZADO POR TERCERO:\n' +
+                      '- Realizar una declaración notarizada que indique quién va a retirar el título con firma y copia de cédula del graduado y de la persona que va a retirar el título.\n' +
+                      '- Acercarse a la secretaría técnica de la IES, en horario de 08h00 a 15h30 de lunes a viernes.\n' +
+                      '- Presentar la cédula del quien retira el título y entregar la declaración notarizada.\n' +
+                      'Digite 0 para regresar al menú principal');
+        } else if (input === '0') {
+            agent.add('Menú Principal:\n' +
+                      `1) Documentos y formatos\n` +
+                      `2) Ajustes en propuesta\n` +
+                      `3) Proceso de sustentación\n` +
+                      `4) Gestión del título\n` +
+                      `5) Preguntas personalizadas\n` +
+                      `6) Contactar Asistente Académico\n` +
+                      `0) Salir\n\n` +
+                      'Por favor, selecciona una opción (0-6).');
+            agent.setContext({ name: 'title_management_menu', lifespan: 0 });
+            agent.setContext({ name: 'main_menu', lifespan: 5 });
+        }
+    }
+
     function fallbackHandler(agent) {
         agent.add('Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n\n' +
                   'Menú Principal:\n' +
@@ -226,7 +276,8 @@ app.post('/', (req, res) => {
     intentMap.set('Main Menu', mainMenuHandler);
     intentMap.set('Documents Menu', documentsMenuHandler);
     intentMap.set('Adjustments Menu', adjustmentsMenuHandler);
-    intentMap.set('Sustenance Menu', sustenanceMenuHandler); // Nueva intención añadida
+    intentMap.set('Sustenance Menu', sustenanceMenuHandler);
+    intentMap.set('Title Management Menu', titleManagementMenuHandler); // Nueva intención añadida
     intentMap.set('Default Fallback Intent', fallbackHandler);
     agent.handleRequest(intentMap);
 });
