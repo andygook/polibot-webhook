@@ -1,26 +1,39 @@
 const express = require('express');
 const { WebhookClient } = require('dialogflow-fulfillment');
 const axios = require('axios');
+const { parse } = require('csv-parse');
 
 const app = express();
 app.use(express.json());
 
-// Datos basados en el archivo estudiantes_info.xlsx
-const studentsData = [
-    { id: "0123456789", apellidos: "Carrera Aguirre", nombres: "Gabriela Eliza", maestria: "MSI", cohorte: "11" },
-    { id: "1234567890", apellidos: "Abrigo Sánchez", nombres: "Darwin Alberto", maestria: "MACI", cohorte: "4" },
-    { id: "2345678901", apellidos: "Santos Zapatier", nombres: "Mery Estefanía", maestria: "MSEP", cohorte: "6" },
-    { id: "3456789012", apellidos: "Rodríguez Pimentel", nombres: "Oscar Miguel", maestria: "MSIG", cohorte: "25" },
-    { id: "4567890123", apellidos: "Morales Macas", nombres: "José Daniel", maestria: "MIB", cohorte: "4" }
-];
+// Datos cargados dinámicamente desde CSV
+let studentsData = [];
+let projectData = [];
 
-const projectData = [
-    { id: "0123456789", projectName: "Evaluación del sistema de cyberseguridad de un banco del Ecuador.", status: "Propuesta en Elaboración", proposalDeadline: "30-07-2025", tutor: "Tutor 1", vocal: "Vocal 1", sustenanceDeadlines: "10-02-2026 (0), PAO 2-2026 (300), PAO 1-2027 (850)", plannedSustenance: "NO TIENE" },
-    { id: "1234567890", projectName: "Desarrollo de un sistema de control automatico industrial para una refinería del Ecuador", status: "Propuesta Presentada", proposalDeadline: "30-03-2025", tutor: "Tutor 1", vocal: "Vocal 2", sustenanceDeadlines: "10-09-2025 (0), PAO 1-2026 (300), PAO 2-2026 (850)", plannedSustenance: "NO TIENE" },
-    { id: "2345678901", projectName: "Balanco de cargas en una central eléctrica del país.", status: "Propuesta Aprobada", proposalDeadline: "30-05-2024", tutor: "Tutor 2", vocal: "Vocal 2", sustenanceDeadlines: "10-02-2025 (0), PAO 2-2025 (300), PAO 1-2026 (850)", plannedSustenance: "NO TIENE" },
-    { id: "3456789012", projectName: "Mejoramiento del proceso de ventas en una empresa retail de Ecuador", status: "Trabajo de Tilación en Elaboración", proposalDeadline: "20-10-2023", tutor: "Tutor 3", vocal: "Vocal 3", sustenanceDeadlines: "20-09-2024 (0), PAO 1-2025 (300), PAO 2-2025 (850)", plannedSustenance: "20-08-2025" },
-    { id: "4567890123", projectName: "Desarrollo de dispositivo para mejorar los resultados de las imágenes de los ecógrafos", status: "Trabajo de Titulación Terminado", proposalDeadline: "30-07-2023", tutor: "Tutor 4", vocal: "Vocal 4", sustenanceDeadlines: "10-02-2024 (0), PAO 2-2024 (300), PAO 1-2025 (850)", plannedSustenance: "15-07-2025" }
-];
+axios.get('https://raw.githubusercontent.com/andygook/polibot-webhook/main/estudiantes_info.csv')
+  .then(response => {
+    parse(response.data, { columns: true, skip_empty_lines: true }, (err, records) => {
+      if (err) console.error('Error parsing CSV:', err);
+      studentsData = records.map(r => ({
+        id: r.Identificación,
+        apellidos: r.Apellidos,
+        nombres: r.Nombres,
+        maestria: r.Maestría,
+        cohorte: r.Cohorte
+      }));
+      projectData = records.map(r => ({
+        id: r.Identificación,
+        projectName: r['Nombre del proyecto'],
+        status: r['Estado del proyecto'],
+        proposalDeadline: r['Plazos presentar propuesta'],
+        tutor: r.Tutor,
+        vocal: r.Vocal,
+        sustenanceDeadlines: `${r['Plazos para sustentar sin prórrogas']} (0), ${r['Primera prórroga']} (${r['Valores asociados a la primer prórroga']}), ${r['Segunda prórroga']} (${r['Valores asociados a la segunda prórroga']}), ${r['Más de 3 periodos académicos']} (${r['Valores asociados cuando han pasado 3 o más periodos']})`,
+        plannedSustenance: r['Fecha planificada de sustentación']
+      }));
+    });
+  })
+  .catch(error => console.error('Error fetching CSV:', error));
 
 app.post('/', (req, res) => {
     const agent = new WebhookClient({ request: req, response: res });
