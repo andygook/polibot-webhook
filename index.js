@@ -5,7 +5,7 @@ const axios = require('axios');
 const app = express();
 app.use(express.json());
 
-// Datos simulados
+// Datos simulados (reemplazar con CSV si es diferente)
 const studentsData = [
     { id: "0123456789", apellidos: "Carrera Aguirre", nombres: "Gabriela Eliza", maestria: "MSI", cohorte: "11" },
     { id: "1234567890", apellidos: "Abrigo Sánchez", nombres: "Darwin Alberto", maestria: "MACI", cohorte: "4" },
@@ -295,10 +295,11 @@ app.post('/', (req, res) => {
         console.log('Procesando personalizedQueriesMenuHandler');
         let input = agent.parameters.id || agent.query;
         const awaitingId = agent.context.get('awaiting_id');
+        const personalizedQueriesContext = agent.context.get('personalized_queries_menu');
 
         console.log('Input recibido:', input);
         console.log('Contexto awaiting_id:', awaitingId);
-        console.log('Parámetros de contexto personalized_queries_menu:', agent.context.get('personalized_queries_menu'));
+        console.log('Contexto personalized_queries_menu:', personalizedQueriesContext);
 
         if (awaitingId && !input) {
             agent.add('Por favor ingresa tu número de identificación (sin puntos ni guiones).');
@@ -309,7 +310,15 @@ app.post('/', (req, res) => {
         if (awaitingId && input && /^\d{10}$/.test(input)) {
             const student = studentsData.find(s => s.id === input);
             if (student) {
-                agent.add(`Apellidos: ${student.apellidos}\nNombres: ${student.nombres}\nMaestría: ${student.maestria}\nCohorte: ${student.cohorte}\n\nSubmenú - Preguntas personalizadas:\n1) Nombre del proyecto\n2) Estado actual del proyecto\n3) Plazos presentar propuesta\n4) Miembros del tribunal de sustentación\n5) Plazos para sustentar y costos\n6) Fecha planificada de sustentación\n0) Regresar al menú principal\n\nPor favor, selecciona una opción (0-6).`);
+                agent.add(`Apellidos: ${student.apellidos}\nNombres: ${student.nombres}\nMaestría: ${student.maestria}\nCohorte: ${student.cohorte}\n\nSubmenú - Preguntas personalizadas:\n` +
+                          `a) Nombre del proyecto\n` +
+                          `b) Estado actual del proyecto\n` +
+                          `c) Plazos presentar propuesta\n` +
+                          `d) Miembros del tribunal de sustentación\n` +
+                          `e) Plazos para sustentar y costos\n` +
+                          `f) Fecha planificada de sustentación\n` +
+                          `0) Regresar al menú principal\n\n` +
+                          `Por favor, selecciona una opción (a-f o 0).`);
                 agent.context.set({ name: 'personalized_queries_menu', lifespan: 5, parameters: { id: input } });
                 agent.context.set({ name: 'awaiting_id', lifespan: 0 });
             } else {
@@ -319,22 +328,22 @@ app.post('/', (req, res) => {
             return;
         }
 
-        if (agent.context.get('personalized_queries_menu') && input) {
-            const studentId = agent.context.get('personalized_queries_menu').parameters.id;
+        if (personalizedQueriesContext && input) {
+            const studentId = personalizedQueriesContext.parameters.id;
             const project = projectData.find(p => p.id === studentId);
 
-            if (input === '1') {
-                agent.add(`Nombre del proyecto: ${project.projectName}\nDigite 0 para regresar al menú anterior o 5 para volver al menú principal.`);
-            } else if (input === '2') {
-                agent.add(`Estado actual del proyecto: ${project.status}\nDigite 0 para regresar al menú anterior o 5 para volver al menú principal.`);
-            } else if (input === '3') {
-                agent.add(`Plazos presentar propuesta: ${project.proposalDeadline}\nDigite 0 para regresar al menú anterior o 5 para volver al menú principal.`);
-            } else if (input === '4') {
-                agent.add(`Miembros del tribunal de sustentación: ${project.tutor} (Miembro 1), ${project.vocal} (Miembro 2)\nDigite 0 para regresar al menú anterior o 5 para volver al menú principal.`);
-            } else if (input === '5') {
-                agent.add(`Plazos para sustentar y costos: ${project.sustenanceDeadlines}\nDigite 0 para regresar al menú anterior o 5 para volver al menú principal.`);
-            } else if (input === '6') {
-                agent.add(`Fecha planificada de sustentación: ${project.plannedSustenance}\nDigite 0 para regresar al menú anterior o 5 para volver al menú principal.`);
+            if (input === 'a') {
+                agent.add(`Nombre del proyecto: ${project.projectName}\nDigite 0 para regresar al menú anterior.`);
+            } else if (input === 'b') {
+                agent.add(`Estado actual del proyecto: ${project.status}\nDigite 0 para regresar al menú anterior.`);
+            } else if (input === 'c') {
+                agent.add(`Plazos presentar propuesta: ${project.proposalDeadline}\nDigite 0 para regresar al menú anterior.`);
+            } else if (input === 'd') {
+                agent.add(`Miembros del tribunal de sustentación: ${project.tutor} (Miembro 1), ${project.vocal} (Miembro 2)\nDigite 0 para regresar al menú anterior.`);
+            } else if (input === 'e') {
+                agent.add(`Plazos para sustentar y costos: ${project.sustenanceDeadlines}\nDigite 0 para regresar al menú anterior.`);
+            } else if (input === 'f') {
+                agent.add(`Fecha planificada de sustentación: ${project.plannedSustenance}\nDigite 0 para regresar al menú anterior.`);
             } else if (input === '0') {
                 agent.add('Menú Principal:\n' +
                           `1) Documentos y formatos\n` +
@@ -348,8 +357,15 @@ app.post('/', (req, res) => {
                 agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 });
                 agent.context.set({ name: 'main_menu', lifespan: 5 });
             } else {
-                agent.add('Opción inválida. Por favor, selecciona una opción válida (0-6).\n\n' +
-                          'Submenú - Preguntas personalizadas:\n1) Nombre del proyecto\n2) Estado actual del proyecto\n3) Plazos presentar propuesta\n4) Miembros del tribunal de sustentación\n5) Plazos para sustentar y costos\n6) Fecha planificada de sustentación\n0) Regresar al menú principal');
+                agent.add('Opción inválida. Por favor, selecciona una opción válida (a-f o 0).\n\n' +
+                          'Submenú - Preguntas personalizadas:\n' +
+                          `a) Nombre del proyecto\n` +
+                          `b) Estado actual del proyecto\n` +
+                          `c) Plazos presentar propuesta\n` +
+                          `d) Miembros del tribunal de sustentación\n` +
+                          `e) Plazos para sustentar y costos\n` +
+                          `f) Fecha planificada de sustentación\n` +
+                          `0) Regresar al menú principal`);
             }
             return;
         }
