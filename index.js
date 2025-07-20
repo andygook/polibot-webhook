@@ -6,9 +6,9 @@ const express = require('express');
    const app = express();
    app.use(express.json());
 
-   // Cargar datos de forma síncrona antes de iniciar el servidor
    let studentsData = [];
    let projectData = [];
+   let isDataLoaded = false;
 
    function loadData() {
        return new Promise((resolve, reject) => {
@@ -36,7 +36,8 @@ const express = require('express');
                                sustenanceDeadlines: `${r['Plazos para sustentar sin prórrogas']} (0), ${r['Primera prórroga']} (${r['Valores asociados a la primer prórroga']}), ${r['Segunda prórroga']} (${r['Valores asociados a la segunda prórroga']}), ${r['Más de 3 periodos académicos']} (${r['Valores asociados cuando han pasado 3 o más periodos']})`,
                                plannedSustenance: r['Fecha planificada de sustentación']
                            }));
-                           console.log('Datos cargados:', studentsData, projectData);
+                           isDataLoaded = true;
+                           console.log('Datos cargados:', studentsData.length, 'estudiantes,', projectData.length, 'proyectos');
                            resolve();
                        }
                    });
@@ -48,7 +49,6 @@ const express = require('express');
        });
    }
 
-   // Esperar a que los datos se carguen antes de iniciar el servidor
    loadData().then(() => {
        app.post('/', (req, res) => {
            const agent = new WebhookClient({ request: req, response: res });
@@ -57,6 +57,7 @@ const express = require('express');
            console.log('Parámetros recibidos:', agent.parameters);
            console.log('Query Text:', agent.query);
            console.log('Contextos activos:', agent.contexts);
+           console.log('Datos cargados:', isDataLoaded ? 'Sí' : 'No');
 
            function welcomeHandler(agent) {
                console.log('Procesando welcomeHandler');
@@ -328,6 +329,12 @@ const express = require('express');
                console.log('Input recibido:', input);
                console.log('Contexto awaiting_id:', awaitingId);
                console.log('Contexto personalized_queries_menu:', personalizedQueriesContext);
+               console.log('Datos cargados en handler:', isDataLoaded ? 'Sí' : 'No');
+
+               if (!isDataLoaded) {
+                   agent.add('Error: Los datos no están cargados. Por favor, intenta de nuevo más tarde.');
+                   return;
+               }
 
                if (awaitingId && !input) {
                    agent.add('Por favor ingresa tu número de identificación (sin puntos ni guiones).');
@@ -438,5 +445,5 @@ const express = require('express');
        });
    }).catch(error => {
        console.error('Error al cargar los datos:', error);
-       process.exit(1); // Salir si falla la carga de datos
+       process.exit(1);
    });
