@@ -31,6 +31,7 @@ const express = require('express');
            sustenanceDeadlines: `${r['Plazos para sustentar sin prórrogas']} (0), ${r['Primera prórroga']} (${r['Valores asociados a la primer prórroga']}), ${r['Segunda prórroga']} (${r['Valores asociados a la segunda prórroga']}), ${r['Más de 3 periodos académicos']} (${r['Valores asociados cuando han pasado 3 o más periodos']})`,
            plannedSustenance: r['Fecha planificada de sustentación']
          }));
+         console.log('Datos cargados:', studentsData, projectData); // Depuración
        });
      })
      .catch(error => console.error('Error fetching CSV:', error));
@@ -306,7 +307,7 @@ const express = require('express');
 
        function personalizedQueriesMenuHandler(agent) {
            console.log('Procesando personalizedQueriesMenuHandler');
-           let input = agent.parameters.option || agent.query; // Usar 'option' o 'query' para capturar 'a', 'b', etc.
+           let input = agent.parameters.option || agent.query.toLowerCase(); // Convertir a minúsculas para consistencia
            const awaitingId = agent.context.get('awaiting_id');
            const personalizedQueriesContext = agent.context.get('personalized_queries_menu');
 
@@ -332,7 +333,7 @@ const express = require('express');
                              `f) Fecha planificada de sustentación\n` +
                              `0) Regresar al menú principal\n\n` +
                              `Por favor, selecciona una opción (a-f o 0).`);
-                   agent.context.set({ name: 'personalized_queries_menu', lifespan: 5, parameters: { id: input } });
+                   agent.context.set({ name: 'personalized_queries_menu', lifespan: 10, parameters: { id: input } }); // Aumentar lifespan a 10
                    agent.context.set({ name: 'awaiting_id', lifespan: 0 });
                } else {
                    agent.add('Número de identificación no encontrado. Por favor, ingresa un número válido (sin puntos ni guiones).');
@@ -344,6 +345,12 @@ const express = require('express');
            if (personalizedQueriesContext && input) {
                const studentId = personalizedQueriesContext.parameters.id;
                const project = projectData.find(p => p.id === studentId);
+
+               if (!project) {
+                   console.log('Proyecto no encontrado para ID:', studentId);
+                   agent.add('Error: No se encontraron datos del proyecto. Digite 0 para regresar al menú anterior.');
+                   return;
+               }
 
                if (input === 'a') {
                    agent.add(`Nombre del proyecto: ${project.projectName}\nDigite 0 para regresar al menú anterior.`);
