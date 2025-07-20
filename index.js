@@ -26,7 +26,9 @@ app.post('/', (req, res) => {
     const agent = new WebhookClient({ request: req, response: res });
 
     console.log('Intención recibida:', agent.intent);
-    console.log('Parámetros recibidos:', agent.parameters); // Depuración adicional
+    console.log('Parámetros recibidos:', agent.parameters);
+    console.log('Query Text:', agent.query); // Depuración adicional
+    console.log('Contextos activos:', agent.contexts); // Depuración de contextos
 
     function welcomeHandler(agent) {
         const message = `¡Bienvenido(a) a PoliBOT! Soy el asistente virtual para estudiantes de posgrado. ¿Cómo puedo ayudarte hoy?\n\n` +
@@ -58,7 +60,11 @@ app.post('/', (req, res) => {
             return;
         }
 
-        if (input === '1') {
+        if (input === '5') {
+            agent.add('Por favor ingresa tu número de identificación (sin puntos ni guiones).');
+            agent.context.set({ name: 'awaiting_id', lifespan: 1 });
+            agent.context.set({ name: 'main_menu', lifespan: 0 });
+        } else if (input === '1') {
             agent.add('Submenú - Documentos y formatos:\n' +
                       '1. Formatos para elaborar la propuesta de titulación\n' +
                       '2. Formatos para elaborar el trabajo de titulación\n' +
@@ -91,10 +97,6 @@ app.post('/', (req, res) => {
                       '0. Regresar al menú principal\n\n' +
                       'Por favor, selecciona una opción (0-3).');
             agent.context.set({ name: 'title_management_menu', lifespan: 5 });
-            agent.context.set({ name: 'main_menu', lifespan: 0 });
-        } else if (input === '5') {
-            agent.add('Por favor ingresa tu número de identificación (sin puntos ni guiones).');
-            agent.context.set({ name: 'awaiting_id', lifespan: 1 });
             agent.context.set({ name: 'main_menu', lifespan: 0 });
         } else if (input === '6') {
             agent.add('Para contactar al Asistente Académico, por favor envía un correo a asistente.academico@ies.edu.ec o llama al +593 2 123 4567. Digite 0 para regresar al menú principal.');
@@ -284,11 +286,12 @@ app.post('/', (req, res) => {
     }
 
     function personalizedQueriesMenuHandler(agent) {
-        let input = agent.parameters.any || agent.query; // Usar agent.query como fallback
+        let input = agent.parameters.id || agent.query; // Usar agent.query como fallback
         const awaitingId = agent.context.get('awaiting_id');
 
         console.log('Input recibido:', input); // Depuración
         console.log('Contexto awaiting_id:', awaitingId); // Depuración
+        console.log('Parámetros de contexto personalized_queries_menu:', agent.context.get('personalized_queries_menu')); // Depuración
 
         if (awaitingId && !input) {
             agent.add('Por favor ingresa tu número de identificación (sin puntos ni guiones).');
@@ -298,7 +301,6 @@ app.post('/', (req, res) => {
 
         if (awaitingId && input && /^\d{10}$/.test(input)) {
             const student = studentsData.find(s => s.id === input);
-            const project = projectData.find(p => p.id === input);
             if (student) {
                 agent.add(`Apellidos: ${student.apellidos}\nNombres: ${student.nombres}\nMaestría: ${student.maestria}\nCohorte: ${student.cohorte}\n\nSubmenú - Preguntas personalizadas:\n1) Nombre del proyecto\n2) Estado actual del proyecto\n3) Plazos presentar propuesta\n4) Miembros del tribunal de sustentación\n5) Plazos para sustentar y costos\n6) Fecha planificada de sustentación\n0) Regresar al menú principal\n\nPor favor, selecciona una opción (0-6).`);
                 agent.context.set({ name: 'personalized_queries_menu', lifespan: 5, parameters: { id: input } });
@@ -366,7 +368,7 @@ app.post('/', (req, res) => {
     intentMap.set('Documents Menu', documentsMenuHandler);
     intentMap.set('Adjustments Menu', adjustmentsMenuHandler);
     intentMap.set('Sustenance Menu', sustenanceMenuHandler);
-    intentMap.set('Title Management Menu', titleManagementMenuHandler);
+    intentMap.set('Title Management Menu', titleManagementHandler);
     intentMap.set('Personalized Queries Menu', personalizedQueriesMenuHandler);
     intentMap.set('Default Fallback Intent', fallbackHandler);
     agent.handleRequest(intentMap);
