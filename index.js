@@ -5,7 +5,7 @@ const axios = require('axios');
 const app = express();
 app.use(express.json());
 
-// Datos simulados (reemplazar con CSV si es diferente)
+// Datos basados en el archivo estudiantes_info.xlsx
 const studentsData = [
     { id: "0123456789", apellidos: "Carrera Aguirre", nombres: "Gabriela Eliza", maestria: "MSI", cohorte: "11" },
     { id: "1234567890", apellidos: "Abrigo Sánchez", nombres: "Darwin Alberto", maestria: "MACI", cohorte: "4" },
