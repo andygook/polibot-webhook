@@ -5,7 +5,7 @@ const axios = require('axios');
 const app = express();
 app.use(express.json());
 
-// Datos simulados desde estudiantes_info.csv
+// Datos simulados
 const studentsData = [
     { id: "0123456789", apellidos: "Carrera Aguirre", nombres: "Gabriela Eliza", maestria: "MSI", cohorte: "11" },
     { id: "1234567890", apellidos: "Abrigo Sánchez", nombres: "Darwin Alberto", maestria: "MACI", cohorte: "4" },
@@ -27,10 +27,11 @@ app.post('/', (req, res) => {
 
     console.log('Intención recibida:', agent.intent);
     console.log('Parámetros recibidos:', agent.parameters);
-    console.log('Query Text:', agent.query); // Depuración adicional
-    console.log('Contextos activos:', agent.contexts); // Depuración de contextos
+    console.log('Query Text:', agent.query);
+    console.log('Contextos activos:', agent.contexts);
 
     function welcomeHandler(agent) {
+        console.log('Procesando welcomeHandler');
         const message = `¡Bienvenido(a) a PoliBOT! Soy el asistente virtual para estudiantes de posgrado. ¿Cómo puedo ayudarte hoy?\n\n` +
                         `Menú Principal:\n` +
                         `1) Documentos y formatos\n` +
@@ -46,6 +47,7 @@ app.post('/', (req, res) => {
     }
 
     function mainMenuHandler(agent) {
+        console.log('Procesando mainMenuHandler');
         let input = agent.parameters.option;
         if (!input || typeof input !== 'string' || !['0', '1', '2', '3', '4', '5', '6'].includes(input)) {
             agent.add('Opción inválida. Por favor, selecciona una opción válida (0-6).\n\n' +
@@ -117,6 +119,7 @@ app.post('/', (req, res) => {
     }
 
     function documentsMenuHandler(agent) {
+        console.log('Procesando documentsMenuHandler');
         let input = agent.parameters.option;
         if (!input || typeof input !== 'string' || !['0', '1', '2'].includes(input)) {
             agent.add('Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
@@ -147,6 +150,7 @@ app.post('/', (req, res) => {
     }
 
     function adjustmentsMenuHandler(agent) {
+        console.log('Procesando adjustmentsMenuHandler');
         let input = agent.parameters.option;
         if (!input || typeof input !== 'string' || !['0', '1', '2'].includes(input)) {
             agent.add('Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
@@ -187,6 +191,7 @@ app.post('/', (req, res) => {
     }
 
     function sustenanceMenuHandler(agent) {
+        console.log('Procesando sustenanceMenuHandler');
         let input = agent.parameters.option;
         if (!input || typeof input !== 'string' || !['0', '1', '2', '3'].includes(input)) {
             agent.add('Opción inválida. Por favor, selecciona una opción válida (0-3).\n\n' +
@@ -244,7 +249,8 @@ app.post('/', (req, res) => {
         }
     }
 
-    function titleManagementMenuHandler(agent) {
+    function titleManagementHandler(agent) {
+        console.log('Procesando titleManagementHandler');
         let input = agent.parameters.option;
         if (!input || typeof input !== 'string' || !['0', '1', '2', '3'].includes(input)) {
             agent.add('Opción inválida. Por favor, selecciona una opción válida (0-3).\n\n' +
@@ -286,12 +292,13 @@ app.post('/', (req, res) => {
     }
 
     function personalizedQueriesMenuHandler(agent) {
-        let input = agent.parameters.id || agent.query; // Usar agent.query como fallback
+        console.log('Procesando personalizedQueriesMenuHandler');
+        let input = agent.parameters.id || agent.query;
         const awaitingId = agent.context.get('awaiting_id');
 
-        console.log('Input recibido:', input); // Depuración
-        console.log('Contexto awaiting_id:', awaitingId); // Depuración
-        console.log('Parámetros de contexto personalized_queries_menu:', agent.context.get('personalized_queries_menu')); // Depuración
+        console.log('Input recibido:', input);
+        console.log('Contexto awaiting_id:', awaitingId);
+        console.log('Parámetros de contexto personalized_queries_menu:', agent.context.get('personalized_queries_menu'));
 
         if (awaitingId && !input) {
             agent.add('Por favor ingresa tu número de identificación (sin puntos ni guiones).');
@@ -304,77 +311,4 @@ app.post('/', (req, res) => {
             if (student) {
                 agent.add(`Apellidos: ${student.apellidos}\nNombres: ${student.nombres}\nMaestría: ${student.maestria}\nCohorte: ${student.cohorte}\n\nSubmenú - Preguntas personalizadas:\n1) Nombre del proyecto\n2) Estado actual del proyecto\n3) Plazos presentar propuesta\n4) Miembros del tribunal de sustentación\n5) Plazos para sustentar y costos\n6) Fecha planificada de sustentación\n0) Regresar al menú principal\n\nPor favor, selecciona una opción (0-6).`);
                 agent.context.set({ name: 'personalized_queries_menu', lifespan: 5, parameters: { id: input } });
-                agent.context.set({ name: 'awaiting_id', lifespan: 0 });
-            } else {
-                agent.add('Número de identificación no encontrado. Por favor, ingresa un número válido (sin puntos ni guiones).');
-                agent.context.set({ name: 'awaiting_id', lifespan: 1 });
-            }
-            return;
-        }
-
-        if (agent.context.get('personalized_queries_menu') && input) {
-            const studentId = agent.context.get('personalized_queries_menu').parameters.id;
-            const project = projectData.find(p => p.id === studentId);
-
-            if (input === '1') {
-                agent.add(`Nombre del proyecto: ${project.projectName}\nDigite 0 para regresar al menú anterior o 5 para volver al menú principal.`);
-            } else if (input === '2') {
-                agent.add(`Estado actual del proyecto: ${project.status}\nDigite 0 para regresar al menú anterior o 5 para volver al menú principal.`);
-            } else if (input === '3') {
-                agent.add(`Plazos presentar propuesta: ${project.proposalDeadline}\nDigite 0 para regresar al menú anterior o 5 para volver al menú principal.`);
-            } else if (input === '4') {
-                agent.add(`Miembros del tribunal de sustentación: ${project.tutor} (Miembro 1), ${project.vocal} (Miembro 2)\nDigite 0 para regresar al menú anterior o 5 para volver al menú principal.`);
-            } else if (input === '5') {
-                agent.add(`Plazos para sustentar y costos: ${project.sustenanceDeadlines}\nDigite 0 para regresar al menú anterior o 5 para volver al menú principal.`);
-            } else if (input === '6') {
-                agent.add(`Fecha planificada de sustentación: ${project.plannedSustenance}\nDigite 0 para regresar al menú anterior o 5 para volver al menú principal.`);
-            } else if (input === '0') {
-                agent.add('Menú Principal:\n' +
-                          `1) Documentos y formatos\n` +
-                          `2) Ajustes en propuesta\n` +
-                          `3) Proceso de sustentación\n` +
-                          `4) Gestión del título\n` +
-                          `5) Preguntas personalizadas\n` +
-                          `6) Contactar Asistente Académico\n` +
-                          `0) Salir\n\n` +
-                          'Por favor, selecciona una opción (0-6).');
-                agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 });
-                agent.context.set({ name: 'main_menu', lifespan: 5 });
-            } else {
-                agent.add('Opción inválida. Por favor, selecciona una opción válida (0-6).\n\n' +
-                          'Submenú - Preguntas personalizadas:\n1) Nombre del proyecto\n2) Estado actual del proyecto\n3) Plazos presentar propuesta\n4) Miembros del tribunal de sustentación\n5) Plazos para sustentar y costos\n6) Fecha planificada de sustentación\n0) Regresar al menú principal');
-            }
-            return;
-        }
-
-        agent.add('Ha ocurrido un error. Por favor, selecciona la opción 5 nuevamente para ingresar tu identificación.');
-    }
-
-    function fallbackHandler(agent) {
-        agent.add('Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n\n' +
-                  'Menú Principal:\n' +
-                  `1) Documentos y formatos\n` +
-                  `2) Ajustes en propuesta\n` +
-                  `3) Proceso de sustentación\n` +
-                  `4) Gestión del título\n` +
-                  `5) Preguntas personalizadas\n` +
-                  `6) Contactar Asistente Académico\n` +
-                  `0) Salir`);
-    }
-
-    let intentMap = new Map();
-    intentMap.set('Default Welcome Intent', welcomeHandler);
-    intentMap.set('Main Menu', mainMenuHandler);
-    intentMap.set('Documents Menu', documentsMenuHandler);
-    intentMap.set('Adjustments Menu', adjustmentsMenuHandler);
-    intentMap.set('Sustenance Menu', sustenanceMenuHandler);
-    intentMap.set('Title Management Menu', titleManagementHandler);
-    intentMap.set('Personalized Queries Menu', personalizedQueriesMenuHandler);
-    intentMap.set('Default Fallback Intent', fallbackHandler);
-    agent.handleRequest(intentMap);
-});
-
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto ${PORT}`);
-});
+                agent.context.set({ name: 'awaiting_id',
