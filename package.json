@@ -1,13 +1,16 @@
 {
   "name": "polibot-webhook",
   "version": "1.0.0",
+  "description": "Webhook para PoliBOT",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "firebase-functions": "^5.0.0",
     "dialogflow-fulfillment": "^0.6.1",
-    "axios": "^1.7.2"
-  }
+    "axios": "^1.6.0",
+    "csv-parse": "^5.5.6"
+  },
+  "author": "Your Name",
+  "license": "ISC"
 }
