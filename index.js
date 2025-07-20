@@ -26,6 +26,7 @@ app.post('/', (req, res) => {
     const agent = new WebhookClient({ request: req, response: res });
 
     console.log('Intención recibida:', agent.intent);
+    console.log('Parámetros recibidos:', agent.parameters); // Depuración adicional
 
     function welcomeHandler(agent) {
         const message = `¡Bienvenido(a) a PoliBOT! Soy el asistente virtual para estudiantes de posgrado. ¿Cómo puedo ayudarte hoy?\n\n` +
@@ -39,7 +40,7 @@ app.post('/', (req, res) => {
                         `0) Salir\n\n` +
                         `Por favor, selecciona una opción (0-6).`;
         agent.add(message);
-        agent.context.set({ name: 'main_menu', lifespan: 5 }); // Usar context.set
+        agent.context.set({ name: 'main_menu', lifespan: 5 });
     }
 
     function mainMenuHandler(agent) {
@@ -283,8 +284,11 @@ app.post('/', (req, res) => {
     }
 
     function personalizedQueriesMenuHandler(agent) {
-        let input = agent.parameters.option || agent.parameters.id;
+        let input = agent.parameters.any || agent.query; // Usar agent.query como fallback
         const awaitingId = agent.context.get('awaiting_id');
+
+        console.log('Input recibido:', input); // Depuración
+        console.log('Contexto awaiting_id:', awaitingId); // Depuración
 
         if (awaitingId && !input) {
             agent.add('Por favor ingresa tu número de identificación (sin puntos ni guiones).');
@@ -368,7 +372,7 @@ app.post('/', (req, res) => {
     agent.handleRequest(intentMap);
 });
 
-const PORT = process.env.PORT || 10000; // Ajustar al puerto usado en Render
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
