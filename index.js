@@ -330,7 +330,7 @@ loadData().then(() => {
             console.log('Contexto awaiting_id:', awaitingId);
             console.log('Contexto personalized_queries_menu:', personalizedQueriesContext);
             console.log('Datos cargados en handler:', isDataLoaded);
-            console.log('studentsData:', studentsData.map(s => s.id)); // Log de todos los IDs
+            console.log('studentsData:', studentsData.map(s => s.id));
 
             if (!isDataLoaded) {
                 agent.add('Error: Los datos no están cargados. Por favor, intenta de nuevo más tarde.');
@@ -348,6 +348,7 @@ loadData().then(() => {
                 const student = studentsData.find(s => s.id.trim() === input.trim());
                 console.log('Estudiante encontrado:', student);
                 if (student) {
+                    console.log('Enviando respuesta con submenú');
                     agent.add(`Apellidos: ${student.apellidos}\nNombres: ${student.nombres}\nMaestría: ${student.maestria}\nCohorte: ${student.cohorte}\n\nSubmenú - Preguntas personalizadas:\n` +
                               `a) Nombre del proyecto\n` +
                               `b) Estado actual del proyecto\n` +
