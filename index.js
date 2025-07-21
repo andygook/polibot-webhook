@@ -239,7 +239,7 @@ loadData().then(() => {
                           '3️- Oficio dirigido al Subdecano de la facultad, en el cual el estudiante solicita fecha y hora de sustentación. (Se envía el modelo)(https://docs.google.com/document/d/1xct0rM4dXtE5I-LPf1YYhE9JXT8DXPhz/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true).\n' +
                           '4️- Copia de cédula y certificado de votación a color actualizado.\n' +
                           '5️- Documento de declaración de datos personales (Se envía el modelo)(https://docs.google.com/document/d/1ulgWeN6Jk0ltoNXhaCk1J5wKD8tDikKE/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true).\n' +
-                          '6️- Certificado de no adeudar a la universidad (Solicitado al departamento de contabilidad).\n' +
+                          '6️- Certificado de no adeudar a la universidad (Solicado al departamento de contabilidad).\n' +
                           '7️- Entregar el documento del trabajo de titulación o tesis, firmado por los miembros del tribunal de sustentación y por el estudiante.\n' +
                           'Digite 0 para regresar al menú principal');
             } else if (input === '2') {
