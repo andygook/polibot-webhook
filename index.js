@@ -324,7 +324,7 @@ loadData().then(() => {
             console.log('Procesando personalizedQueriesMenuHandler');
             const awaitingIdentification = agent.context.get('awaiting_identification');
             const personalizedQueriesContext = agent.context.get('personalized_queries_menu');
-            let input = agent.query.toLowerCase();
+            let input = agent.parameters.identification || agent.query;
 
             console.log('Input recibido:', input);
             console.log('Contexto awaiting_identification:', awaitingIdentification);
@@ -337,13 +337,7 @@ loadData().then(() => {
                 return;
             }
 
-            if (awaitingIdentification && !input) {
-                agent.add('Por favor ingresa tu número de identificación (sin puntos ni guiones).');
-                agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
-                return;
-            }
-
-            if (awaitingIdentification && input && /^\d{10}$/.test(input)) {
+            if ((awaitingIdentification || agent.intent === 'Personalized Queries Menu') && input && /^\d{10}$/.test(input)) {
                 console.log('Buscando estudiante con ID:', input);
                 const student = studentsData.find(s => s.id.trim() === input.trim());
                 console.log('Estudiante encontrado:', student);
