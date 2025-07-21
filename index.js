@@ -322,7 +322,7 @@ loadData().then(() => {
 
         function personalizedQueriesMenuHandler(agent) {
             console.log('Procesando personalizedQueriesMenuHandler');
-            let input = agent.parameters.id || agent.query.toLowerCase();
+            let input = agent.parameters.identification || agent.query.toLowerCase();
             const awaitingId = agent.context.get('awaiting_id');
             const personalizedQueriesContext = agent.context.get('personalized_queries_menu');
 
@@ -359,7 +359,7 @@ loadData().then(() => {
                               `f) Fecha planificada de sustentación\n` +
                               `0) Regresar al menú principal\n\n` +
                               `Por favor, selecciona una opción (a-f o 0).`);
-                    agent.context.set({ name: 'personalized_queries_menu', lifespan: 10, parameters: { id: input } });
+                    agent.context.set({ name: 'personalized_queries_menu', lifespan: 10, parameters: { identification: input } });
                     agent.context.set({ name: 'awaiting_id', lifespan: 0 });
                 } else {
                     agent.add('Número de identificación no encontrado. Por favor, ingresa un número válido (sin puntos ni guiones).');
@@ -369,7 +369,7 @@ loadData().then(() => {
             }
 
             if (personalizedQueriesContext && input) {
-                const studentId = personalizedQueriesContext.parameters.id;
+                const studentId = personalizedQueriesContext.parameters.identification;
                 const project = projectData.find(p => p.id.trim() === studentId.trim());
 
                 if (!project) {
