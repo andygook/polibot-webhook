@@ -322,13 +322,14 @@ loadData().then(() => {
 
         function personalizedQueriesMenuHandler(agent) {
             console.log('Procesando personalizedQueriesMenuHandler');
-            let input = agent.parameters.option || agent.query.toLowerCase();
+            let input = agent.parameters.id || agent.query.toLowerCase(); // Cambiado de option a id
             const awaitingId = agent.context.get('awaiting_id');
             const personalizedQueriesContext = agent.context.get('personalized_queries_menu');
 
             console.log('Input recibido:', input);
             console.log('Contexto awaiting_id:', awaitingId);
             console.log('Contexto personalized_queries_menu:', personalizedQueriesContext);
+            console.log('Parámetros detallados:', agent.parameters);
             console.log('Datos cargados en handler:', isDataLoaded);
             console.log('studentsData:', studentsData.map(s => s.id));
 
