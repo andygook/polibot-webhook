@@ -93,7 +93,7 @@ loadData().then(() => {
 
             if (input === '5') {
                 agent.add('Por favor ingresa tu número de identificación (sin puntos ni guiones).');
-                agent.context.set({ name: 'awaiting_id', lifespan: 1 });
+                agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
                 agent.context.set({ name: 'main_menu', lifespan: 0 });
             } else if (input === '1') {
                 agent.add('Submenú - Documentos y formatos:\n' +
@@ -322,29 +322,28 @@ loadData().then(() => {
 
         function personalizedQueriesMenuHandler(agent) {
             console.log('Procesando personalizedQueriesMenuHandler');
-            let input = agent.parameters.identification || agent.query.toLowerCase();
-            const awaitingId = agent.context.get('awaiting_id');
+            const awaitingIdentification = agent.context.get('awaiting_identification');
             const personalizedQueriesContext = agent.context.get('personalized_queries_menu');
+            let input = agent.query.toLowerCase();
 
             console.log('Input recibido:', input);
-            console.log('Contexto awaiting_id:', awaitingId);
+            console.log('Contexto awaiting_identification:', awaitingIdentification);
             console.log('Contexto personalized_queries_menu:', personalizedQueriesContext);
             console.log('Parámetros detallados:', agent.parameters);
             console.log('Datos cargados en handler:', isDataLoaded);
-            console.log('studentsData:', studentsData.map(s => s.id));
 
             if (!isDataLoaded) {
                 agent.add('Error: Los datos no están cargados. Por favor, intenta de nuevo más tarde.');
                 return;
             }
 
-            if (awaitingId && !input) {
+            if (awaitingIdentification && !input) {
                 agent.add('Por favor ingresa tu número de identificación (sin puntos ni guiones).');
-                agent.context.set({ name: 'awaiting_id', lifespan: 1 });
+                agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
                 return;
             }
 
-            if (awaitingId && input && /^\d{10}$/.test(input)) {
+            if (awaitingIdentification && input && /^\d{10}$/.test(input)) {
                 console.log('Buscando estudiante con ID:', input);
                 const student = studentsData.find(s => s.id.trim() === input.trim());
                 console.log('Estudiante encontrado:', student);
@@ -360,10 +359,10 @@ loadData().then(() => {
                               `0) Regresar al menú principal\n\n` +
                               `Por favor, selecciona una opción (a-f o 0).`);
                     agent.context.set({ name: 'personalized_queries_menu', lifespan: 10, parameters: { identification: input } });
-                    agent.context.set({ name: 'awaiting_id', lifespan: 0 });
+                    agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
                 } else {
-                    agent.add('Número de identificación no encontrado. Por favor, ingresa un número válido (sin puntos ni guiones).');
-                    agent.context.set({ name: 'awaiting_id', lifespan: 1 });
+                    agent.add('Número de identificación no encontrado. Por favor, ingresa un número válido (sin puntos ni guiones) o selecciona 0 para regresar al menú principal.');
+                    agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
                 }
                 return;
             }
@@ -374,22 +373,22 @@ loadData().then(() => {
 
                 if (!project) {
                     console.log('Proyecto no encontrado para ID:', studentId);
-                    agent.add('Error: No se encontraron datos del proyecto. Digite 0 para regresar al menú anterior.');
+                    agent.add('Error: No se encontraron datos del proyecto. Digite 0 para regresar al menú principal.');
                     return;
                 }
 
                 if (input === 'a') {
-                    agent.add(`Nombre del proyecto: ${project.projectName}\nDigite 0 para regresar al menú anterior.`);
+                    agent.add(`Nombre del proyecto: ${project.projectName}\nDigite 0 para regresar al menú principal.`);
                 } else if (input === 'b') {
-                    agent.add(`Estado actual del proyecto: ${project.status}\nDigite 0 para regresar al menú anterior.`);
+                    agent.add(`Estado actual del proyecto: ${project.status}\nDigite 0 para regresar al menú principal.`);
                 } else if (input === 'c') {
-                    agent.add(`Plazos presentar propuesta: ${project.proposalDeadline}\nDigite 0 para regresar al menú anterior.`);
+                    agent.add(`Plazos presentar propuesta: ${project.proposalDeadline}\nDigite 0 para regresar al menú principal.`);
                 } else if (input === 'd') {
-                    agent.add(`Miembros del tribunal de sustentación: ${project.tutor} (Miembro 1), ${project.vocal} (Miembro 2)\nDigite 0 para regresar al menú anterior.`);
+                    agent.add(`Miembros del tribunal de sustentación: ${project.tutor} (Miembro 1), ${project.vocal} (Miembro 2)\nDigite 0 para regresar al menú principal.`);
                 } else if (input === 'e') {
-                    agent.add(`Plazos para sustentar y costos: ${project.sustenanceDeadlines}\nDigite 0 para regresar al menú anterior.`);
+                    agent.add(`Plazos para sustentar y costos: ${project.sustenanceDeadlines}\nDigite 0 para regresar al menú principal.`);
                 } else if (input === 'f') {
-                    agent.add(`Fecha planificada de sustentación: ${project.plannedSustenance}\nDigite 0 para regresar al menú anterior.`);
+                    agent.add(`Fecha planificada de sustentación: ${project.plannedSustenance}\nDigite 0 para regresar al menú principal.`);
                 } else if (input === '0') {
                     agent.add('Menú Principal:\n' +
                               `1) Documentos y formatos\n` +
