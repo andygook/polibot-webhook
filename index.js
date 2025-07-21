@@ -322,7 +322,7 @@ loadData().then(() => {
 
         function personalizedQueriesMenuHandler(agent) {
             console.log('Procesando personalizedQueriesMenuHandler');
-            let input = agent.parameters.id || agent.query.toLowerCase(); // Cambiado de option a id
+            let input = agent.parameters.id || agent.query.toLowerCase();
             const awaitingId = agent.context.get('awaiting_id');
             const personalizedQueriesContext = agent.context.get('personalized_queries_menu');
 
