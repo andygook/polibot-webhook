@@ -337,11 +337,15 @@ loadData().then(() => {
                 return;
             }
 
-            // Procesar la identificación
-            if ((awaitingIdentification || agent.intent === 'Personalized Queries Menu') && (agent.parameters.identification || agent.parameters.id || agent.query) && /^\d{10}$/.test(agent.parameters.identification || agent.parameters.id || agent.query)) {
-                let idInput = agent.parameters.identification || agent.parameters.id || agent.query;
-                console.log('Buscando estudiante con ID:', idInput);
-                const student = studentsData.find(s => s.id.trim() === idInput.trim());
+            if (awaitingIdentification && !input) {
+                agent.add('Por favor ingresa tu número de identificación (sin puntos ni guiones).');
+                agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
+                return;
+            }
+
+            if (awaitingIdentification && input && /^\d{10}$/.test(input)) {
+                console.log('Buscando estudiante con ID:', input);
+                const student = studentsData.find(s => s.id.trim() === input.trim());
                 console.log('Estudiante encontrado:', student);
                 if (student) {
                     console.log('Enviando respuesta con submenú');
@@ -354,7 +358,7 @@ loadData().then(() => {
                               `f) Fecha planificada de sustentación\n` +
                               `0) Regresar al menú principal\n\n` +
                               `Por favor, selecciona una opción (a-f o 0).`);
-                    agent.context.set({ name: 'personalized_queries_menu', lifespan: 10, parameters: { identification: idInput } });
+                    agent.context.set({ name: 'personalized_queries_menu', lifespan: 10, parameters: { identification: input } });
                     agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
                 } else {
                     agent.add('Número de identificación no encontrado. Por favor, ingresa un número válido (sin puntos ni guiones) o selecciona 0 para regresar al menú principal.');
@@ -363,8 +367,7 @@ loadData().then(() => {
                 return;
             }
 
-            // Procesar las opciones del submenú directamente desde el query
-            if (personalizedQueriesContext) {
+            if (personalizedQueriesContext && input) {
                 const studentId = personalizedQueriesContext.parameters.identification;
                 const project = projectData.find(p => p.id.trim() === studentId.trim());
 
@@ -374,34 +377,30 @@ loadData().then(() => {
                     return;
                 }
 
-                // Verificar si el input es una opción válida (a-f, 0)
-                if (['a', 'b', 'c', 'd', 'e', 'f', '0'].includes(input)) {
-                    if (input === 'a') {
-                        agent.add(`Nombre del proyecto: ${project.projectName}\nDigite 0 para regresar al menú principal.`);
-                    } else if (input === 'b') {
-                        agent.add(`Estado actual del proyecto: ${project.status}\nDigite 0 para regresar al menú principal.`);
-                    } else if (input === 'c') {
-                        agent.add(`Plazos presentar propuesta: ${project.proposalDeadline}\nDigite 0 para regresar al menú principal.`);
-                    } else if (input === 'd') {
-                        agent.add(`Miembros del tribunal de sustentación: ${project.tutor} (Miembro 1), ${project.vocal} (Miembro 2)\nDigite 0 para regresar al menú principal.`);
-                    } else if (input === 'e') {
-                        agent.add(`Plazos para sustentar y costos: ${project.sustenanceDeadlines}\nDigite 0 para regresar al menú principal.`);
-                    } else if (input === 'f') {
-                        agent.add(`Fecha planificada de sustentación: ${project.plannedSustenance}\nDigite 0 para regresar al menú principal.`);
-                    } else if (input === '0') {
-                        agent.add('Menú Principal:\n' +
-                                  `1) Documentos y formatos\n` +
-                                  `2) Ajustes en propuesta\n` +
-                                  `3) Proceso de sustentación\n` +
-                                  `4) Gestión del título\n` +
-                                  `5) Preguntas personalizadas\n` +
-                                  `6) Contactar Asistente Académico\n` +
-                                  `0) Salir\n\n` +
-                                  'Por favor, selecciona una opción (0-6).');
-                        agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 });
-                        agent.context.set({ name: 'main_menu', lifespan: 5 });
-                    }
-                    return;
+                if (input === 'a') {
+                    agent.add(`Nombre del proyecto: ${project.projectName}\nDigite 0 para regresar al menú principal.`);
+                } else if (input === 'b') {
+                    agent.add(`Estado actual del proyecto: ${project.status}\nDigite 0 para regresar al menú principal.`);
+                } else if (input === 'c') {
+                    agent.add(`Plazos presentar propuesta: ${project.proposalDeadline}\nDigite 0 para regresar al menú principal.`);
+                } else if (input === 'd') {
+                    agent.add(`Miembros del tribunal de sustentación: ${project.tutor} (Miembro 1), ${project.vocal} (Miembro 2)\nDigite 0 para regresar al menú principal.`);
+                } else if (input === 'e') {
+                    agent.add(`Plazos para sustentar y costos: ${project.sustenanceDeadlines}\nDigite 0 para regresar al menú principal.`);
+                } else if (input === 'f') {
+                    agent.add(`Fecha planificada de sustentación: ${project.plannedSustenance}\nDigite 0 para regresar al menú principal.`);
+                } else if (input === '0') {
+                    agent.add('Menú Principal:\n' +
+                              `1) Documentos y formatos\n` +
+                              `2) Ajustes en propuesta\n` +
+                              `3) Proceso de sustentación\n` +
+                              `4) Gestión del título\n` +
+                              `5) Preguntas personalizadas\n` +
+                              `6) Contactar Asistente Académico\n` +
+                              `0) Salir\n\n` +
+                              'Por favor, selecciona una opción (0-6).');
+                    agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 });
+                    agent.context.set({ name: 'main_menu', lifespan: 5 });
                 } else {
                     agent.add('Opción inválida. Por favor, selecciona una opción válida (a-f o 0).\n\n' +
                               'Submenú - Preguntas personalizadas:\n' +
@@ -412,8 +411,8 @@ loadData().then(() => {
                               `e) Plazos para sustentar y costos\n` +
                               `f) Fecha planificada de sustentación\n` +
                               `0) Regresar al menú principal`);
-                    return;
                 }
+                return;
             }
 
             agent.add('Ha ocurrido un error. Por favor, selecciona la opción 5 nuevamente para ingresar tu identificación.');
