@@ -92,7 +92,7 @@ loadData().then(() => {
             }
 
             if (input === '5') {
-                agent.add('Por favor ingresa tu número de identificación (debe tener exactamente 10 dígitos, sin puntos ni guiones).');
+                agent.add('Por favor ingresa tu número de identificación (debe tener exactamente 10 dígitos, sin puntos ni guiones) o selecciona 0 para regresar al menú principal.');
                 agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
                 agent.context.set({ name: 'main_menu', lifespan: 0 });
             } else if (input === '1') {
@@ -169,6 +169,22 @@ loadData().then(() => {
                 let idInput = agent.parameters.identification || agent.query;
                 console.log('Validando y buscando estudiante con ID:', idInput);
 
+                // Manejar "0" como retorno al menú principal
+                if (idInput === '0') {
+                    agent.add('Menú Principal:\n' +
+                              `1) Documentos y formatos\n` +
+                              `2) Ajustes en propuesta\n` +
+                              `3) Proceso de sustentación\n` +
+                              `4) Gestión del título\n` +
+                              `5) Preguntas personalizadas\n` +
+                              `6) Contactar Asistente Académico\n` +
+                              `0) Salir\n\n` +
+                              'Por favor, selecciona una opción (0-6).');
+                    agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
+                    agent.context.set({ name: 'main_menu', lifespan: 5 });
+                    return;
+                }
+
                 // Validar longitud exacta de 10 dígitos
                 if (!/^\d{10}$/.test(idInput)) {
                     agent.add('El número de identificación debe tener exactamente 10 dígitos. Por favor, ingrésalo nuevamente o selecciona 0 para regresar al menú principal.');
@@ -196,22 +212,6 @@ loadData().then(() => {
                     agent.add('Número de identificación no encontrado. Por favor, ingresa un número válido de 10 dígitos o selecciona 0 para regresar al menú principal.');
                     agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
                 }
-                return;
-            }
-
-            // Manejar retorno al menú principal con 0
-            if (awaitingIdentification && agent.query === '0') {
-                agent.add('Menú Principal:\n' +
-                          `1) Documentos y formatos\n` +
-                          `2) Ajustes en propuesta\n` +
-                          `3) Proceso de sustentación\n` +
-                          `4) Gestión del título\n` +
-                          `5) Preguntas personalizadas\n` +
-                          `6) Contactar Asistente Académico\n` +
-                          `0) Salir\n\n` +
-                          'Por favor, selecciona una opción (0-6).');
-                agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
-                agent.context.set({ name: 'main_menu', lifespan: 5 });
                 return;
             }
 
