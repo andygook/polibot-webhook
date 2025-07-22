@@ -419,19 +419,6 @@ loadData().then(() => {
             }
         }
 
-        function fallbackHandler(agent) {
-            console.log('Procesando fallbackHandler');
-            agent.add('Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n\n' +
-                      'Menú Principal:\n' +
-                      `1) Documentos y formatos\n` +
-                      `2) Ajustes en propuesta\n` +
-                      `3) Proceso de sustentación\n` +
-                      `4) Gestión del título\n` +
-                      `5) Preguntas personalizadas\n` +
-                      `6) Contactar Asistente Académico\n` +
-                      `0) Salir`);
-        }
-
         let intentMap = new Map();
         intentMap.set('Default Welcome Intent', welcomeHandler);
         intentMap.set('Main Menu', mainMenuHandler);
@@ -440,7 +427,6 @@ loadData().then(() => {
         intentMap.set('Adjustments Menu', adjustmentsMenuHandler);
         intentMap.set('Sustenance Menu', sustenanceMenuHandler);
         intentMap.set('Title Management Menu', titleManagementHandler);
-        intentMap.set('Default Fallback Intent', fallbackHandler);
         agent.handleRequest(intentMap);
     });
 
