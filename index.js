@@ -21,20 +21,20 @@ function loadData() {
                     } else {
                         studentsData = records.map(r => ({
                             id: r.Identificación,
-                            apellidos: r.Apellidos,
-                            nombres: r.Nombres,
-                            maestria: r.Maestría,
-                            cohorte: r.Cohorte
+                            apellidos: r.Apellidos || 'No disponible',
+                            nombres: r.Nombres || 'No disponible',
+                            maestria: r.Maestría || 'No disponible',
+                            cohorte: r.Cohorte || 'No disponible'
                         }));
                         projectData = records.map(r => ({
                             id: r.Identificación,
-                            projectName: r['Nombre del proyecto'],
-                            status: r['Estado del proyecto'],
-                            proposalDeadline: r['Plazos presentar propuesta'],
-                            tutor: r.Tutor,
-                            vocal: r.Vocal,
-                            sustenanceDeadlines: `${r['Plazos para sustentar sin prórrogas']} (0), ${r['Primera prórroga']} (${r['Valores asociados a la primer prórroga'] || '0'})`,
-                            plannedSustenance: r['Fecha planificada de sustentación'] || 'NO TIENE'
+                            projectName: r['Nombre del proyecto'] || 'No disponible',
+                            status: r['Estado del proyecto'] || 'No disponible',
+                            proposalDeadline: r['Plazos presentar propuesta'] || 'No disponible',
+                            tutor: r.Tutor || 'No disponible',
+                            vocal: r.Vocal || 'No disponible',
+                            sustenanceDeadlines: `${r['Plazos para sustentar sin prórrogas'] || 'No disponible'} (0), ${r['Primera prórroga'] || 'No disponible'} (${r['Valores asociados a la primer prórroga'] || '0'})`,
+                            plannedSustenance: r['Fecha planificada de sustentación'] || 'No disponible'
                         }));
                         isDataLoaded = true;
                         console.log('Datos cargados:', studentsData.length, 'estudiantes,', projectData.length, 'proyectos');
