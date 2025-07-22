@@ -92,7 +92,7 @@ loadData().then(() => {
             }
 
             if (input === '5') {
-                agent.add('Por favor ingresa tu número de identificación (sin puntos ni guiones).');
+                agent.add('Por favor ingresa tu número de identificación (debe tener exactamente 10 dígitos, sin puntos ni guiones).');
                 agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
                 agent.context.set({ name: 'main_menu', lifespan: 0 });
             } else if (input === '1') {
@@ -151,7 +151,7 @@ loadData().then(() => {
             console.log('Procesando personalizedQueriesMenuHandler');
             const awaitingIdentification = agent.context.get('awaiting_identification');
             const personalizedQueriesContext = agent.context.get('personalized_queries_menu');
-            let input = agent.query.toLowerCase();
+            let input = agent.query;
 
             console.log('Input recibido:', input);
             console.log('Contexto awaiting_identification:', awaitingIdentification);
@@ -165,9 +165,18 @@ loadData().then(() => {
             }
 
             // Procesar la identificación
-            if ((awaitingIdentification || agent.intent === 'Personalized Queries Menu') && (agent.parameters.identification || agent.parameters.id || agent.query) && /^\d{10}$/.test(agent.parameters.identification || agent.parameters.id || agent.query)) {
-                let idInput = agent.parameters.identification || agent.parameters.id || agent.query;
-                console.log('Buscando estudiante con ID:', idInput);
+            if (awaitingIdentification && (agent.parameters.identification || agent.query)) {
+                let idInput = agent.parameters.identification || agent.query;
+                console.log('Validando y buscando estudiante con ID:', idInput);
+
+                // Validar longitud exacta de 10 dígitos
+                if (!/^\d{10}$/.test(idInput)) {
+                    agent.add('El número de identificación debe tener exactamente 10 dígitos. Por favor, ingrésalo nuevamente o selecciona 0 para regresar al menú principal.');
+                    agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
+                    return;
+                }
+
+                // Buscar estudiante
                 const student = studentsData.find(s => s.id.trim() === idInput.trim());
                 console.log('Estudiante encontrado:', student);
                 if (student) {
@@ -184,9 +193,25 @@ loadData().then(() => {
                     agent.context.set({ name: 'personalized_queries_menu', lifespan: 10, parameters: { identification: idInput } });
                     agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
                 } else {
-                    agent.add('Número de identificación no encontrado. Por favor, ingresa un número válido (sin puntos ni guiones) o selecciona 0 para regresar al menú principal.');
+                    agent.add('Número de identificación no encontrado. Por favor, ingresa un número válido de 10 dígitos o selecciona 0 para regresar al menú principal.');
                     agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
                 }
+                return;
+            }
+
+            // Manejar retorno al menú principal con 0
+            if (awaitingIdentification && agent.query === '0') {
+                agent.add('Menú Principal:\n' +
+                          `1) Documentos y formatos\n` +
+                          `2) Ajustes en propuesta\n` +
+                          `3) Proceso de sustentación\n` +
+                          `4) Gestión del título\n` +
+                          `5) Preguntas personalizadas\n` +
+                          `6) Contactar Asistente Académico\n` +
+                          `0) Salir\n\n` +
+                          'Por favor, selecciona una opción (0-6).');
+                agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
+                agent.context.set({ name: 'main_menu', lifespan: 5 });
                 return;
             }
 
