@@ -10,9 +10,9 @@ let studentsData = [];
 let projectData = [];
 let isDataLoaded = false;
 
-// Configuración de Telegram (reemplaza con tus valores)
-const TELEGRAM_BOT_TOKEN = 'TU_TOKEN_AQUI'; // Obtén esto de BotFather
-const TELEGRAM_CHAT_ID = 'TU_CHAT_ID_AQUI'; // Obtén esto desde las actualizaciones de Telegram
+// Configuración de Telegram (reemplaza con tus valores reales)
+const TELEGRAM_BOT_TOKEN = 'TU_TOKEN_REAL_AQUI'; // Ejemplo: 123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
+const TELEGRAM_CHAT_ID = 'TU_CHAT_ID_REAL_AQUI'; // Ejemplo: 123456789 o -123456789 para grupos
 
 function loadData() {
     return new Promise((resolve, reject) => {
@@ -63,7 +63,7 @@ async function sendTelegramMessage(text) {
         });
         console.log('Mensaje enviado a Telegram:', text);
     } catch (error) {
-        console.error('Error enviando mensaje a Telegram:', error);
+        console.error('Error enviando mensaje a Telegram:', error.response ? error.response.data : error.message);
     }
 }
 
