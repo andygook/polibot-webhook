@@ -36,6 +36,7 @@ function loadData() {
                             sustenanceDeadlines: `${r['Plazos para sustentar sin prórrogas'] || 'No disponible'} (0), ${r['Primera prórroga'] || 'No disponible'} (${r['Valores asociados a la primer prórroga'] || '0'})`,
                             plannedSustenance: r['Fecha planificada de sustentación'] || 'No disponible'
                         }));
+                        console.log('Datos cargados en projectData para ID 0123456789:', projectData.find(p => p.id === '0123456789')?.proposalDeadline);
                         isDataLoaded = true;
                         console.log('Datos cargados:', studentsData.length, 'estudiantes,', projectData.length, 'proyectos');
                         resolve();
@@ -230,6 +231,7 @@ loadData().then(() => {
 
             const studentId = personalizedQueriesContext.parameters.identification;
             const project = projectData.find(p => p.id.trim() === studentId.trim());
+            console.log('Proyecto encontrado para ID', studentId, ':', project);
 
             if (!project) {
                 console.log('Proyecto no encontrado para ID:', studentId);
@@ -244,6 +246,7 @@ loadData().then(() => {
                     agent.add(`Estado actual del proyecto: ${project.status}\nDigite g para regresar al menú anterior.`);
                 } else if (input === 'c') {
                     agent.add(`Plazos presentar propuesta: ${project.proposalDeadline}\nDigite g para regresar al menú anterior.`);
+                    console.log('proposalDeadline para ID', studentId, ':', project.proposalDeadline);
                 } else if (input === 'd') {
                     agent.add(`Miembros del tribunal de sustentación: ${project.tutor} (Miembro 1), ${project.vocal} (Miembro 2)\nDigite g para regresar al menú anterior.`);
                 } else if (input === 'e') {
