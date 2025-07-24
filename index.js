@@ -62,7 +62,7 @@ loadData().then(() => {
 
         function welcomeHandler(agent) {
             console.log('Procesando welcomeHandler');
-            const message = `¡Bienvenido(a) a PoliBOT! Soy el asistente virtual para estudiantes de posgrado. ¿Cómo puedo ayudarte hoy?\n\n` +
+            const message = `¡Bienvenido(a), soy PoliBOT!, tu asistente virtual en postgrado. ¿Cómo puedo ayudarte?\n\n` +
                             `Menú Principal:\n` +
                             `1) Documentos y formatos\n` +
                             `2) Ajustes en propuesta\n` +
