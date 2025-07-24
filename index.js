@@ -225,7 +225,7 @@ loadData().then(() => {
             let input = agent.parameters.option?.toLowerCase();
 
             if (!personalizedQueriesContext || !input) {
-                agent.add('Error: No se detectó el contexto o la opción. Digite g para regresar al menú principal.');
+                agent.add('Error: No se detectó el contexto o la opción. Digite g para regresar al menú anterior.');
                 return;
             }
 
@@ -235,7 +235,7 @@ loadData().then(() => {
 
             if (!project) {
                 console.log('Proyecto no encontrado para ID:', studentId);
-                agent.add('Error: No se encontraron datos del proyecto. Digite g para regresar al menú principal.');
+                agent.add('Error: No se encontraron datos del proyecto. Digite g para regresar al menú anterior.');
                 return;
             }
 
@@ -254,16 +254,32 @@ loadData().then(() => {
                 } else if (input === 'f') {
                     agent.add(`Fecha planificada de sustentación: ${project.plannedSustenance}\nDigite g para regresar al menú anterior.`);
                 } else if (input === 'g') {
-                    agent.add(`Submenú - Preguntas personalizadas:\n` +
-                              `a) Nombre del proyecto\n` +
-                              `b) Estado actual del proyecto\n` +
-                              `c) Plazos presentar propuesta\n` +
-                              `d) Miembros del tribunal de sustentación\n` +
-                              `e) Plazos para sustentar y costos\n` +
-                              `f) Fecha planificada de sustentación\n` +
-                              `g) Regresar al menú principal\n\n` +
-                              `Por favor, selecciona una opción (a-g).`);
-                    agent.context.set({ name: 'personalized_queries_menu', lifespan: 10, parameters: { identification: studentId } });
+                    // Verificar si ya estamos en el submenú; si es así, regresar al menú principal
+                    const isInSubmenu = agent.context.get('personalized_queries_menu')?.parameters?.isInSubmenu;
+                    if (isInSubmenu) {
+                        agent.add('Menú Principal:\n' +
+                                  `1) Documentos y formatos\n` +
+                                  `2) Ajustes en propuesta\n` +
+                                  `3) Proceso de sustentación\n` +
+                                  `4) Gestión del título\n` +
+                                  `5) Preguntas personalizadas\n` +
+                                  `6) Contactar Asistente Académico\n` +
+                                  `0) Salir\n\n` +
+                                  'Por favor, selecciona una opción (0-6).');
+                        agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 });
+                        agent.context.set({ name: 'main_menu', lifespan: 5 });
+                    } else {
+                        agent.add(`Submenú - Preguntas personalizadas:\n` +
+                                  `a) Nombre del proyecto\n` +
+                                  `b) Estado actual del proyecto\n` +
+                                  `c) Plazos presentar propuesta\n` +
+                                  `d) Miembros del tribunal de sustentación\n` +
+                                  `e) Plazos para sustentar y costos\n` +
+                                  `f) Fecha planificada de sustentación\n` +
+                                  `g) Regresar al menú principal\n\n` +
+                                  `Por favor, selecciona una opción (a-g).`);
+                        agent.context.set({ name: 'personalized_queries_menu', lifespan: 10, parameters: { identification: studentId, isInSubmenu: true } });
+                    }
                 }
             } else {
                 agent.add('Opción inválida. Por favor, selecciona una opción válida (a-g).\n\n' +
