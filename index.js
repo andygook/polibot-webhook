@@ -72,10 +72,7 @@ loadData().then(() => {
                             `6) Contactar Asistente Académico\n` +
                             `0) Salir\n\n` +
                             `Por favor, selecciona una opción (0-6).`;
-            agent.add(new agent.RichResponse().addSimpleResponse({
-                text: message,
-                displayText: message // Asegura que se muestre en texto plano en algunos clientes
-            }));
+            agent.add(message);
             agent.context.set({ name: 'main_menu', lifespan: 5 });
         }
 
