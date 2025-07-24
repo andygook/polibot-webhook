@@ -10,9 +10,9 @@ let studentsData = [];
 let projectData = [];
 let isDataLoaded = false;
 
-// Configuración de Telegram (reemplaza con tus valores reales)
-const TELEGRAM_BOT_TOKEN = 'TU_TOKEN_REAL_AQUI'; // Ejemplo: 123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
-const TELEGRAM_CHAT_ID = 'TU_CHAT_ID_REAL_AQUI'; // Ejemplo: 123456789 o -123456789 para grupos
+// Configuración de Telegram
+const TELEGRAM_BOT_TOKEN = '7253134218:AAFVF7q25Ukx24IcGOgw-T3-ohzMYQRN0Lk'; // Token proporcionado
+const TELEGRAM_CHAT_ID = 'TU_CHAT_ID_REAL_AQUI'; // Reemplaza con el chat_id que obtengas
 
 function loadData() {
     return new Promise((resolve, reject) => {
