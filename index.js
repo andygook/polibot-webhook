@@ -62,8 +62,8 @@ loadData().then(() => {
 
         function welcomeHandler(agent) {
             console.log('Procesando welcomeHandler');
-            const message = `¡Bienvenido(a), soy PoliBOT!, tu asistente virtual en postgrado. ¿Cómo puedo ayudarte?\n\n` +
-                            `Menú Principal:\n` +
+            const message = `¡Bienvenido(a), soy **PoliBOT**!, tu asistente virtual en postgrado. ¿Cómo puedo ayudarte?\n\n` +
+                            `**Menú Principal:**\n` +
                             `1) Documentos y formatos\n` +
                             `2) Ajustes en propuesta\n` +
                             `3) Proceso de sustentación\n` +
@@ -81,7 +81,7 @@ loadData().then(() => {
             let input = agent.parameters.option;
             if (!input || typeof input !== 'string' || !['0', '1', '2', '3', '4', '5', '6'].includes(input)) {
                 agent.add('Opción inválida. Por favor, selecciona una opción válida (0-6).\n\n' +
-                          'Menú Principal:\n' +
+                          '**Menú Principal:**\n' +
                           `1) Documentos y formatos\n` +
                           `2) Ajustes en propuesta\n` +
                           `3) Proceso de sustentación\n` +
@@ -137,7 +137,7 @@ loadData().then(() => {
                 agent.context.set({ name: 'main_menu', lifespan: 0 });
             } else {
                 agent.add('Esta opción aún no está implementada. Por favor, selecciona otra opción.\n\n' +
-                          'Menú Principal:\n' +
+                          '**Menú Principal:**\n' +
                           `1) Documentos y formatos\n` +
                           `2) Ajustes en propuesta\n` +
                           `3) Proceso de sustentación\n` +
