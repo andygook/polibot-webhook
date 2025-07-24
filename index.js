@@ -59,7 +59,7 @@ async function sendTelegramMessage(text) {
         await axios.post(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
             chat_id: TELEGRAM_CHAT_ID,
             text: text,
-            parse_mode: 'Markdown' // Usamos Markdown para negritas con **
+            parse_mode: 'Markdown' // Mantenemos parse_mode por compatibilidad, pero sin usar negritas
         });
         console.log('Mensaje enviado a Telegram:', text);
     } catch (error) {
@@ -79,16 +79,16 @@ loadData().then(() => {
 
         function welcomeHandler(agent) {
             console.log('Procesando welcomeHandler');
-            const message = `¡Bienvenido(a), soy **PoliBOT**!, tu asistente virtual en postgrado. ¿Cómo puedo ayudarte?\n\n` +
-                            `**Menú Principal:**\n` +
-                            `1) Documentos y formatos\n` +
-                            `2) Ajustes en propuesta\n` +
-                            `3) Proceso de sustentación\n` +
-                            `4) Gestión del título\n` +
-                            `5) Preguntas personalizadas\n` +
-                            `6) Contactar Asistente Académico\n` +
-                            `0) Salir\n\n` +
-                            `Por favor, selecciona una opción (0-6).`;
+            const message = '¡Bienvenido(a), soy PoliBOT!, tu asistente virtual en postgrado. ¿Cómo puedo ayudarte?\n\n' +
+                            'Menú Principal:\n' +
+                            '1) Documentos y formatos\n' +
+                            '2) Ajustes en propuesta\n' +
+                            '3) Proceso de sustentación\n' +
+                            '4) Gestión del título\n' +
+                            '5) Preguntas personalizadas\n' +
+                            '6) Contactar Asistente Académico\n' +
+                            '0) Salir\n\n' +
+                            'Por favor, selecciona una opción (0-6).';
             sendTelegramMessage(message); // Envía directamente a Telegram
             agent.add(message); // Mantiene la respuesta para Dialogflow
             agent.context.set({ name: 'main_menu', lifespan: 5 });
@@ -99,14 +99,14 @@ loadData().then(() => {
             let input = agent.parameters.option;
             if (!input || typeof input !== 'string' || !['0', '1', '2', '3', '4', '5', '6'].includes(input)) {
                 const message = 'Opción inválida. Por favor, selecciona una opción válida (0-6).\n\n' +
-                                '**Menú Principal:**\n' +
-                                `1) Documentos y formatos\n` +
-                                `2) Ajustes en propuesta\n` +
-                                `3) Proceso de sustentación\n` +
-                                `4) Gestión del título\n` +
-                                `5) Preguntas personalizadas\n` +
-                                `6) Contactar Asistente Académico\n` +
-                                `0) Salir`;
+                                'Menú Principal:\n' +
+                                '1) Documentos y formatos\n' +
+                                '2) Ajustes en propuesta\n' +
+                                '3) Proceso de sustentación\n' +
+                                '4) Gestión del título\n' +
+                                '5) Preguntas personalizadas\n' +
+                                '6) Contactar Asistente Académico\n' +
+                                '0) Salir';
                 sendTelegramMessage(message);
                 agent.add(message);
                 return;
@@ -171,14 +171,14 @@ loadData().then(() => {
                 agent.context.set({ name: 'main_menu', lifespan: 0 });
             } else {
                 const message = 'Esta opción aún no está implementada. Por favor, selecciona otra opción.\n\n' +
-                                '**Menú Principal:**\n' +
-                                `1) Documentos y formatos\n` +
-                                `2) Ajustes en propuesta\n` +
-                                `3) Proceso de sustentación\n` +
-                                `4) Gestión del título\n` +
-                                `5) Preguntas personalizadas\n` +
-                                `6) Contactar Asistente Académico\n` +
-                                `0) Salir`;
+                                'Menú Principal:\n' +
+                                '1) Documentos y formatos\n' +
+                                '2) Ajustes en propuesta\n' +
+                                '3) Proceso de sustentación\n' +
+                                '4) Gestión del título\n' +
+                                '5) Preguntas personalizadas\n' +
+                                '6) Contactar Asistente Académico\n' +
+                                '0) Salir';
                 sendTelegramMessage(message);
                 agent.add(message);
             }
@@ -208,14 +208,14 @@ loadData().then(() => {
                 console.log('Validando y buscando estudiante con ID:', idInput);
 
                 if (idInput === '0') {
-                    const message = '**Menú Principal:**\n' +
-                                    `1) Documentos y formatos\n` +
-                                    `2) Ajustes en propuesta\n` +
-                                    `3) Proceso de sustentación\n` +
-                                    `4) Gestión del título\n` +
-                                    `5) Preguntas personalizadas\n` +
-                                    `6) Contactar Asistente Académico\n` +
-                                    `0) Salir\n\n` +
+                    const message = 'Menú Principal:\n' +
+                                    '1) Documentos y formatos\n' +
+                                    '2) Ajustes en propuesta\n' +
+                                    '3) Proceso de sustentación\n' +
+                                    '4) Gestión del título\n' +
+                                    '5) Preguntas personalizadas\n' +
+                                    '6) Contactar Asistente Académico\n' +
+                                    '0) Salir\n\n' +
                                     'Por favor, selecciona una opción (0-6).';
                     sendTelegramMessage(message);
                     agent.add(message);
@@ -314,29 +314,29 @@ loadData().then(() => {
                 } else if (input === 'g') {
                     const isInSubmenu = agent.context.get('personalized_queries_menu')?.parameters?.isInSubmenu;
                     if (isInSubmenu) {
-                        const message = '**Menú Principal:**\n' +
-                                        `1) Documentos y formatos\n` +
-                                        `2) Ajustes en propuesta\n` +
-                                        `3) Proceso de sustentación\n` +
-                                        `4) Gestión del título\n` +
-                                        `5) Preguntas personalizadas\n` +
-                                        `6) Contactar Asistente Académico\n` +
-                                        `0) Salir\n\n` +
+                        const message = 'Menú Principal:\n' +
+                                        '1) Documentos y formatos\n' +
+                                        '2) Ajustes en propuesta\n' +
+                                        '3) Proceso de sustentación\n' +
+                                        '4) Gestión del título\n' +
+                                        '5) Preguntas personalizadas\n' +
+                                        '6) Contactar Asistente Académico\n' +
+                                        '0) Salir\n\n' +
                                         'Por favor, selecciona una opción (0-6).';
                         sendTelegramMessage(message);
                         agent.add(message);
                         agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 });
                         agent.context.set({ name: 'main_menu', lifespan: 5 });
                     } else {
-                        const message = `Submenú - Preguntas personalizadas:\n` +
-                                        `a) Nombre del proyecto\n` +
-                                        `b) Estado actual del proyecto\n` +
-                                        `c) Plazos presentar propuesta\n` +
-                                        `d) Miembros del tribunal de sustentación\n` +
-                                        `e) Plazos para sustentar y costos\n` +
-                                        `f) Fecha planificada de sustentación\n` +
-                                        `g) Regresar al menú principal\n\n` +
-                                        `Por favor, selecciona una opción (a-g).`;
+                        const message = 'Submenú - Preguntas personalizadas:\n' +
+                                        'a) Nombre del proyecto\n' +
+                                        'b) Estado actual del proyecto\n' +
+                                        'c) Plazos presentar propuesta\n' +
+                                        'd) Miembros del tribunal de sustentación\n' +
+                                        'e) Plazos para sustentar y costos\n' +
+                                        'f) Fecha planificada de sustentación\n' +
+                                        'g) Regresar al menú principal\n\n' +
+                                        'Por favor, selecciona una opción (a-g).';
                         sendTelegramMessage(message);
                         agent.add(message);
                         agent.context.set({ name: 'personalized_queries_menu', lifespan: 10, parameters: { identification: studentId, isInSubmenu: true } });
@@ -345,13 +345,13 @@ loadData().then(() => {
             } else {
                 const message = 'Opción inválida. Por favor, selecciona una opción válida (a-g).\n\n' +
                                 'Submenú - Preguntas personalizadas:\n' +
-                                `a) Nombre del proyecto\n` +
-                                `b) Estado actual del proyecto\n` +
-                                `c) Plazos presentar propuesta\n` +
-                                `d) Miembros del tribunal de sustentación\n` +
-                                `e) Plazos para sustentar y costos\n` +
-                                `f) Fecha planificada de sustentación\n` +
-                                `g) Regresar al menú principal`;
+                                'a) Nombre del proyecto\n' +
+                                'b) Estado actual del proyecto\n' +
+                                'c) Plazos presentar propuesta\n' +
+                                'd) Miembros del tribunal de sustentación\n' +
+                                'e) Plazos para sustentar y costos\n' +
+                                'f) Fecha planificada de sustentación\n' +
+                                'g) Regresar al menú principal';
                 sendTelegramMessage(message);
                 agent.add(message);
             }
@@ -380,14 +380,14 @@ loadData().then(() => {
                 sendTelegramMessage(message);
                 agent.add(message);
             } else if (input === '0') {
-                const message = '**Menú Principal:**\n' +
-                                `1) Documentos y formatos\n` +
-                                `2) Ajustes en propuesta\n` +
-                                `3) Proceso de sustentación\n` +
-                                `4) Gestión del título\n` +
-                                `5) Preguntas personalizadas\n` +
-                                `6) Contactar Asistente Académico\n` +
-                                `0) Salir\n\n` +
+                const message = 'Menú Principal:\n' +
+                                '1) Documentos y formatos\n' +
+                                '2) Ajustes en propuesta\n' +
+                                '3) Proceso de sustentación\n' +
+                                '4) Gestión del título\n' +
+                                '5) Preguntas personalizadas\n' +
+                                '6) Contactar Asistente Académico\n' +
+                                '0) Salir\n\n' +
                                 'Por favor, selecciona una opción (0-6).';
                 sendTelegramMessage(message);
                 agent.add(message);
@@ -429,14 +429,14 @@ loadData().then(() => {
                 sendTelegramMessage(message);
                 agent.add(message);
             } else if (input === '0') {
-                const message = '**Menú Principal:**\n' +
-                                `1) Documentos y formatos\n` +
-                                `2) Ajustes en propuesta\n` +
-                                `3) Proceso de sustentación\n` +
-                                `4) Gestión del título\n` +
-                                `5) Preguntas personalizadas\n` +
-                                `6) Contactar Asistente Académico\n` +
-                                `0) Salir\n\n` +
+                const message = 'Menú Principal:\n' +
+                                '1) Documentos y formatos\n' +
+                                '2) Ajustes en propuesta\n' +
+                                '3) Proceso de sustentación\n' +
+                                '4) Gestión del título\n' +
+                                '5) Preguntas personalizadas\n' +
+                                '6) Contactar Asistente Académico\n' +
+                                '0) Salir\n\n' +
                                 'Por favor, selecciona una opción (0-6).';
                 sendTelegramMessage(message);
                 agent.add(message);
@@ -498,14 +498,14 @@ loadData().then(() => {
                 sendTelegramMessage(message);
                 agent.add(message);
             } else if (input === '0') {
-                const message = '**Menú Principal:**\n' +
-                                `1) Documentos y formatos\n` +
-                                `2) Ajustes en propuesta\n` +
-                                `3) Proceso de sustentación\n` +
-                                `4) Gestión del título\n` +
-                                `5) Preguntas personalizadas\n` +
-                                `6) Contactar Asistente Académico\n` +
-                                `0) Salir\n\n` +
+                const message = 'Menú Principal:\n' +
+                                '1) Documentos y formatos\n' +
+                                '2) Ajustes en propuesta\n' +
+                                '3) Proceso de sustentación\n' +
+                                '4) Gestión del título\n' +
+                                '5) Preguntas personalizadas\n' +
+                                '6) Contactar Asistente Académico\n' +
+                                '0) Salir\n\n' +
                                 'Por favor, selecciona una opción (0-6).';
                 sendTelegramMessage(message);
                 agent.add(message);
@@ -550,14 +550,14 @@ loadData().then(() => {
                 sendTelegramMessage(message);
                 agent.add(message);
             } else if (input === '0') {
-                const message = '**Menú Principal:**\n' +
-                                `1) Documentos y formatos\n` +
-                                `2) Ajustes en propuesta\n` +
-                                `3) Proceso de sustentación\n` +
-                                `4) Gestión del título\n` +
-                                `5) Preguntas personalizadas\n` +
-                                `6) Contactar Asistente Académico\n` +
-                                `0) Salir\n\n` +
+                const message = 'Menú Principal:\n' +
+                                '1) Documentos y formatos\n' +
+                                '2) Ajustes en propuesta\n' +
+                                '3) Proceso de sustentación\n' +
+                                '4) Gestión del título\n' +
+                                '5) Preguntas personalizadas\n' +
+                                '6) Contactar Asistente Académico\n' +
+                                '0) Salir\n\n' +
                                 'Por favor, selecciona una opción (0-6).';
                 sendTelegramMessage(message);
                 agent.add(message);
