@@ -62,8 +62,8 @@ loadData().then(() => {
 
         function welcomeHandler(agent) {
             console.log('Procesando welcomeHandler');
-            const message = `¡Bienvenido(a), soy **PoliBOT**!, tu asistente virtual en postgrado. ¿Cómo puedo ayudarte?\n\n` +
-                            `**Menú Principal:**\n` +
+            const message = `¡Bienvenido(a), soy <b>PoliBOT</b>!, tu asistente virtual en postgrado. ¿Cómo puedo ayudarte?\n\n` +
+                            `<b>Menú Principal:</b>\n` +
                             `1) Documentos y formatos\n` +
                             `2) Ajustes en propuesta\n` +
                             `3) Proceso de sustentación\n` +
@@ -72,7 +72,10 @@ loadData().then(() => {
                             `6) Contactar Asistente Académico\n` +
                             `0) Salir\n\n` +
                             `Por favor, selecciona una opción (0-6).`;
-            agent.add(message);
+            agent.add(new agent.RichResponse().addSimpleResponse({
+                text: message,
+                displayText: message // Asegura que se muestre en texto plano en algunos clientes
+            }));
             agent.context.set({ name: 'main_menu', lifespan: 5 });
         }
 
@@ -81,7 +84,7 @@ loadData().then(() => {
             let input = agent.parameters.option;
             if (!input || typeof input !== 'string' || !['0', '1', '2', '3', '4', '5', '6'].includes(input)) {
                 agent.add('Opción inválida. Por favor, selecciona una opción válida (0-6).\n\n' +
-                          '**Menú Principal:**\n' +
+                          '<b>Menú Principal:</b>\n' +
                           `1) Documentos y formatos\n` +
                           `2) Ajustes en propuesta\n` +
                           `3) Proceso de sustentación\n` +
@@ -137,7 +140,7 @@ loadData().then(() => {
                 agent.context.set({ name: 'main_menu', lifespan: 0 });
             } else {
                 agent.add('Esta opción aún no está implementada. Por favor, selecciona otra opción.\n\n' +
-                          '**Menú Principal:**\n' +
+                          '<b>Menú Principal:</b>\n' +
                           `1) Documentos y formatos\n` +
                           `2) Ajustes en propuesta\n` +
                           `3) Proceso de sustentación\n` +
@@ -172,7 +175,7 @@ loadData().then(() => {
 
                 // Manejar "0" como retorno al menú principal
                 if (idInput === '0') {
-                    agent.add('Menú Principal:\n' +
+                    agent.add('<b>Menú Principal:</b>\n' +
                               `1) Documentos y formatos\n` +
                               `2) Ajustes en propuesta\n` +
                               `3) Proceso de sustentación\n` +
@@ -257,7 +260,7 @@ loadData().then(() => {
                     // Verificar si ya estamos en el submenú; si es así, regresar al menú principal
                     const isInSubmenu = agent.context.get('personalized_queries_menu')?.parameters?.isInSubmenu;
                     if (isInSubmenu) {
-                        agent.add('Menú Principal:\n' +
+                        agent.add('<b>Menú Principal:</b>\n' +
                                   `1) Documentos y formatos\n` +
                                   `2) Ajustes en propuesta\n` +
                                   `3) Proceso de sustentación\n` +
@@ -311,7 +314,7 @@ loadData().then(() => {
             } else if (input === '2') {
                 agent.add('Documento disponible aquí: [Formatos para el trabajo de titulación](https://docs.google.com/document/d/16w1HRQ5LBNqLesaZdDJiJQdS98-GCupa/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)\n\nDigite 0 para regresar al menú principal');
             } else if (input === '0') {
-                agent.add('Menú Principal:\n' +
+                agent.add('<b>Menú Principal:</b>\n' +
                           `1) Documentos y formatos\n` +
                           `2) Ajustes en propuesta\n` +
                           `3) Proceso de sustentación\n` +
@@ -352,7 +355,7 @@ loadData().then(() => {
                           '4️- Inicia nuevamente el proceso de revisión y aprobación de la propuesta del trabajo de titulación.\n' +
                           'Digite 0 para regresar al menú principal');
             } else if (input === '0') {
-                agent.add('Menú Principal:\n' +
+                agent.add('<b>Menú Principal:</b>\n' +
                           `1) Documentos y formatos\n` +
                           `2) Ajustes en propuesta\n` +
                           `3) Proceso de sustentación\n` +
@@ -411,7 +414,7 @@ loadData().then(() => {
                           '10- Envestidura grado de magister.\n' +
                           'Digite 0 para regresar al menú principal');
             } else if (input === '0') {
-                agent.add('Menú Principal:\n' +
+                agent.add('<b>Menú Principal:</b>\n' +
                           `1) Documentos y formatos\n` +
                           `2) Ajustes en propuesta\n` +
                           `3) Proceso de sustentación\n` +
@@ -453,7 +456,7 @@ loadData().then(() => {
                           '- Presentar la cédula del quien retira el título y entregar la declaración notarizada.\n' +
                           'Digite 0 para regresar al menú principal');
             } else if (input === '0') {
-                agent.add('Menú Principal:\n' +
+                agent.add('<b>Menú Principal:</b>\n' +
                           `1) Documentos y formatos\n` +
                           `2) Ajustes en propuesta\n` +
                           `3) Proceso de sustentación\n` +
