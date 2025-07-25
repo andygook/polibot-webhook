@@ -91,20 +91,20 @@ loadData().then(() => {
                             'Por favor, selecciona una opción (0-6).';
             sendTelegramMessage(message);
             agent.add('');
-            agent.context.set({ name: 'main_menu', lifespan: 5 }); // lifespan se usa en el webhook, no en la configuración de entrada
+            agent.context.set({ name: 'main_menu', lifespan: 5 });
         }
 
         function mainMenuHandler(agent) {
             console.log('Procesando mainMenuHandler');
-            // Verificar si el contexto main_menu está activo
             const mainMenuContext = agent.context.get('main_menu');
             console.log('Contexto main_menu activo:', !!mainMenuContext);
+            console.log('Input recibido en mainMenuHandler:', agent.query || agent.parameters.option); // Usar query si option no está disponible
             // Limpiar contexto awaiting_identification si existe
             agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
-            let input = agent.parameters.option;
-            console.log('Input recibido en mainMenuHandler:', input); // Depuración
+            let input = agent.parameters.option || agent.query;
+            console.log('Input validado:', input);
             if (!input || typeof input !== 'string' || !['0', '1', '2', '3', '4', '5', '6'].includes(input)) {
-                console.log('Entrada inválida detectada:', input); // Depuración adicional
+                console.log('Entrada inválida detectada:', input);
                 const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
                                 'Menú Principal:\n' +
                                 '1) Documentos y formatos\n' +
@@ -117,7 +117,7 @@ loadData().then(() => {
                                 'Por favor, selecciona una opción (0-6).';
                 sendTelegramMessage(message);
                 agent.add('');
-                agent.context.set({ name: 'main_menu', lifespan: 5 }); // Reiniciar contexto
+                agent.context.set({ name: 'main_menu', lifespan: 5 });
                 return;
             }
 
