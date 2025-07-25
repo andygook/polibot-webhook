@@ -103,7 +103,7 @@ loadData().then(() => {
             console.log('Input validado:', input);
             if (!input || typeof input !== 'string' || !['0', '1', '2', '3', '4', '5', '6'].includes(input)) {
                 console.log('Entrada inválida detectada:', input);
-                const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
+                const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n\n' +
                                 'Menú Principal:\n' +
                                 '1) Documentos y formatos\n' +
                                 '2) Ajustes en propuesta\n' +
