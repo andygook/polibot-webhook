@@ -89,8 +89,9 @@ loadData().then(() => {
                             '6) Contactar Asistente Académico\n' +
                             '0) Salir\n\n' +
                             'Por favor, selecciona una opción (0-6).';
-            sendTelegramMessage(message); // Solo envía a Telegram
-            agent.context.set({ name: 'main_menu', lifespan: 5 }); // Configura contexto sin respuesta adicional
+            sendTelegramMessage(message); // Envía a Telegram
+            agent.add(''); // Respuesta vacía para Dialogflow
+            agent.context.set({ name: 'main_menu', lifespan: 5 });
         }
 
         function mainMenuHandler(agent) {
@@ -107,12 +108,14 @@ loadData().then(() => {
                                 '6) Contactar Asistente Académico\n' +
                                 '0) Salir';
                 sendTelegramMessage(message);
+                agent.add('');
                 return;
             }
 
             if (input === '5') {
                 const message = 'Por favor ingresa tu número de identificación (debe tener exactamente 10 dígitos, sin puntos ni guiones) o selecciona 0 para regresar al menú principal.';
                 sendTelegramMessage(message);
+                agent.add('');
                 agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
                 agent.context.set({ name: 'main_menu', lifespan: 0 });
             } else if (input === '1') {
@@ -122,6 +125,7 @@ loadData().then(() => {
                                 '0. Regresar al menú principal\n\n' +
                                 'Por favor, selecciona una opción (0-2).';
                 sendTelegramMessage(message);
+                agent.add('');
                 agent.context.set({ name: 'documents_menu', lifespan: 5 });
                 agent.context.set({ name: 'main_menu', lifespan: 0 });
             } else if (input === '2') {
@@ -131,6 +135,7 @@ loadData().then(() => {
                                 '0. Regresar al menú principal\n\n' +
                                 'Por favor, selecciona una opción (0-2).';
                 sendTelegramMessage(message);
+                agent.add('');
                 agent.context.set({ name: 'adjustments_menu', lifespan: 5 });
                 agent.context.set({ name: 'main_menu', lifespan: 0 });
             } else if (input === '3') {
@@ -141,6 +146,7 @@ loadData().then(() => {
                                 '0. Regresar al menú principal\n\n' +
                                 'Por favor, selecciona una opción (0-3).';
                 sendTelegramMessage(message);
+                agent.add('');
                 agent.context.set({ name: 'sustenance_menu', lifespan: 5 });
                 agent.context.set({ name: 'main_menu', lifespan: 0 });
             } else if (input === '4') {
@@ -151,14 +157,17 @@ loadData().then(() => {
                                 '0. Regresar al menú principal\n\n' +
                                 'Por favor, selecciona una opción (0-3).';
                 sendTelegramMessage(message);
+                agent.add('');
                 agent.context.set({ name: 'title_management_menu', lifespan: 5 });
                 agent.context.set({ name: 'main_menu', lifespan: 0 });
             } else if (input === '6') {
                 const message = 'Para contactar al Asistente Académico, por favor envía un correo a asistente.academico@ies.edu.ec o llama al +593 2 123 4567. Digite 0 para regresar al menú principal.';
                 sendTelegramMessage(message);
+                agent.add('');
             } else if (input === '0') {
                 const message = 'Gracias por usar PoliBOT. ¡Espero verte pronto para más consultas!';
                 sendTelegramMessage(message);
+                agent.add('');
                 agent.context.set({ name: 'main_menu', lifespan: 0 });
             } else {
                 const message = 'Esta opción aún no está implementada. Por favor, selecciona otra opción.\n\n' +
@@ -171,6 +180,7 @@ loadData().then(() => {
                                 '6) Contactar Asistente Académico\n' +
                                 '0) Salir';
                 sendTelegramMessage(message);
+                agent.add('');
             }
         }
 
@@ -189,6 +199,7 @@ loadData().then(() => {
             if (!isDataLoaded) {
                 const message = 'Error: Los datos no están cargados. Por favor, intenta de nuevo más tarde.';
                 sendTelegramMessage(message);
+                agent.add('');
                 return;
             }
 
@@ -207,6 +218,7 @@ loadData().then(() => {
                                     '0) Salir\n\n' +
                                     'Por favor, selecciona una opción (0-6).';
                     sendTelegramMessage(message);
+                    agent.add('');
                     agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
                     agent.context.set({ name: 'main_menu', lifespan: 5 });
                     return;
@@ -215,6 +227,7 @@ loadData().then(() => {
                 if (!/^\d{10}$/.test(idInput)) {
                     const message = 'El número de identificación debe tener exactamente 10 dígitos. Por favor, ingrésalo nuevamente o selecciona 0 para regresar al menú principal.';
                     sendTelegramMessage(message);
+                    agent.add('');
                     agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
                     return;
                 }
@@ -232,11 +245,13 @@ loadData().then(() => {
                                     `g) Regresar al menú principal\n\n` +
                                     `Por favor, selecciona una opción (a-g).`;
                     sendTelegramMessage(message);
+                    agent.add('');
                     agent.context.set({ name: 'personalized_queries_menu', lifespan: 10, parameters: { identification: idInput } });
                     agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
                 } else {
                     const message = 'Número de identificación no encontrado. Por favor, ingresa un número válido de 10 dígitos o selecciona 0 para regresar al menú principal.';
                     sendTelegramMessage(message);
+                    agent.add('');
                     agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
                 }
                 return;
@@ -244,6 +259,7 @@ loadData().then(() => {
 
             const message = 'Ha ocurrido un error. Por favor, selecciona la opción 5 nuevamente para ingresar tu identificación.';
             sendTelegramMessage(message);
+            agent.add('');
         }
 
         function processPersonalizedQueriesHandler(agent) {
@@ -254,6 +270,7 @@ loadData().then(() => {
             if (!personalizedQueriesContext || !input) {
                 const message = 'Error: No se detectó el contexto o la opción. Digite g para regresar al menú anterior.';
                 sendTelegramMessage(message);
+                agent.add('');
                 return;
             }
 
@@ -264,6 +281,7 @@ loadData().then(() => {
             if (!project) {
                 const message = 'Error: No se encontraron datos del proyecto. Digite g para regresar al menú anterior.';
                 sendTelegramMessage(message);
+                agent.add('');
                 return;
             }
 
@@ -271,22 +289,28 @@ loadData().then(() => {
                 if (input === 'a') {
                     const message = `Nombre del proyecto: ${project.projectName}\nDigite g para regresar al menú anterior.`;
                     sendTelegramMessage(message);
+                    agent.add('');
                 } else if (input === 'b') {
                     const message = `Estado actual del proyecto: ${project.status}\nDigite g para regresar al menú anterior.`;
                     sendTelegramMessage(message);
+                    agent.add('');
                 } else if (input === 'c') {
                     const message = `Plazos presentar propuesta: ${project.proposalDeadline}\nDigite g para regresar al menú anterior.`;
                     sendTelegramMessage(message);
+                    agent.add('');
                     console.log('proposalDeadline para ID', studentId, ':', project.proposalDeadline);
                 } else if (input === 'd') {
                     const message = `Miembros del tribunal de sustentación: ${project.tutor} (Miembro 1), ${project.vocal} (Miembro 2)\nDigite g para regresar al menú anterior.`;
                     sendTelegramMessage(message);
+                    agent.add('');
                 } else if (input === 'e') {
                     const message = `Plazos para sustentar y costos: ${project.sustenanceDeadlines}\nDigite g para regresar al menú anterior.`;
                     sendTelegramMessage(message);
+                    agent.add('');
                 } else if (input === 'f') {
                     const message = `Fecha planificada de sustentación: ${project.plannedSustenance}\nDigite g para regresar al menú anterior.`;
                     sendTelegramMessage(message);
+                    agent.add('');
                 } else if (input === 'g') {
                     const isInSubmenu = agent.context.get('personalized_queries_menu')?.parameters?.isInSubmenu;
                     if (isInSubmenu) {
@@ -300,6 +324,7 @@ loadData().then(() => {
                                         '0) Salir\n\n' +
                                         'Por favor, selecciona una opción (0-6).';
                         sendTelegramMessage(message);
+                        agent.add('');
                         agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 });
                         agent.context.set({ name: 'main_menu', lifespan: 5 });
                     } else {
@@ -313,6 +338,7 @@ loadData().then(() => {
                                         'g) Regresar al menú principal\n\n' +
                                         'Por favor, selecciona una opción (a-g).';
                         sendTelegramMessage(message);
+                        agent.add('');
                         agent.context.set({ name: 'personalized_queries_menu', lifespan: 10, parameters: { identification: studentId, isInSubmenu: true } });
                     }
                 }
@@ -327,6 +353,7 @@ loadData().then(() => {
                                 'f) Fecha planificada de sustentación\n' +
                                 'g) Regresar al menú principal';
                 sendTelegramMessage(message);
+                agent.add('');
             }
         }
 
@@ -340,15 +367,18 @@ loadData().then(() => {
                                 '2. Formatos para elaborar el trabajo de titulación\n' +
                                 '0. Regresar al menú principal';
                 sendTelegramMessage(message);
+                agent.add('');
                 return;
             }
 
             if (input === '1') {
                 const message = 'Documento disponible aquí: [Formatos para la propuesta de titulación](https://docs.google.com/document/d/1toHHm36VScxfI7YbgGnVf9lvW4Ca8SE0/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)\n\nDigite 0 para regresar al menú principal';
                 sendTelegramMessage(message);
+                agent.add('');
             } else if (input === '2') {
                 const message = 'Documento disponible aquí: [Formatos para el trabajo de titulación](https://docs.google.com/document/d/16w1HRQ5LBNqLesaZdDJiJQdS98-GCupa/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)\n\nDigite 0 para regresar al menú principal';
                 sendTelegramMessage(message);
+                agent.add('');
             } else if (input === '0') {
                 const message = 'Menú Principal:\n' +
                                 '1) Documentos y formatos\n' +
@@ -360,6 +390,7 @@ loadData().then(() => {
                                 '0) Salir\n\n' +
                                 'Por favor, selecciona una opción (0-6).';
                 sendTelegramMessage(message);
+                agent.add('');
                 agent.context.set({ name: 'documents_menu', lifespan: 0 });
                 agent.context.set({ name: 'main_menu', lifespan: 5 });
             }
@@ -375,6 +406,7 @@ loadData().then(() => {
                                 '2. Cambios de miembros del tribunal (requisitos)\n' +
                                 '0. Regresar al menú principal';
                 sendTelegramMessage(message);
+                agent.add('');
                 return;
             }
 
@@ -386,6 +418,7 @@ loadData().then(() => {
                                 '4️- Inicia nuevamente el proceso de revisión y aprobación de la propuesta de trabajo de titulación.\n' +
                                 'Digite 0 para regresar al menú principal';
                 sendTelegramMessage(message);
+                agent.add('');
             } else if (input === '2') {
                 const message = 'Los requisitos para cambios de miembros del tribunal de sustentación:\n' +
                                 '1️- Realizar solicitud indicando el motivo por el cual solicita el cambio de los miembros de tribunal (tutor y/o vocal), en el caso de tener los nuevos nombres indicarlo, caso contrario solicitar reunión previa con el coordinador para la designación del o de los nuevos miembros del tribunal de sustentación.\n' +
@@ -394,6 +427,7 @@ loadData().then(() => {
                                 '4️- Inicia nuevamente el proceso de revisión y aprobación de la propuesta del trabajo de titulación.\n' +
                                 'Digite 0 para regresar al menú principal';
                 sendTelegramMessage(message);
+                agent.add('');
             } else if (input === '0') {
                 const message = 'Menú Principal:\n' +
                                 '1) Documentos y formatos\n' +
@@ -405,6 +439,7 @@ loadData().then(() => {
                                 '0) Salir\n\n' +
                                 'Por favor, selecciona una opción (0-6).';
                 sendTelegramMessage(message);
+                agent.add('');
                 agent.context.set({ name: 'adjustments_menu', lifespan: 0 });
                 agent.context.set({ name: 'main_menu', lifespan: 5 });
             }
@@ -421,6 +456,7 @@ loadData().then(() => {
                                 '3. Tiempo de duración de la sustentación\n' +
                                 '0. Regresar al menú principal';
                 sendTelegramMessage(message);
+                agent.add('');
                 return;
             }
 
@@ -435,6 +471,7 @@ loadData().then(() => {
                                 '7️- Entregar el documento del trabajo de titulación o tesis, firmado por los miembros del tribunal de sustentación y por el estudiante.\n' +
                                 'Digite 0 para regresar al menú principal';
                 sendTelegramMessage(message);
+                agent.add('');
             } else if (input === '2') {
                 const message = 'Revisión antiplagio:\n' +
                                 '1️- Se envía al tutor, para que suba el documento final de trabajo de titulación al sistema de revisión del antiplagio.\n' +
@@ -443,6 +480,7 @@ loadData().then(() => {
                                 '4️- El nuevo documento se sube nuevamente para revisión en el sistema.\n' +
                                 'Digite 0 para regresar al menú principal';
                 sendTelegramMessage(message);
+                agent.add('');
             } else if (input === '3') {
                 const message = 'Tiempo de duración de la sustentación:\n' +
                                 'Detalles a Considerar:\n' +
@@ -458,6 +496,7 @@ loadData().then(() => {
                                 '10- Envestidura grado de magister.\n' +
                                 'Digite 0 para regresar al menú principal';
                 sendTelegramMessage(message);
+                agent.add('');
             } else if (input === '0') {
                 const message = 'Menú Principal:\n' +
                                 '1) Documentos y formatos\n' +
@@ -469,6 +508,7 @@ loadData().then(() => {
                                 '0) Salir\n\n' +
                                 'Por favor, selecciona una opción (0-6).';
                 sendTelegramMessage(message);
+                agent.add('');
                 agent.context.set({ name: 'sustenance_menu', lifespan: 0 });
                 agent.context.set({ name: 'main_menu', lifespan: 5 });
             }
@@ -485,15 +525,18 @@ loadData().then(() => {
                                 '3. Retiro del título (lugar y requisitos)\n' +
                                 '0. Regresar al menú principal';
                 sendTelegramMessage(message);
+                agent.add('');
                 return;
             }
 
             if (input === '1') {
                 const message = 'Los tiempos del registro del título en el Senescyt: Aproximadamente entre 15 y 30 días, este trámite es realizado por otro departamento de la IES.\n\nDigite 0 para regresar al menú principal';
                 sendTelegramMessage(message);
+                agent.add('');
             } else if (input === '2') {
                 const message = 'Tiempos de entrega física del título: Aproximadamente entre 15 y 30 días, este trámite es realizado por otro departamento de la IES, cuando el título ya se encuentra registrado en el Senescyt entonces el estudiante se debe acercar a la secretaría técnica de la IES.\n\nDigite 0 para regresar al menú principal';
                 sendTelegramMessage(message);
+                agent.add('');
             } else if (input === '3') {
                 const message = 'Lugar y requisitos para el retiro del título:\n' +
                                 'TRÁMITE PERSONAL:\n' +
@@ -505,6 +548,7 @@ loadData().then(() => {
                                 '- Presentar la cédula del quien retira el título y entregar la declaración notarizada.\n' +
                                 'Digite 0 para regresar al menú principal';
                 sendTelegramMessage(message);
+                agent.add('');
             } else if (input === '0') {
                 const message = 'Menú Principal:\n' +
                                 '1) Documentos y formatos\n' +
@@ -516,6 +560,7 @@ loadData().then(() => {
                                 '0) Salir\n\n' +
                                 'Por favor, selecciona una opción (0-6).';
                 sendTelegramMessage(message);
+                agent.add('');
                 agent.context.set({ name: 'title_management_menu', lifespan: 0 });
                 agent.context.set({ name: 'main_menu', lifespan: 5 });
             }
