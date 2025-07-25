@@ -91,11 +91,14 @@ loadData().then(() => {
                             'Por favor, selecciona una opción (0-6).';
             sendTelegramMessage(message);
             agent.add('');
-            agent.context.set({ name: 'main_menu', lifespan: 5 });
+            agent.context.set({ name: 'main_menu', lifespan: 5 }); // lifespan se usa en el webhook, no en la configuración de entrada
         }
 
         function mainMenuHandler(agent) {
             console.log('Procesando mainMenuHandler');
+            // Verificar si el contexto main_menu está activo
+            const mainMenuContext = agent.context.get('main_menu');
+            console.log('Contexto main_menu activo:', !!mainMenuContext);
             // Limpiar contexto awaiting_identification si existe
             agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
             let input = agent.parameters.option;
@@ -114,6 +117,7 @@ loadData().then(() => {
                                 'Por favor, selecciona una opción (0-6).';
                 sendTelegramMessage(message);
                 agent.add('');
+                agent.context.set({ name: 'main_menu', lifespan: 5 }); // Reiniciar contexto
                 return;
             }
 
