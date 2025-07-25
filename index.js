@@ -242,7 +242,7 @@ loadData().then(() => {
                                     `Por favor, selecciona una opción (a-g).`;
                     sendTelegramMessage(message);
                     agent.add('');
-                    agent.context.set({ name: 'personalized_queries_menu', lifespan: 5 });
+                    agent.context.set({ name: 'personalized_queries_menu', lifespan: 5, parameters: { identification: student.id } });
                     agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
                 } else {
                     const message = 'Número de identificación no encontrado. Por favor, ingresa un número válido de 10 dígitos o selecciona 0 para regresar al menú principal.';
