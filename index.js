@@ -59,7 +59,7 @@ async function sendTelegramMessage(text) {
         await axios.post(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
             chat_id: TELEGRAM_CHAT_ID,
             text: text,
-            parse_mode: 'Markdown' // Mantenemos por compatibilidad, sin negritas
+            parse_mode: 'Markdown'
         });
         console.log('Mensaje enviado a Telegram:', text);
     } catch (error) {
@@ -89,8 +89,8 @@ loadData().then(() => {
                             '6) Contactar Asistente Académico\n' +
                             '0) Salir\n\n' +
                             'Por favor, selecciona una opción (0-6).';
-            sendTelegramMessage(message); // Envía a Telegram
-            agent.add(''); // Respuesta vacía para Dialogflow
+            sendTelegramMessage(message);
+            agent.add('');
             agent.context.set({ name: 'main_menu', lifespan: 5 });
         }
 
@@ -164,23 +164,12 @@ loadData().then(() => {
                 const message = 'Para contactar al Asistente Académico, por favor envía un correo a asistente.academico@ies.edu.ec o llama al +593 2 123 4567. Digite 0 para regresar al menú principal.';
                 sendTelegramMessage(message);
                 agent.add('');
+                agent.context.set({ name: 'main_menu', lifespan: 0 });
             } else if (input === '0') {
                 const message = 'Gracias por usar PoliBOT. ¡Espero verte pronto para más consultas!';
                 sendTelegramMessage(message);
                 agent.add('');
                 agent.context.set({ name: 'main_menu', lifespan: 0 });
-            } else {
-                const message = 'Esta opción aún no está implementada. Por favor, selecciona otra opción.\n\n' +
-                                'Menú Principal:\n' +
-                                '1) Documentos y formatos\n' +
-                                '2) Ajustes en propuesta\n' +
-                                '3) Proceso de sustentación\n' +
-                                '4) Gestión del título\n' +
-                                '5) Preguntas personalizadas\n' +
-                                '6) Contactar Asistente Académico\n' +
-                                '0) Salir';
-                sendTelegramMessage(message);
-                agent.add('');
             }
         }
 
