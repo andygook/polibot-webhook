@@ -98,9 +98,7 @@ loadData().then(() => {
             console.log('Procesando mainMenuHandler');
             const mainMenuContext = agent.context.get('main_menu');
             console.log('Contexto main_menu activo:', !!mainMenuContext);
-            console.log('Input recibido en mainMenuHandler:', agent.query || agent.parameters.option); // Usar query si option no está disponible
-            // Limpiar contexto awaiting_identification si existe
-            agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
+            console.log('Input recibido en mainMenuHandler:', agent.query || agent.parameters.option);
             let input = agent.parameters.option || agent.query;
             console.log('Input validado:', input);
             if (!input || typeof input !== 'string' || !['0', '1', '2', '3', '4', '5', '6'].includes(input)) {
@@ -567,6 +565,7 @@ loadData().then(() => {
         let intentMap = new Map();
         intentMap.set('Default Welcome Intent', welcomeHandler);
         intentMap.set('Main Menu', mainMenuHandler);
+        intentMap.set('Default Fallback Intent', mainMenuHandler); // Añadimos el fallback para usar la misma lógica
         intentMap.set('Personalized Queries Menu', personalizedQueriesMenuHandler);
         intentMap.set('Process Personalized Queries', processPersonalizedQueriesHandler);
         intentMap.set('Documents Menu', documentsMenuHandler);
