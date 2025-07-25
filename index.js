@@ -100,7 +100,7 @@ loadData().then(() => {
             agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
             let input = agent.parameters.option;
             if (!input || typeof input !== 'string' || !['0', '1', '2', '3', '4', '5', '6'].includes(input)) {
-                const message = 'Opción inválida. Por favor, selecciona una opción válida (0-6).\n\n' +
+                const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
                                 'Menú Principal:\n' +
                                 '1) Documentos y formatos\n' +
                                 '2) Ajustes en propuesta\n' +
@@ -108,7 +108,8 @@ loadData().then(() => {
                                 '4) Gestión del título\n' +
                                 '5) Preguntas personalizadas\n' +
                                 '6) Contactar Asistente Académico\n' +
-                                '0) Salir';
+                                '0) Salir\n\n' +
+                                'Por favor, selecciona una opción (0-6).';
                 sendTelegramMessage(message);
                 agent.add('');
                 return;
