@@ -96,6 +96,8 @@ loadData().then(() => {
 
         function mainMenuHandler(agent) {
             console.log('Procesando mainMenuHandler');
+            // Limpiar contexto awaiting_identification si existe
+            agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
             let input = agent.parameters.option;
             if (!input || typeof input !== 'string' || !['0', '1', '2', '3', '4', '5', '6'].includes(input)) {
                 const message = 'Opción inválida. Por favor, selecciona una opción válida (0-6).\n\n' +
