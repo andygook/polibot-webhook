@@ -103,7 +103,7 @@ loadData().then(() => {
             console.log('Input validado:', input);
             if (!input || typeof input !== 'string' || !['0', '1', '2', '3', '4', '5', '6'].includes(input)) {
                 console.log('Entrada inválida detectada:', input);
-                const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n\n' +
+                const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
                                 'Menú Principal:\n' +
                                 '1) Documentos y formatos\n' +
                                 '2) Ajustes en propuesta\n' +
@@ -242,7 +242,7 @@ loadData().then(() => {
                                     `Por favor, selecciona una opción (a-g).`;
                     sendTelegramMessage(message);
                     agent.add('');
-                    agent.context.set({ name: 'personalized_queries_menu', lifespan: 10, parameters: { identification: idInput } });
+                    agent.context.set({ name: 'personalized_queries_menu', lifespan: 5 });
                     agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
                 } else {
                     const message = 'Número de identificación no encontrado. Por favor, ingresa un número válido de 10 dígitos o selecciona 0 para regresar al menú principal.';
@@ -263,10 +263,22 @@ loadData().then(() => {
             const personalizedQueriesContext = agent.context.get('personalized_queries_menu');
             let input = agent.parameters.option?.toLowerCase();
 
+            console.log('Input recibido:', input);
+            console.log('Contexto personalized_queries_menu:', personalizedQueriesContext);
             if (!personalizedQueriesContext || !input) {
-                const message = 'Error: No se detectó el contexto o la opción. Digite g para regresar al menú anterior.';
+                console.log('Entrada inválida detectada:', input);
+                const message = 'Opción inválida. Por favor, selecciona una opción válida (a-g).\n\n' +
+                                'Submenú - Preguntas personalizadas:\n' +
+                                'a) Nombre del proyecto\n' +
+                                'b) Estado actual del proyecto\n' +
+                                'c) Plazos presentar propuesta\n' +
+                                'd) Miembros del tribunal de sustentación\n' +
+                                'e) Plazos para sustentar y costos\n' +
+                                'f) Fecha planificada de sustentación\n' +
+                                'g) Regresar al menú principal';
                 sendTelegramMessage(message);
                 agent.add('');
+                agent.context.set({ name: 'personalized_queries_menu', lifespan: 5 });
                 return;
             }
 
@@ -308,7 +320,7 @@ loadData().then(() => {
                     sendTelegramMessage(message);
                     agent.add('');
                 } else if (input === 'g') {
-                    const isInSubmenu = agent.context.get('personalized_queries_menu')?.parameters?.isInSubmenu;
+                    const isInSubmenu = personalizedQueriesContext.parameters?.isInSubmenu;
                     if (isInSubmenu) {
                         const message = 'Menú Principal:\n' +
                                         '1) Documentos y formatos\n' +
@@ -335,28 +347,21 @@ loadData().then(() => {
                                         'Por favor, selecciona una opción (a-g).';
                         sendTelegramMessage(message);
                         agent.add('');
-                        agent.context.set({ name: 'personalized_queries_menu', lifespan: 10, parameters: { identification: studentId, isInSubmenu: true } });
+                        agent.context.set({ name: 'personalized_queries_menu', lifespan: 5, parameters: { identification: studentId, isInSubmenu: true } });
                     }
                 }
-            } else {
-                const message = 'Opción inválida. Por favor, selecciona una opción válida (a-g).\n\n' +
-                                'Submenú - Preguntas personalizadas:\n' +
-                                'a) Nombre del proyecto\n' +
-                                'b) Estado actual del proyecto\n' +
-                                'c) Plazos presentar propuesta\n' +
-                                'd) Miembros del tribunal de sustentación\n' +
-                                'e) Plazos para sustentar y costos\n' +
-                                'f) Fecha planificada de sustentación\n' +
-                                'g) Regresar al menú principal';
-                sendTelegramMessage(message);
-                agent.add('');
             }
         }
 
         function documentsMenuHandler(agent) {
             console.log('Procesando documentsMenuHandler');
-            let input = agent.parameters.option;
+            const documentsMenuContext = agent.context.get('documents_menu');
+            console.log('Contexto documents_menu activo:', !!documentsMenuContext);
+            console.log('Input recibido en documentsMenuHandler:', agent.query || agent.parameters.option);
+            let input = agent.parameters.option || agent.query;
+            console.log('Input validado:', input);
             if (!input || typeof input !== 'string' || !['0', '1', '2'].includes(input)) {
+                console.log('Entrada inválida detectada:', input);
                 const message = 'Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
                                 'Submenú - Documentos y formatos:\n' +
                                 '1. Formatos para elaborar la propuesta de titulación\n' +
@@ -364,6 +369,7 @@ loadData().then(() => {
                                 '0. Regresar al menú principal';
                 sendTelegramMessage(message);
                 agent.add('');
+                agent.context.set({ name: 'documents_menu', lifespan: 5 });
                 return;
             }
 
@@ -394,8 +400,13 @@ loadData().then(() => {
 
         function adjustmentsMenuHandler(agent) {
             console.log('Procesando adjustmentsMenuHandler');
-            let input = agent.parameters.option;
+            const adjustmentsMenuContext = agent.context.get('adjustments_menu');
+            console.log('Contexto adjustments_menu activo:', !!adjustmentsMenuContext);
+            console.log('Input recibido en adjustmentsMenuHandler:', agent.query || agent.parameters.option);
+            let input = agent.parameters.option || agent.query;
+            console.log('Input validado:', input);
             if (!input || typeof input !== 'string' || !['0', '1', '2'].includes(input)) {
+                console.log('Entrada inválida detectada:', input);
                 const message = 'Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
                                 'Submenú - Ajustes en propuesta:\n' +
                                 '1. Cambios en la propuesta (requisitos)\n' +
@@ -403,6 +414,7 @@ loadData().then(() => {
                                 '0. Regresar al menú principal';
                 sendTelegramMessage(message);
                 agent.add('');
+                agent.context.set({ name: 'adjustments_menu', lifespan: 5 });
                 return;
             }
 
@@ -443,8 +455,13 @@ loadData().then(() => {
 
         function sustenanceMenuHandler(agent) {
             console.log('Procesando sustenanceMenuHandler');
-            let input = agent.parameters.option;
+            const sustenanceMenuContext = agent.context.get('sustenance_menu');
+            console.log('Contexto sustenance_menu activo:', !!sustenanceMenuContext);
+            console.log('Input recibido en sustenanceMenuHandler:', agent.query || agent.parameters.option);
+            let input = agent.parameters.option || agent.query;
+            console.log('Input validado:', input);
             if (!input || typeof input !== 'string' || !['0', '1', '2', '3'].includes(input)) {
+                console.log('Entrada inválida detectada:', input);
                 const message = 'Opción inválida. Por favor, selecciona una opción válida (0-3).\n\n' +
                                 'Submenú - Proceso de sustentación:\n' +
                                 '1. Requisitos y documentos para solicitar sustentación\n' +
@@ -453,6 +470,7 @@ loadData().then(() => {
                                 '0. Regresar al menú principal';
                 sendTelegramMessage(message);
                 agent.add('');
+                agent.context.set({ name: 'sustenance_menu', lifespan: 5 });
                 return;
             }
 
@@ -512,8 +530,13 @@ loadData().then(() => {
 
         function titleManagementHandler(agent) {
             console.log('Procesando titleManagementHandler');
-            let input = agent.parameters.option;
+            const titleManagementContext = agent.context.get('title_management_menu');
+            console.log('Contexto title_management_menu activo:', !!titleManagementContext);
+            console.log('Input recibido en titleManagementHandler:', agent.query || agent.parameters.option);
+            let input = agent.parameters.option || agent.query;
+            console.log('Input validado:', input);
             if (!input || typeof input !== 'string' || !['0', '1', '2', '3'].includes(input)) {
+                console.log('Entrada inválida detectada:', input);
                 const message = 'Opción inválida. Por favor, selecciona una opción válida (0-3).\n\n' +
                                 'Submenú - Gestión del título:\n' +
                                 '1. Registro del título en el Senescyt (tiempos)\n' +
@@ -522,6 +545,7 @@ loadData().then(() => {
                                 '0. Regresar al menú principal';
                 sendTelegramMessage(message);
                 agent.add('');
+                agent.context.set({ name: 'title_management_menu', lifespan: 5 });
                 return;
             }
 
@@ -565,13 +589,19 @@ loadData().then(() => {
         let intentMap = new Map();
         intentMap.set('Default Welcome Intent', welcomeHandler);
         intentMap.set('Main Menu', mainMenuHandler);
-        intentMap.set('Default Fallback Intent', mainMenuHandler); // Añadimos el fallback para usar la misma lógica
+        intentMap.set('Default Fallback Intent', mainMenuHandler); // Fallback para main_menu
         intentMap.set('Personalized Queries Menu', personalizedQueriesMenuHandler);
         intentMap.set('Process Personalized Queries', processPersonalizedQueriesHandler);
         intentMap.set('Documents Menu', documentsMenuHandler);
         intentMap.set('Adjustments Menu', adjustmentsMenuHandler);
         intentMap.set('Sustenance Menu', sustenanceMenuHandler);
         intentMap.set('Title Management Menu', titleManagementHandler);
+        // Añadimos fallbacks para los submenús
+        intentMap.set('Default Fallback Intent - documents_menu', documentsMenuHandler);
+        intentMap.set('Default Fallback Intent - adjustments_menu', adjustmentsMenuHandler);
+        intentMap.set('Default Fallback Intent - sustenance_menu', sustenanceMenuHandler);
+        intentMap.set('Default Fallback Intent - title_management_menu', titleManagementHandler);
+        intentMap.set('Default Fallback Intent - personalized_queries_menu', processPersonalizedQueriesHandler);
         agent.handleRequest(intentMap);
     });
 
