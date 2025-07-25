@@ -99,8 +99,9 @@ loadData().then(() => {
             // Limpiar contexto awaiting_identification si existe
             agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
             let input = agent.parameters.option;
-            console.log('Input recibido en mainMenuHandler:', input); // Depuración adicional
+            console.log('Input recibido en mainMenuHandler:', input); // Depuración
             if (!input || typeof input !== 'string' || !['0', '1', '2', '3', '4', '5', '6'].includes(input)) {
+                console.log('Entrada inválida detectada:', input); // Depuración adicional
                 const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
                                 'Menú Principal:\n' +
                                 '1) Documentos y formatos\n' +
