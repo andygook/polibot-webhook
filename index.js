@@ -12,7 +12,7 @@ let isDataLoaded = false;
 
 // Configuración de Telegram
 const TELEGRAM_BOT_TOKEN = '7253134218:AAFVF7q25Ukx24IcGOgw-T3-ohzMYQRN0Lk'; // Token proporcionado
-const TELEGRAM_CHAT_ID = 'TU_CHAT_ID_REAL_AQUI'; // Reemplaza con el chat_id que obtengas
+const TELEGRAM_CHAT_ID = '5513706934'; // chat_id proporcionado
 
 function loadData() {
     return new Promise((resolve, reject) => {
