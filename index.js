@@ -596,12 +596,12 @@ loadData().then(() => {
         intentMap.set('Adjustments Menu', adjustmentsMenuHandler);
         intentMap.set('Sustenance Menu', sustenanceMenuHandler);
         intentMap.set('Title Management Menu', titleManagementHandler);
-        // Añadimos fallbacks para los submenús
-        intentMap.set('Default Fallback Intent - documents_menu', documentsMenuHandler);
-        intentMap.set('Default Fallback Intent - adjustments_menu', adjustmentsMenuHandler);
-        intentMap.set('Default Fallback Intent - sustenance_menu', sustenanceMenuHandler);
-        intentMap.set('Default Fallback Intent - title_management_menu', titleManagementHandler);
-        intentMap.set('Default Fallback Intent - personalized_queries_menu', processPersonalizedQueriesHandler);
+        // Fallbacks para submenús
+        intentMap.set('Fallback - Documents Menu', documentsMenuHandler);
+        intentMap.set('Fallback - Adjustments Menu', adjustmentsMenuHandler);
+        intentMap.set('Fallback - Sustenance Menu', sustenanceMenuHandler);
+        intentMap.set('Fallback - Title Management Menu', titleManagementHandler);
+        intentMap.set('Fallback - Personalized Queries Menu', processPersonalizedQueriesHandler);
         agent.handleRequest(intentMap);
     });
 
