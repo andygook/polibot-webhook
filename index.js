@@ -608,6 +608,10 @@ loadData().then(() => {
     const PORT = process.env.PORT || 10000;
     app.listen(PORT, () => {
         console.log(`Servidor corriendo en el puerto ${PORT}`);
+        // Añadido para asegurar que el servidor esté listo
+        setTimeout(() => {
+            console.log('Servidor completamente listo para recibir solicitudes');
+        }, 5000); // Espera 5 segundos adicionales
     });
 }).catch(error => {
     console.error('Error al cargar los datos:', error);
