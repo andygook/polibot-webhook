@@ -186,10 +186,10 @@ app.post('/', (req, res) => {
             agent.context.set({ name: 'documents_menu', lifespan: 5 });
             agent.context.set({ name: 'main_menu', lifespan: 0 });
         } else if (input === '2') {
-            const message = 'Submenú - Ajustes en propuesta:\n' +
-                            '1. Cambios en la propuesta (requisitos)\n' +
-                            '2. Cambios de miembros del tribunal (requisitos)\n' +
-                            '0. Regresar al menú principal\n\n' +
+            const message = 'AJUSTES EN PROPUESTA.\n\n' +
+                            '1.- Requisitos: Cambios en la propuesta.\n' +
+                            '2.- Requisitos: Cambios de miembros del tribunal de sustentación.\n' +
+                            '0.- Regresar al menú principal\n\n' +
                             'Por favor, selecciona una opción (0-2).';
             agent.add('');
             sendTelegramMessage(message);
