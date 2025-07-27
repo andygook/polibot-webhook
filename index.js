@@ -575,7 +575,7 @@ app.post('/', (req, res) => {
                             '1.- Presentar una solicitud dirigida al coordinador de la maestría, indicando el motivo del cambio.\n' +
                             '2.- Entregar la nueva propuesta de titulación firmada por los miembros del tribunal (tutor y vocal).\n' +
                             '3.- Enviar por correo electrónico al coordinador de la maestría, con copia al personal administrativo, la solicitud y la propuesta firmada.\n' +
-                            'Digite 0 para regresar al menú principal';
+                            '\nDigite 0 para regresar al menú principal';
             agent.add('');
             sendTelegramMessage(message);
         } else if (input === '2') {
