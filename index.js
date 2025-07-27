@@ -663,6 +663,7 @@ app.post('/', (req, res) => {
 
         if (input === '1') {
             const message = 'Los requisitos para solicitar fecha de sustentación son:\n' +
+                            '\n' +
                             '1.- Carta de aprobación firmada por el tutor y revisor. Descarga el modelo [aquí](https://docs.google.com/document/d/1pHAoCHePsnKROQmkUrSxMvdtqHfbfOMr/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)\n' +
                             '2.- Presentar en PDF la evidencia de la aprobación del análisis antiplagio.\n' +
                             '3.- Presentar solicitud de fecha y hora de sustentación. Descarga el modelo [aquí](https://docs.google.com/document/d/1xct0rM4dXtE5I-LPf1YYhE9JXT8DXPhz/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)\n' +
