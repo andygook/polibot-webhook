@@ -775,7 +775,8 @@ app.post('/', (req, res) => {
         }
 
         if (input === '1') {
-            const message = 'Los tiempos del registro del título en el Senescyt: Aproximadamente entre 15 y 30 días, este trámite es realizado por otro departamento de la IES.\n\nDigite 0 para regresar al menú principal';
+            const message = 'El proceso del registro oficial del título ante el Senescyt es realizado por la Secretaría Académica de la IES en un plazo aproximado de 15 a 30 días laborales. No necesita intervención del graduado.\n' +
+                            '\nDigite 0 para regresar al menú principal.';
             agent.add('');
             sendTelegramMessage(message);
         } else if (input === '2') {
