@@ -577,12 +577,11 @@ app.post('/', (req, res) => {
             agent.add('');
             sendTelegramMessage(message);
         } else if (input === '2') {
-            const message = 'Los requisitos para cambios de miembros del tribunal de sustentación:\n' +
-                            '1️- Realizar solicitud indicando el motivo por el cual solicita el cambio de los miembros de tribunal (tutor y/o vocal), en el caso de tener los nuevos nombres indicarlo, caso contrario solicitar reunión previa con el coordinador para la designación del o de los nuevos miembros del tribunal de sustentación.\n' +
-                            '2️- Nueva propuesta firmada por los miembros de tribunal de titulación (tutor y vocal).\n' +
-                            '3️- Enviar al coordinador de la maestría con copia personal administrativo.\n' +
-                            '4️- Inicia nuevamente el proceso de revisión y aprobación de la propuesta del trabajo de titulación.\n' +
-                            'Digite 0 para regresar al menú principal';
+            const message = 'Los requisitos para cambios de miembros del tribunal de sustentación son:\n' +
+                            '\n1.- Presentar una solicitud indicando el motivo del cambio de tutor y/o revisor. Si ya se cuenta con los nombres de los nuevos miembros, incluirlos en la solicitud; de lo contrario, solicitar una reunión con el coordinador de la maestría para su designación.\n' +
+                            '2.- Entregar la nueva propuesta firmada por los nuevos miembros del tribunal de sustentación.\n' +
+                            '3.- Enviar por correo electrónico al coordinador de la maestría, con copia al personal administrativo, la solicitud y la propuesta firmadas.\n' +
+                            '\nDigite 0 para regresar al menú principal';
             agent.add('');
             sendTelegramMessage(message);
         } else if (input === '0') {
