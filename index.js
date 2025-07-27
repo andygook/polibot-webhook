@@ -785,15 +785,20 @@ app.post('/', (req, res) => {
             agent.add('');
             sendTelegramMessage(message);
         } else if (input === '3') {
-            const message = 'Lugar y requisitos para el retiro del título:\n' +
-                            'TRÁMITE PERSONAL:\n' +
-                            '- Acercarse a la secretaría técnica de la IES, en horario de 08h00 a 15h30 de lunes a viernes.\n' +
-                            '- Presentar original de cédula.\n' +
+            const message = 'TRÁMITE PERSONAL:\n' +
+                            'Lugar: Oficina de la Secretaría Académica de la IES.\n' +
+                            'Horario de atención: De lunes a viernes de 08:00 a 15:30\n' +
+                            'Requisitos: Presentar documento de identificación original.\n' +
+                            '\n' +
                             'TRÁMITE REALIZADO POR TERCERO:\n' +
-                            '- Realizar una declaración notarizada que indique quién va a retirar el título con firma y copia de cédula del graduado y de la persona que va a retirar el título.\n' +
-                            '- Acercarse a la secretaría técnica de la IES, en horario de 08h00 a 15h30 de lunes a viernes.\n' +
-                            '- Presentar la cédula del quien retira el título y entregar la declaración notarizada.\n' +
-                            'Digite 0 para regresar al menú principal';
+                            'Lugar: Oficina de la Secretaría Académica de la IES.\n' +
+                            'Horario de atención: De lunes a viernes de 08:00 a 15:30\n' +
+                            'Requisitos:\n' +
+                            '  a) Presentar documento de identificación original de la persona que retira el título.\n' +
+                            '  b) Presentar la declaración notarizada en la que se verifique que el graduado autoriza a otra persona a retirar el título (la declaración debe tener copia nítida de los documentos de identificacón de ambas personas).\n' +
+                            'Nota: Para mayor inforamación sobre trámites realizados por terceros, contactarse con la Secretaría Académica de la IES.\n' +
+                            '\n' +
+                            'Digite 0 para regresar al menú principal.';
             agent.add('');
             sendTelegramMessage(message);
         } else if (input === '0') {
