@@ -196,11 +196,11 @@ app.post('/', (req, res) => {
             agent.context.set({ name: 'adjustments_menu', lifespan: 5 });
             agent.context.set({ name: 'main_menu', lifespan: 0 });
         } else if (input === '3') {
-            const message = 'Submenú - Proceso de sustentación:\n' +
-                            '1. Requisitos y documentos para solicitar sustentación\n' +
-                            '2. Revisión antiplagio\n' +
-                            '3. Tiempo de duración de la sustentación\n' +
-                            '0. Regresar al menú principal\n\n' +
+            const message = 'PROCESO DE SUSTENTACIÓN.\n' +
+                            '1.- Requisitos: Solicitar fecha de sustentación.\n' +
+                            '2.- Proceso de aprobación del análisis antiplagio.\n' +
+                            '3.- Detalles importantes para la sustentación.\n' +
+                            '0.- Regresar al menú principal.\n\n' +
                             'Por favor, selecciona una opción (0-3).';
             agent.add('');
             sendTelegramMessage(message);
@@ -614,12 +614,12 @@ app.post('/', (req, res) => {
         if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                            'Submenú - Proceso de sustentación:\n' +
-                            '1. Requisitos y documentos para solicitar sustentación\n' +
-                            '2. Revisión antiplagio\n' +
-                            '3. Tiempo de duración de la sustentación\n' +
-                            '0. Regresar al menú principal\n\n' +
-                            'Por favor, selecciona una opción (0-3).\n';
+                            'PROCESO DE SUSTENTACIÓN.\n' +
+                            '1.- Requisitos: Solicitar fecha de sustentación.\n' +
+                            '2.- Proceso de aprobación del análisis antiplagio.\n' +
+                            '3.- Detalles importantes para la sustentación.\n' +
+                            '0.- Regresar al menú principal.\n\n' +
+                            'Por favor, selecciona una opción (0-3).';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'sustenance_menu', lifespan: 5 });
@@ -631,12 +631,12 @@ app.post('/', (req, res) => {
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                            'Submenú - Proceso de sustentación:\n' +
-                            '1. Requisitos y documentos para solicitar sustentación\n' +
-                            '2. Revisión antiplagio\n' +
-                            '3. Tiempo de duración de la sustentación\n' +
-                            '0. Regresar al menú principal\n\n' +
-                            'Por favor, selecciona una opción (0-3).\n';
+                            'PROCESO DE SUSTENTACIÓN.\n' +
+                            '1.- Requisitos: Solicitar fecha de sustentación.\n' +
+                            '2.- Proceso de aprobación del análisis antiplagio.\n' +
+                            '3.- Detalles importantes para la sustentación.\n' +
+                            '0.- Regresar al menú principal.\n\n' +
+                            'Por favor, selecciona una opción (0-3).';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'sustenance_menu', lifespan: 5 });
@@ -646,11 +646,11 @@ app.post('/', (req, res) => {
         if (!input || typeof input !== 'string' || !['0', '1', '2', '3'].includes(input)) {
             console.log('Entrada inválida detectada:', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-3).\n\n' +
-                            'Submenú - Proceso de sustentación:\n' +
-                            '1. Requisitos y documentos para solicitar sustentación\n' +
-                            '2. Revisión antiplagio\n' +
-                            '3. Tiempo de duración de la sustentación\n' +
-                            '0. Regresar al menú principal\n';
+                            'PROCESO DE SUSTENTACIÓN.\n' +
+                            '1.- Requisitos: Solicitar fecha de sustentación.\n' +
+                            '2.- Proceso de aprobación del análisis antiplagio.\n' +
+                            '3.- Detalles importantes para la sustentación.\n' +
+                            '0.- Regresar al menú principal.';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'sustenance_menu', lifespan: 5 });
