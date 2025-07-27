@@ -529,12 +529,11 @@ app.post('/', (req, res) => {
         // Validación de entrada vacía (posible GIF o sticker)
         if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
-            const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                            'Submenú - Ajustes en propuesta:\n' +
-                            '1. Cambios en la propuesta (requisitos)\n' +
-                            '2. Cambios de miembros del tribunal (requisitos)\n' +
-                            '0. Regresar al menú principal\n\n' +
-                            'Por favor, selecciona una opción (0-2).\n';
+            const message = 'Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
+                            'AJUSTES EN PROPUESTA\n' +
+                            '1.- Requisitos: Cambios en la propuesta.\n' +
+                            '2.- Requisitos: Cambios de miembros del tribunal de sustentación.\n' +
+                            '0.- Regresar al menú principal';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'adjustments_menu', lifespan: 5 });
@@ -545,12 +544,11 @@ app.post('/', (req, res) => {
         const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/u;
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
-            const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                            'Submenú - Ajustes en propuesta:\n' +
-                            '1. Cambios en la propuesta (requisitos)\n' +
-                            '2. Cambios de miembros del tribunal (requisitos)\n' +
-                            '0. Regresar al menú principal\n\n' +
-                            'Por favor, selecciona una opción (0-2).\n';
+            const message = 'Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
+                            'AJUSTES EN PROPUESTA\n' +
+                            '1.- Requisitos: Cambios en la propuesta.\n' +
+                            '2.- Requisitos: Cambios de miembros del tribunal de sustentación.\n' +
+                            '0.- Regresar al menú principal';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'adjustments_menu', lifespan: 5 });
@@ -560,10 +558,10 @@ app.post('/', (req, res) => {
         if (!input || typeof input !== 'string' || !['0', '1', '2'].includes(input)) {
             console.log('Entrada inválida detectada:', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
-                            'Submenú - Ajustes en propuesta:\n' +
-                            '1. Cambios en la propuesta (requisitos)\n' +
-                            '2. Cambios de miembros del tribunal (requisitos)\n' +
-                            '0. Regresar al menú principal\n';
+                            'AJUSTES EN PROPUESTA\n' +
+                            '1.- Requisitos: Cambios en la propuesta.\n' +
+                            '2.- Requisitos: Cambios de miembros del tribunal de sustentación.\n' +
+                            '0.- Regresar al menú principal';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'adjustments_menu', lifespan: 5 });
