@@ -684,19 +684,17 @@ app.post('/', (req, res) => {
             agent.add('');
             sendTelegramMessage(message);
         } else if (input === '3') {
-            const message = 'Tiempo de duración de la sustentación:\n' +
-                            'Detalles a Considerar:\n' +
-                            '1️- Vestir formalmente.\n' +
-                            '2️- Material visual, no debe ser sobrecargado de información.\n' +
-                            '3️- Se espera 15 minutos máximo de espera para iniciar la sustentación, si alguno de los involucrados no asiste se suspende y se genera nuevamente fecha de sustentación.\n' +
-                            '4️- Una vez iniciada la sustentación, en 20 minutos máximo el o los estudiante(s) deben presentar su trabajo.\n' +
-                            '5️- Ronda de preguntas aproximadamente 10 minutos.\n' +
-                            '6️- Los estudiantes abandonan la sala de sustentación presencial o virtual.\n' +
-                            '7️- Deliberación de los miembros del tribunal de sustentación.\n' +
-                            '8️- Ingresan los estudiantes nuevamente a la sala de sustentación presencial o virtual.\n' +
-                            '9️- Lectura del acta de sustentación.\n' +
-                            '10- Envestidura grado de magister.\n' +
-                            'Digite 0 para regresar al menú principal';
+            const message = 'Detalles importantes para la sustentación:\n' +
+                            '\n' +
+                            '1.- Vestir formalmente.\n' +
+                            '2.- Se recomienda que la presentación no esté sobrecargada.\n' +
+                            '3.- Tiempo máximo de espera para iniciar la sustentación 15min. Si algún participante no asiste, se suspende y se reprograma.\n' +
+                            '4.- Tiempo máximo para defender su trabajo de titulación es: 20min.\n' +
+                            '5.- Tiempo aproximado de la ronda de preguntas es: 10min.\n' +
+                            '6.- Después de que los estudiantes abandonen la sala de sustentación ya sea presencial o virtual, el tiempo máximo de deliveración de los miembros del tribunal de sustentación: 10min.\n' +
+                            '7.- Reingreso de los estudiantes a la sala de sustentación para lectura del acta de graduación.\n' +
+                            '8.- Investidura de magister. Si es presencial, requiere toga y birrete proporcionados por la IES. En modalidad virtual no aplica.\n' +
+                            '\nDigite 0 para regresar al menú principal.';
             agent.add('');
             sendTelegramMessage(message);
         } else if (input === '0') {
