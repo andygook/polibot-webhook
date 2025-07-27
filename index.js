@@ -572,7 +572,7 @@ app.post('/', (req, res) => {
 
         if (input === '1') {
             const message = 'Los requisitos para el cambio en la propuesta de titulación son:\n' +
-                            '1.- Presentar una solicitud dirigida al coordinador de la maestría, indicando el motivo del cambio.\n' +
+                            '\n1.- Presentar una solicitud dirigida al coordinador de la maestría, indicando el motivo del cambio.\n' +
                             '2.- Entregar la nueva propuesta de titulación firmada por los miembros del tribunal (tutor y vocal).\n' +
                             '3.- Enviar por correo electrónico al coordinador de la maestría, con copia al personal administrativo, la solicitud y la propuesta firmada.\n' +
                             '\nDigite 0 para regresar al menú principal';
