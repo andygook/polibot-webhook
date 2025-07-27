@@ -208,11 +208,12 @@ app.post('/', (req, res) => {
             agent.context.set({ name: 'sustenance_menu', lifespan: 5 });
             agent.context.set({ name: 'main_menu', lifespan: 0 });
         } else if (input === '4') {
-            const message = 'Submenú - Gestión del título:\n' +
-                            '1. Registro del título en el Senescyt (tiempos)\n' +
-                            '2. Entrega física del título (tiempos)\n' +
-                            '3. Retiro del título (lugar y requisitos)\n' +
-                            '0. Regresar al menú principal\n\n' +
+            const message = 'GESTIÓN DEL TÍTULO.\n' +
+                            '\n' +
+                            '1.- Proceso de registro del título ante Senescyt.\n' +
+                            '2.- Tiempo estimado para retirar el título.\n' +
+                            '3.- Retiro del título: lugar y documentos necesarios.\n' +
+                            '0.- Regresar al menú principal.\n\n' +
                             'Por favor, selecciona una opción (0-3).';
             agent.add('');
             sendTelegramMessage(message);
@@ -727,11 +728,12 @@ app.post('/', (req, res) => {
         if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                            'Submenú - Gestión del título:\n' +
-                            '1. Registro del título en el Senescyt (tiempos)\n' +
-                            '2. Entrega física del título (tiempos)\n' +
-                            '3. Retiro del título (lugar y requisitos)\n' +
-                            '0. Regresar al menú principal\n\n' +
+                            'GESTIÓN DEL TÍTULO.\n' +
+                            '\n' +
+                            '1.- Proceso de registro del título ante Senescyt.\n' +
+                            '2.- Tiempo estimado para retirar el título.\n' +
+                            '3.- Retiro del título: lugar y documentos necesarios.\n' +
+                            '0.- Regresar al menú principal.\n\n' +
                             'Por favor, selecciona una opción (0-3).\n';
             agent.add('');
             sendTelegramMessage(message);
@@ -744,11 +746,12 @@ app.post('/', (req, res) => {
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                            'Submenú - Gestión del título:\n' +
-                            '1. Registro del título en el Senescyt (tiempos)\n' +
-                            '2. Entrega física del título (tiempos)\n' +
-                            '3. Retiro del título (lugar y requisitos)\n' +
-                            '0. Regresar al menú principal\n\n' +
+                            'GESTIÓN DEL TÍTULO.\n' +
+                            '\n' +
+                            '1.- Proceso de registro del título ante Senescyt.\n' +
+                            '2.- Tiempo estimado para retirar el título.\n' +
+                            '3.- Retiro del título: lugar y documentos necesarios.\n' +
+                            '0.- Regresar al menú principal.\n\n' +
                             'Por favor, selecciona una opción (0-3).\n';
             agent.add('');
             sendTelegramMessage(message);
@@ -759,11 +762,12 @@ app.post('/', (req, res) => {
         if (!input || typeof input !== 'string' || !['0', '1', '2', '3'].includes(input)) {
             console.log('Entrada inválida detectada:', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-3).\n\n' +
-                            'Submenú - Gestión del título:\n' +
-                            '1. Registro del título en el Senescyt (tiempos)\n' +
-                            '2. Entrega física del título (tiempos)\n' +
-                            '3. Retiro del título (lugar y requisitos)\n' +
-                            '0. Regresar al menú principal\n';
+                            'GESTIÓN DEL TÍTULO.\n' +
+                            '\n' +
+                            '1.- Proceso de registro del título ante Senescyt.\n' +
+                            '2.- Tiempo estimado para retirar el título.\n' +
+                            '3.- Retiro del título: lugar y documentos necesarios.\n' +
+                            '0.- Regresar al menú principal\n';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'title_management_menu', lifespan: 5 });
