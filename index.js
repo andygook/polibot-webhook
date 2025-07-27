@@ -252,6 +252,7 @@ app.post('/', (req, res) => {
 
             if (idInput === '0') {
                 const message = 'Menú Principal:\n' +
+                                '\n' + // Salto de línea adicional
                                 '1) Documentos y formatos\n' +
                                 '2) Ajustes en propuesta\n' +
                                 '3) Proceso de sustentación\n' +
@@ -407,6 +408,7 @@ app.post('/', (req, res) => {
                 const isInSubmenu = personalizedQueriesContext.parameters?.isInSubmenu;
                 if (isInSubmenu) {
                     const message = 'Menú Principal:\n' +
+                                    '\n' + // Salto de línea adicional
                                     '1) Documentos y formatos\n' +
                                     '2) Ajustes en propuesta\n' +
                                     '3) Proceso de sustentación\n' +
@@ -497,6 +499,7 @@ app.post('/', (req, res) => {
             sendTelegramMessage(message);
         } else if (input === '0') {
             const message = 'Menú Principal:\n' +
+                            '\n' + // Salto de línea adicional
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
                             '3) Proceso de sustentación\n' +
@@ -584,6 +587,7 @@ app.post('/', (req, res) => {
             sendTelegramMessage(message);
         } else if (input === '0') {
             const message = 'Menú Principal:\n' +
+                            '\n' + // Salto de línea adicional
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
                             '3) Proceso de sustentación\n' +
@@ -693,6 +697,7 @@ app.post('/', (req, res) => {
             sendTelegramMessage(message);
         } else if (input === '0') {
             const message = 'Menú Principal:\n' +
+                            '\n' + // Salto de línea adicional
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
                             '3) Proceso de sustentación\n' +
@@ -785,6 +790,7 @@ app.post('/', (req, res) => {
             sendTelegramMessage(message);
         } else if (input === '0') {
             const message = 'Menú Principal:\n' +
+                            '\n' + // Salto de línea adicional
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
                             '3) Proceso de sustentación\n' +
