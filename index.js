@@ -780,7 +780,8 @@ app.post('/', (req, res) => {
             agent.add('');
             sendTelegramMessage(message);
         } else if (input === '2') {
-            const message = 'Tiempos de entrega física del título: Aproximadamente entre 15 y 30 días, este trámite es realizado por otro departamento de la IES, cuando el título ya se encuentra registrado en el Senescyt entonces el estudiante se debe acercar a la secretaría técnica de la IES.\n\nDigite 0 para regresar al menú principal';
+            const message = 'Cuando tu título se encuentre oficialmente registrado en la página web del Senescyt (verificado con tu cédula de identidad), podrás retirarlo en la Secretaría Académica de la IES. Este proceso toma apróximadamente entre 15 a 30 días laborales después de la sustentación.\n' +
+                            '\nDigite 0 para regresar al menú principal.';
             agent.add('');
             sendTelegramMessage(message);
         } else if (input === '3') {
