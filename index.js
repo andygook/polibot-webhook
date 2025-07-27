@@ -120,7 +120,7 @@ app.post('/', (req, res) => {
                             '5) Preguntas personalizadas\n' +
                             '6) Contactar Asistente Académico\n' +
                             '0) Salir\n\n' +
-                            'Por favor, selecciona una opción (0-6).';
+                            'Por favor, selecciona una opción (0-6).\n';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'main_menu', lifespan: 5 });
@@ -140,7 +140,7 @@ app.post('/', (req, res) => {
                             '5) Preguntas personalizadas\n' +
                             '6) Contactar Asistente Académico\n' +
                             '0) Salir\n\n' +
-                            'Por favor, selecciona una opción (0-6).';
+                            'Por favor, selecciona una opción (0-6).\n';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'main_menu', lifespan: 5 });
@@ -159,7 +159,7 @@ app.post('/', (req, res) => {
                             '5) Preguntas personalizadas\n' +
                             '6) Contactar Asistente Académico\n' +
                             '0) Salir\n\n' +
-                            'Por favor, selecciona una opción (0-6).';
+                            'Por favor, selecciona una opción (0-6).\n';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'main_menu', lifespan: 5 });
@@ -322,7 +322,7 @@ app.post('/', (req, res) => {
                             'd) Miembros del tribunal de sustentación\n' +
                             'e) Plazos para sustentar y costos\n' +
                             'f) Fecha planificada de sustentación\n' +
-                            'g) Regresar al menú principal';
+                            'g) Regresar al menú principal\n';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'personalized_queries_menu', lifespan: 5 });
@@ -340,7 +340,7 @@ app.post('/', (req, res) => {
                             'd) Miembros del tribunal de sustentación\n' +
                             'e) Plazos para sustentar y costos\n' +
                             'f) Fecha planificada de sustentación\n' +
-                            'g) Regresar al menú principal';
+                            'g) Regresar al menú principal\n';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'personalized_queries_menu', lifespan: 5 });
@@ -359,7 +359,7 @@ app.post('/', (req, res) => {
                             'd) Miembros del tribunal de sustentación\n' +
                             'e) Plazos para sustentar y costos\n' +
                             'f) Fecha planificada de sustentación\n' +
-                            'g) Regresar al menú principal';
+                            'g) Regresar al menú principal\n';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'personalized_queries_menu', lifespan: 5 });
@@ -453,7 +453,7 @@ app.post('/', (req, res) => {
                             '1. Formatos para elaborar la propuesta de titulación\n' +
                             '2. Formatos para elaborar el trabajo de titulación\n' +
                             '0. Regresar al menú principal\n\n' +
-                            'Por favor, selecciona una opción (0-2).';
+                            'Por favor, selecciona una opción (0-2).\n';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'documents_menu', lifespan: 5 });
@@ -469,7 +469,7 @@ app.post('/', (req, res) => {
                             '1. Formatos para elaborar la propuesta de titulación\n' +
                             '2. Formatos para elaborar el trabajo de titulación\n' +
                             '0. Regresar al menú principal\n\n' +
-                            'Por favor, selecciona una opción (0-2).';
+                            'Por favor, selecciona una opción (0-2).\n';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'documents_menu', lifespan: 5 });
@@ -482,7 +482,7 @@ app.post('/', (req, res) => {
                             'Submenú - Documentos y formatos:\n' +
                             '1. Formatos para elaborar la propuesta de titulación\n' +
                             '2. Formatos para elaborar el trabajo de titulación\n' +
-                            '0. Regresar al menú principal';
+                            '0. Regresar al menú principal\n';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'documents_menu', lifespan: 5 });
@@ -530,7 +530,7 @@ app.post('/', (req, res) => {
                             '1. Cambios en la propuesta (requisitos)\n' +
                             '2. Cambios de miembros del tribunal (requisitos)\n' +
                             '0. Regresar al menú principal\n\n' +
-                            'Por favor, selecciona una opción (0-2).';
+                            'Por favor, selecciona una opción (0-2).\n';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'adjustments_menu', lifespan: 5 });
@@ -546,7 +546,7 @@ app.post('/', (req, res) => {
                             '1. Cambios en la propuesta (requisitos)\n' +
                             '2. Cambios de miembros del tribunal (requisitos)\n' +
                             '0. Regresar al menú principal\n\n' +
-                            'Por favor, selecciona una opción (0-2).';
+                            'Por favor, selecciona una opción (0-2).\n';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'adjustments_menu', lifespan: 5 });
@@ -559,7 +559,7 @@ app.post('/', (req, res) => {
                             'Submenú - Ajustes en propuesta:\n' +
                             '1. Cambios en la propuesta (requisitos)\n' +
                             '2. Cambios de miembros del tribunal (requisitos)\n' +
-                            '0. Regresar al menú principal';
+                            '0. Regresar al menú principal\n';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'adjustments_menu', lifespan: 5 });
@@ -618,7 +618,7 @@ app.post('/', (req, res) => {
                             '2. Revisión antiplagio\n' +
                             '3. Tiempo de duración de la sustentación\n' +
                             '0. Regresar al menú principal\n\n' +
-                            'Por favor, selecciona una opción (0-3).';
+                            'Por favor, selecciona una opción (0-3).\n';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'sustenance_menu', lifespan: 5 });
@@ -635,7 +635,7 @@ app.post('/', (req, res) => {
                             '2. Revisión antiplagio\n' +
                             '3. Tiempo de duración de la sustentación\n' +
                             '0. Regresar al menú principal\n\n' +
-                            'Por favor, selecciona una opción (0-3).';
+                            'Por favor, selecciona una opción (0-3).\n';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'sustenance_menu', lifespan: 5 });
@@ -649,7 +649,7 @@ app.post('/', (req, res) => {
                             '1. Requisitos y documentos para solicitar sustentación\n' +
                             '2. Revisión antiplagio\n' +
                             '3. Tiempo de duración de la sustentación\n' +
-                            '0. Regresar al menú principal';
+                            '0. Regresar al menú principal\n';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'sustenance_menu', lifespan: 5 });
@@ -727,7 +727,7 @@ app.post('/', (req, res) => {
                             '2. Entrega física del título (tiempos)\n' +
                             '3. Retiro del título (lugar y requisitos)\n' +
                             '0. Regresar al menú principal\n\n' +
-                            'Por favor, selecciona una opción (0-3).';
+                            'Por favor, selecciona una opción (0-3).\n';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'title_management_menu', lifespan: 5 });
@@ -744,7 +744,7 @@ app.post('/', (req, res) => {
                             '2. Entrega física del título (tiempos)\n' +
                             '3. Retiro del título (lugar y requisitos)\n' +
                             '0. Regresar al menú principal\n\n' +
-                            'Por favor, selecciona una opción (0-3).';
+                            'Por favor, selecciona una opción (0-3).\n';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'title_management_menu', lifespan: 5 });
@@ -758,7 +758,7 @@ app.post('/', (req, res) => {
                             '1. Registro del título en el Senescyt (tiempos)\n' +
                             '2. Entrega física del título (tiempos)\n' +
                             '3. Retiro del título (lugar y requisitos)\n' +
-                            '0. Regresar al menú principal';
+                            '0. Regresar al menú principal\n';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'title_management_menu', lifespan: 5 });
