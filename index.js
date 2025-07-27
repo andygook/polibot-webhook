@@ -112,6 +112,7 @@ app.post('/', (req, res) => {
         if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
+                            '\n' + // Salto de línea adicional
                             'Menú Principal:\n' +
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
@@ -132,6 +133,7 @@ app.post('/', (req, res) => {
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
+                            '\n' + // Salto de línea adicional
                             'Menú Principal:\n' +
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
@@ -151,6 +153,7 @@ app.post('/', (req, res) => {
         if (!input || typeof input !== 'string' || !['0', '1', '2', '3', '4', '5', '6'].includes(input)) {
             console.log('Entrada inválida detectada:', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
+                            '\n' + // Salto de línea adicional
                             'Menú Principal:\n' +
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
