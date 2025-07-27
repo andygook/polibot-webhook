@@ -492,7 +492,7 @@ app.post('/', (req, res) => {
             agent.add('');
             sendTelegramMessage(message);
         } else if (input === '2') {
-            const message = 'Documento disponible aquí: [Formatos para el trabajo de titulación](https://docs.google.com/document/d/16w1HRQ5LBNqLesaZdDJiJQdS98-GCupa/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)\n\nDigite 0 para regresar al menú principal';
+            const message = 'Descarga el formato para elaborar el trabajo de titulación, [aquí](https://docs.google.com/document/d/16w1HRQ5LBNqLesaZdDJiJQdS98-GCupa/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true).\n\nDigite 0 para regresar al menú principal';
             agent.add('');
             sendTelegramMessage(message);
         } else if (input === '0') {
