@@ -197,6 +197,7 @@ app.post('/', (req, res) => {
             agent.context.set({ name: 'main_menu', lifespan: 0 });
         } else if (input === '3') {
             const message = 'PROCESO DE SUSTENTACIÓN.\n' +
+                            '\n' +
                             '1.- Requisitos: Solicitar fecha de sustentación.\n' +
                             '2.- Proceso de aprobación del análisis antiplagio.\n' +
                             '3.- Detalles importantes para la sustentación.\n' +
@@ -615,6 +616,7 @@ app.post('/', (req, res) => {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
                             'PROCESO DE SUSTENTACIÓN.\n' +
+                            '\n' +
                             '1.- Requisitos: Solicitar fecha de sustentación.\n' +
                             '2.- Proceso de aprobación del análisis antiplagio.\n' +
                             '3.- Detalles importantes para la sustentación.\n' +
@@ -632,6 +634,7 @@ app.post('/', (req, res) => {
             console.log('Entrada con emojis detectada:', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
                             'PROCESO DE SUSTENTACIÓN.\n' +
+                            '\n' +
                             '1.- Requisitos: Solicitar fecha de sustentación.\n' +
                             '2.- Proceso de aprobación del análisis antiplagio.\n' +
                             '3.- Detalles importantes para la sustentación.\n' +
@@ -647,6 +650,7 @@ app.post('/', (req, res) => {
             console.log('Entrada inválida detectada:', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-3).\n\n' +
                             'PROCESO DE SUSTENTACIÓN.\n' +
+                            '\n' +
                             '1.- Requisitos: Solicitar fecha de sustentación.\n' +
                             '2.- Proceso de aprobación del análisis antiplagio.\n' +
                             '3.- Detalles importantes para la sustentación.\n' +
