@@ -173,10 +173,10 @@ app.post('/', (req, res) => {
             agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
             agent.context.set({ name: 'main_menu', lifespan: 0 });
         } else if (input === '1') {
-            const message = 'Submenú - Documentos y formatos:\n' +
-                            '1. Formatos para elaborar la propuesta de titulación\n' +
-                            '2. Formatos para elaborar el trabajo de titulación\n' +
-                            '0. Regresar al menú principal\n\n' +
+            const message = 'DOCUMENTOS Y FORMATOS.\n\n' +
+                            '1.- Formato para elaborar la propuesta de titulación\n' +
+                            '2.- Formato para elaborar el trabajo de titulación\n' +
+                            '0.- Regresar al menú principal\n\n' +
                             'Por favor, selecciona una opción (0-2).';
             agent.add('');
             sendTelegramMessage(message);
