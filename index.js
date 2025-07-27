@@ -571,11 +571,10 @@ app.post('/', (req, res) => {
         }
 
         if (input === '1') {
-            const message = 'Los requisitos para cambios en la propuesta de titulación son:\n' +
-                            '1️- Realizar solicitud indicando el motivo por el cambio en la propuesta.\n' +
-                            '2️- Nueva propuesta firmada por los miembros de tribunal de titulación (tutor y vocal).\n' +
-                            '3️- Enviar al coordinador de la maestría con copia personal administrativo.\n' +
-                            '4️- Inicia nuevamente el proceso de revisión y aprobación de la propuesta de trabajo de titulación.\n' +
+            const message = 'Los requisitos para el cambio en la propuesta de titulación son:\n' +
+                            '1.- Presentar una solicitud dirigida al coordinador de la maestría, indicando el motivo del cambio.\n' +
+                            '2.- Entregar la nueva propuesta de titulación firmada por los miembros del tribunal (tutor y vocal).\n' +
+                            '3.- Enviar por correo electrónico al coordinador de la maestría, con copia al personal administrativo, la solicitud y la propuesta firmada.\n' +
                             'Digite 0 para regresar al menú principal';
             agent.add('');
             sendTelegramMessage(message);
