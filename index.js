@@ -796,7 +796,8 @@ app.post('/', (req, res) => {
                             'Requisitos:\n' +
                             '  a) Presentar documento de identificación original de la persona que retira el título.\n' +
                             '  b) Presentar la declaración notarizada en la que se verifique que el graduado autoriza a otra persona a retirar el título (la declaración debe tener copia nítida de los documentos de identificacón de ambas personas).\n' +
-                            'Nota: Para mayor inforamación sobre trámites realizados por terceros, contactarse con la Secretaría Académica de la IES.\n' +
+                            '\n' +
+                            '  Nota: Para mayor información sobre trámites realizados por terceros, contactarse con la Secretaría Académica de la IES.\n' +
                             '\n' +
                             'Digite 0 para regresar al menú principal.';
             agent.add('');
