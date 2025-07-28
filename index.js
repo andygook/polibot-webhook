@@ -220,7 +220,12 @@ app.post('/', (req, res) => {
             agent.context.set({ name: 'title_management_menu', lifespan: 5 });
             agent.context.set({ name: 'main_menu', lifespan: 0 });
         } else if (input === '6') {
-            const message = 'Para contactar al Asistente Académico, por favor envía un correo a asistente.academico@ies.edu.ec o llama al +593 2 123 4567. Digite 0 para regresar al menú principal.';
+            const message = 'ASISTENCIA PERSONALIZADA.\n' +
+                            '\n' +
+                            'Si tienes dudas, necesitas ayuda con algún proceso o requieres atención específica, puedes comunicarte con el Asistente Académico.\n' +
+                            'Escríbenos a asistente.academico@ies.edu.ec o llama al +59321234567 y con gusto te atenderemos.\n' +
+                            '\n' +
+                            'Digite 0 para regresar al menú principal.';
             agent.add('');
             sendTelegramMessage(message);
             agent.context.set({ name: 'main_menu', lifespan: 0 });
