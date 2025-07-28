@@ -853,11 +853,7 @@ app.post('/', (req, res) => {
             agent.context.set({ name: 'contact_assistance', lifespan: 0 });
             agent.context.set({ name: 'main_menu', lifespan: 5 });
         } else {
-            const message = 'ASISTENCIA PERSONALIZADA.\n' +
-                            '\n' +
-                            'Si tienes dudas, necesitas ayuda con algún proceso o requieres atención específica, puedes comunicarte con el Asistente Académico.\n' +
-                            'Escríbenos a asistente.academico@ies.edu.ec o llama al +59321234567 y con gusto te atenderemos.\n' +
-                            '\n' +
+            const message = 'Opción inválida.\n' +
                             'Digite 0 para regresar al menú principal.';
             agent.add('');
             sendTelegramMessage(message);
