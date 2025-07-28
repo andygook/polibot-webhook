@@ -383,7 +383,7 @@ app.post('/', (req, res) => {
         console.log('Proyecto encontrado para ID', studentId, ':', project);
 
         if (!project) {
-            const message = 'Error: No se encontraron datos del proyecto. Digite g para regresar al menú anterior.';
+            const message = 'Lo sentimos, no se encontraron datos del proyecto asociado a tu identificación. Por favor, verifica que el número de identificación sea correcto (10 dígitos) o selecciona \'g\' para regresar al menú anterior.';
             agent.add('');
             sendTelegramMessage(message);
             return;
