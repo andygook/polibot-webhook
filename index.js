@@ -228,6 +228,7 @@ app.post('/', (req, res) => {
                             'Digite 0 para regresar al menú principal.';
             agent.add('');
             sendTelegramMessage(message);
+            agent.context.set({ name: 'contact_assistance', lifespan: 1 });
             agent.context.set({ name: 'main_menu', lifespan: 0 });
         } else if (input === '0') {
             const message = 'Gracias por usar PoliBOT. ¡Espero verte pronto para más consultas!';
@@ -825,6 +826,45 @@ app.post('/', (req, res) => {
         }
     }
 
+    function contactAssistanceHandler(agent) {
+        console.log('Procesando contactAssistanceHandler');
+        const contactAssistanceContext = agent.context.get('contact_assistance');
+        console.log('Contexto contact_assistance activo:', !!contactAssistanceContext);
+        let input = agent.query || agent.parameters.option;
+
+        if (!contactAssistanceContext) {
+            agent.add('');
+            return;
+        }
+
+        if (input === '0') {
+            const message = 'Menú Principal:\n' +
+                            '\n' + // Salto de línea adicional
+                            '1) Documentos y formatos\n' +
+                            '2) Ajustes en propuesta\n' +
+                            '3) Proceso de sustentación\n' +
+                            '4) Gestión del título\n' +
+                            '5) Preguntas personalizadas\n' +
+                            '6) Contactar Asistente Académico\n' +
+                            '0) Salir\n\n' +
+                            'Por favor, selecciona una opción (0-6).';
+            agent.add('');
+            sendTelegramMessage(message);
+            agent.context.set({ name: 'contact_assistance', lifespan: 0 });
+            agent.context.set({ name: 'main_menu', lifespan: 5 });
+        } else {
+            const message = 'ASISTENCIA PERSONALIZADA.\n' +
+                            '\n' +
+                            'Si tienes dudas, necesitas ayuda con algún proceso o requieres atención específica, puedes comunicarte con el Asistente Académico.\n' +
+                            'Escríbenos a asistente.academico@ies.edu.ec o llama al +59321234567 y con gusto te atenderemos.\n' +
+                            '\n' +
+                            'Digite 0 para regresar al menú principal.';
+            agent.add('');
+            sendTelegramMessage(message);
+            agent.context.set({ name: 'contact_assistance', lifespan: 1 });
+        }
+    }
+
     let intentMap = new Map();
     intentMap.set('Default Welcome Intent', welcomeHandler);
     intentMap.set('Main Menu', mainMenuHandler);
@@ -835,12 +875,14 @@ app.post('/', (req, res) => {
     intentMap.set('Adjustments Menu', adjustmentsMenuHandler);
     intentMap.set('Sustenance Menu', sustenanceMenuHandler);
     intentMap.set('Title Management Menu', titleManagementHandler);
+    intentMap.set('Contact Assistance', contactAssistanceHandler);
     // Fallbacks para submenús
     intentMap.set('Fallback - Documents Menu', documentsMenuHandler);
     intentMap.set('Fallback - Adjustments Menu', adjustmentsMenuHandler);
     intentMap.set('Fallback - Sustenance Menu', sustenanceMenuHandler);
     intentMap.set('Fallback - Title Management Menu', titleManagementHandler);
     intentMap.set('Fallback - Personalized Queries Menu', processPersonalizedQueriesHandler);
+    intentMap.set('Fallback - Contact Assistance', contactAssistanceHandler);
     agent.handleRequest(intentMap);
 });
 
