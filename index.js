@@ -289,10 +289,11 @@ app.post('/', (req, res) => {
 
         if (input === 's') {
             const message = 'Por favor ingresa tu número de identificación (debe tener exactamente 10 dígitos, sin puntos ni guiones) o selecciona 0 para regresar al menú principal.';
-            agent.add('');
-            sendTelegramMessage(message);
-            agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
-            agent.context.set({ name: 'terms_acceptance', lifespan: 0 });
+            agent.add(message); // Agregar el mensaje directamente a la respuesta
+            sendTelegramMessage(message).then(() => {
+                agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
+                agent.context.set({ name: 'terms_acceptance', lifespan: 0 });
+            }).catch(err => console.error('Error al enviar mensaje de identificación:', err));
         } else if (input === 'n') {
             const message = 'Menú Principal:\n' +
                             '\n' + // Salto de línea adicional
