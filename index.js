@@ -343,6 +343,7 @@ app.post('/', (req, res) => {
             let idInput = (agent.parameters.identification || agent.query).trim();
             console.log('Validando y buscando estudiante con ID:', idInput);
 
+            // Manejo explícito de "0" para regresar al menú principal
             if (idInput === '0') {
                 const message = 'Menú Principal:\n' +
                                 '\n' + // Salto de línea adicional
@@ -366,6 +367,7 @@ app.post('/', (req, res) => {
             if (!digitRegex.test(idInput)) {
                 const message = 'Número de identificación inválido.\n' +
                                 'Ingrese nuevamente su N° de identificación (debe tener 10 dígitos, sin puntos ni guiones).\n' +
+                                '\n' +
                                 'Digite 0 para regresar al menú principal.';
                 agent.add('');
                 sendTelegramMessage(message);
