@@ -340,7 +340,7 @@ app.post('/', (req, res) => {
         }
 
         if (awaitingIdentification && (agent.parameters.identification || agent.query)) {
-            let idInput = agent.parameters.identification || agent.query;
+            let idInput = (agent.parameters.identification || agent.query).trim();
             console.log('Validando y buscando estudiante con ID:', idInput);
 
             if (idInput === '0') {
@@ -361,8 +361,12 @@ app.post('/', (req, res) => {
                 return;
             }
 
-            if (!/^\d{10}$/.test(idInput)) {
-                const message = 'El número de identificación debe tener exactamente 10 dígitos. Por favor, ingrésalo nuevamente o selecciona 0 para regresar al menú principal.';
+            // Validación estricta de identificación
+            const digitRegex = /^\d{10}$/;
+            if (!digitRegex.test(idInput)) {
+                const message = 'Número de identificación inválido.\n' +
+                                'Ingrese nuevamente su N° de identificación (debe tener 10 dígitos, sin puntos ni guiones).\n' +
+                                'Digite 0 para regresar al menú principal.';
                 agent.add('');
                 sendTelegramMessage(message);
                 agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
@@ -954,7 +958,7 @@ app.post('/', (req, res) => {
     intentMap.set('Sustenance Menu', sustenanceMenuHandler);
     intentMap.set('Title Management Menu', titleManagementHandler);
     intentMap.set('Contact Assistance', contactAssistanceHandler);
-    intentMap.set('Terms Acceptance', termsAcceptanceHandler); // Nuevo handler para términos
+    intentMap.set('Terms Acceptance', termsAcceptanceHandler); // Handler para términos
     // Fallbacks para submenús
     intentMap.set('Fallback - Documents Menu', documentsMenuHandler);
     intentMap.set('Fallback - Adjustments Menu', adjustmentsMenuHandler);
