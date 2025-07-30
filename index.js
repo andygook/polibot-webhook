@@ -92,7 +92,7 @@ app.post('/', (req, res) => {
                         '3) Proceso de sustentación\n' +
                         '4) Gestión del título\n' +
                         '5) Preguntas personalizadas\n' +
-                        '6) Contactar Asistente Académico\n' +
+                        '6) Contactar asistente académico\n' +
                         '0) Salir\n\n' +
                         'Por favor, selecciona una opción (0-6).';
         agent.add(''); // Respuesta vacía para Dialogflow
@@ -120,7 +120,7 @@ app.post('/', (req, res) => {
                             '3) Proceso de sustentación\n' +
                             '4) Gestión del título\n' +
                             '5) Preguntas personalizadas\n' +
-                            '6) Contactar Asistente Académico\n' +
+                            '6) Contactar asistente académico\n' +
                             '0) Salir\n\n' +
                             'Por favor, selecciona una opción (0-6).\n';
             agent.add('');
@@ -141,7 +141,7 @@ app.post('/', (req, res) => {
                             '3) Proceso de sustentación\n' +
                             '4) Gestión del título\n' +
                             '5) Preguntas personalizadas\n' +
-                            '6) Contactar Asistente Académico\n' +
+                            '6) Contactar asistente académico\n' +
                             '0) Salir\n\n' +
                             'Por favor, selecciona una opción (0-6).\n';
             agent.add('');
@@ -161,7 +161,7 @@ app.post('/', (req, res) => {
                             '3) Proceso de sustentación\n' +
                             '4) Gestión del título\n' +
                             '5) Preguntas personalizadas\n' +
-                            '6) Contactar Asistente Académico\n' +
+                            '6) Contactar asistente académico\n' +
                             '0) Salir\n\n' +
                             'Por favor, selecciona una opción (0-6).\n';
             agent.add('');
@@ -190,8 +190,8 @@ app.post('/', (req, res) => {
             agent.context.set({ name: 'main_menu', lifespan: 0 });
         } else if (input === '2') {
             const message = 'AJUSTES EN PROPUESTA.\n\n' +
-                            '1.- Requisitos: Cambios en la propuesta.\n' +
-                            '2.- Requisitos: Cambios de miembros del tribunal de sustentación.\n' +
+                            '1.- Requisitos: Cambios en la propuesta\n' +
+                            '2.- Requisitos: Cambios de miembros del tribunal de sustentación\n' +
                             '0.- Regresar al menú principal\n\n' +
                             'Por favor, selecciona una opción (0-2).';
             agent.add('');
@@ -201,10 +201,10 @@ app.post('/', (req, res) => {
         } else if (input === '3') {
             const message = 'PROCESO DE SUSTENTACIÓN.\n' +
                             '\n' +
-                            '1.- Requisitos: Solicitar fecha de sustentación.\n' +
-                            '2.- Proceso de aprobación del análisis antiplagio.\n' +
-                            '3.- Detalles importantes para la sustentación.\n' +
-                            '0.- Regresar al menú principal.\n\n' +
+                            '1.- Requisitos: Solicitar fecha de sustentación\n' +
+                            '2.- Proceso de aprobación del análisis antiplagio\n' +
+                            '3.- Detalles importantes para la sustentación\n' +
+                            '0.- Regresar al menú principal\n\n' +
                             'Por favor, selecciona una opción (0-3).';
             agent.add('');
             sendTelegramMessage(chatId, message);
@@ -213,10 +213,10 @@ app.post('/', (req, res) => {
         } else if (input === '4') {
             const message = 'GESTIÓN DEL TÍTULO.\n' +
                             '\n' +
-                            '1.- Proceso de registro del título ante Senescyt.\n' +
-                            '2.- Tiempo estimado para retirar el título.\n' +
-                            '3.- Retiro del título: lugar y documentos necesarios.\n' +
-                            '0.- Regresar al menú principal.\n\n' +
+                            '1.- Proceso de registro del título ante Senescyt\n' +
+                            '2.- Tiempo estimado para retirar el título\n' +
+                            '3.- Retiro del título: lugar y documentos necesarios\n' +
+                            '0.- Regresar al menú principal\n\n' +
                             'Por favor, selecciona una opción (0-3).';
             agent.add('');
             sendTelegramMessage(chatId, message);
@@ -288,7 +288,7 @@ app.post('/', (req, res) => {
                            '3) Proceso de sustentación\n' +
                            '4) Gestión del título\n' +
                            '5) Preguntas personalizadas\n' +
-                           '6) Contactar Asistente Académico\n' +
+                           '6) Contactar asistente académico\n' +
                            '0) Salir\n\n' +
                            'Por favor, selecciona una opción (0-6).';
             agent.add(''); // Respuesta vacía para Dialogflow
@@ -506,7 +506,7 @@ app.post('/', (req, res) => {
                                    '3) Proceso de sustentación\n' +
                                    '4) Gestión del título\n' +
                                    '5) Preguntas personalizadas\n' +
-                                   '6) Contactar Asistente Académico\n' +
+                                   '6) Contactar asistente académico\n' +
                                    '0) Salir\n\n' +
                                    'Por favor, selecciona una opción (0-6).';
                     agent.add('');
@@ -543,7 +543,7 @@ app.post('/', (req, res) => {
         if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
-                           'DOCUMENTOS Y FORMATOS.\n\n' +
+                           'DOCUMENTOS Y FORMATOS\n\n' +
                            '1. Formatos para elaborar la propuesta de titulación\n' +
                            '2. Formatos para elaborar el trabajo de titulación\n' +
                            '0. Regresar al menú principal';
@@ -558,7 +558,7 @@ app.post('/', (req, res) => {
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
-                           'DOCUMENTOS Y FORMATOS.\n\n' +
+                           'DOCUMENTOS Y FORMATOS\n\n' +
                            '1. Formatos para elaborar la propuesta de titulación\n' +
                            '2. Formatos para elaborar el trabajo de titulación\n' +
                            '0. Regresar al menú principal';
@@ -571,7 +571,7 @@ app.post('/', (req, res) => {
         if (!input || typeof input !== 'string' || !['0', '1', '2'].includes(input)) {
             console.log('Entrada inválida detectada:', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
-                           'DOCUMENTOS Y FORMATOS.\n\n' +
+                           'DOCUMENTOS Y FORMATOS\n\n' +
                            '1. Formatos para elaborar la propuesta de titulación\n' +
                            '2. Formatos para elaborar el trabajo de titulación\n' +
                            '0. Regresar al menú principal';
@@ -597,7 +597,7 @@ app.post('/', (req, res) => {
                            '3) Proceso de sustentación\n' +
                            '4) Gestión del título\n' +
                            '5) Preguntas personalizadas\n' +
-                           '6) Contactar Asistente Académico\n' +
+                           '6) Contactar asistente académico\n' +
                            '0) Salir\n\n' +
                            'Por favor, selecciona una opción (0-6).';
             agent.add('');
@@ -620,8 +620,8 @@ app.post('/', (req, res) => {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
                            'AJUSTES EN PROPUESTA\n' +
-                           '1.- Requisitos: Cambios en la propuesta.\n' +
-                           '2.- Requisitos: Cambios de miembros del tribunal de sustentación.\n' +
+                           '1.- Requisitos: Cambios en la propuesta\n' +
+                           '2.- Requisitos: Cambios de miembros del tribunal de sustentación\n' +
                            '0.- Regresar al menú principal';
             agent.add('');
             sendTelegramMessage(chatId, message);
@@ -635,8 +635,8 @@ app.post('/', (req, res) => {
             console.log('Entrada con emojis detectada:', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
                            'AJUSTES EN PROPUESTA\n' +
-                           '1.- Requisitos: Cambios en la propuesta.\n' +
-                           '2.- Requisitos: Cambios de miembros del tribunal de sustentación.\n' +
+                           '1.- Requisitos: Cambios en la propuesta\n' +
+                           '2.- Requisitos: Cambios de miembros del tribunal de sustentación\n' +
                            '0.- Regresar al menú principal';
             agent.add('');
             sendTelegramMessage(chatId, message);
@@ -648,8 +648,8 @@ app.post('/', (req, res) => {
             console.log('Entrada inválida detectada:', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
                            'AJUSTES EN PROPUESTA\n' +
-                           '1.- Requisitos: Cambios en la propuesta.\n' +
-                           '2.- Requisitos: Cambios de miembros del tribunal de sustentación.\n' +
+                           '1.- Requisitos: Cambios en la propuesta\n' +
+                           '2.- Requisitos: Cambios de miembros del tribunal de sustentación\n' +
                            '0.- Regresar al menú principal';
             agent.add('');
             sendTelegramMessage(chatId, message);
@@ -681,7 +681,7 @@ app.post('/', (req, res) => {
                            '3) Proceso de sustentación\n' +
                            '4) Gestión del título\n' +
                            '5) Preguntas personalizadas\n' +
-                           '6) Contactar Asistente Académico\n' +
+                           '6) Contactar asistente académico\n' +
                            '0) Salir\n\n' +
                            'Por favor, selecciona una opción (0-6).';
             agent.add('');
@@ -705,10 +705,10 @@ app.post('/', (req, res) => {
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
                            'PROCESO DE SUSTENTACIÓN.\n' +
                            '\n' +
-                           '1.- Requisitos: Solicitar fecha de sustentación.\n' +
-                           '2.- Proceso de aprobación del análisis antiplagio.\n' +
-                           '3.- Detalles importantes para la sustentación.\n' +
-                           '0.- Regresar al menú principal.\n\n' +
+                           '1.- Requisitos: Solicitar fecha de sustentación\n' +
+                           '2.- Proceso de aprobación del análisis antiplagio\n' +
+                           '3.- Detalles importantes para la sustentación\n' +
+                           '0.- Regresar al menú principal\n\n' +
                            'Por favor, selecciona una opción (0-3).';
             agent.add('');
             sendTelegramMessage(chatId, message);
@@ -723,10 +723,10 @@ app.post('/', (req, res) => {
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
                            'PROCESO DE SUSTENTACIÓN.\n' +
                            '\n' +
-                           '1.- Requisitos: Solicitar fecha de sustentación.\n' +
-                           '2.- Proceso de aprobación del análisis antiplagio.\n' +
-                           '3.- Detalles importantes para la sustentación.\n' +
-                           '0.- Regresar al menú principal.\n\n' +
+                           '1.- Requisitos: Solicitar fecha de sustentación\n' +
+                           '2.- Proceso de aprobación del análisis antiplagio\n' +
+                           '3.- Detalles importantes para la sustentación\n' +
+                           '0.- Regresar al menú principal\n\n' +
                            'Por favor, selecciona una opción (0-3).';
             agent.add('');
             sendTelegramMessage(chatId, message);
@@ -737,12 +737,12 @@ app.post('/', (req, res) => {
         if (!input || typeof input !== 'string' || !['0', '1', '2', '3'].includes(input)) {
             console.log('Entrada inválida detectada:', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-3).\n\n' +
-                           'PROCESO DE SUSTENTACIÓN.\n' +
+                           'PROCESO DE SUSTENTACIÓN\n' +
                            '\n' +
-                           '1.- Requisitos: Solicitar fecha de sustentación.\n' +
-                           '2.- Proceso de aprobación del análisis antiplagio.\n' +
-                           '3.- Detalles importantes para la sustentación.\n' +
-                           '0.- Regresar al menú principal.';
+                           '1.- Requisitos: Solicitar fecha de sustentación\n' +
+                           '2.- Proceso de aprobación del análisis antiplagio\n' +
+                           '3.- Detalles importantes para la sustentación\n' +
+                           '0.- Regresar al menú principal';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'sustenance_menu', lifespan: 5 });
@@ -793,7 +793,7 @@ app.post('/', (req, res) => {
                            '3) Proceso de sustentación\n' +
                            '4) Gestión del título\n' +
                            '5) Preguntas personalizadas\n' +
-                           '6) Contactar Asistente Académico\n' +
+                           '6) Contactar asistente académico\n' +
                            '0) Salir\n\n' +
                            'Por favor, selecciona una opción (0-6).';
             agent.add('');
@@ -815,13 +815,13 @@ app.post('/', (req, res) => {
         if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                           'GESTIÓN DEL TÍTULO.\n' +
+                           'GESTIÓN DEL TÍTULO\n' +
                            '\n' +
-                           '1.- Proceso de registro del título ante Senescyt.\n' +
-                           '2.- Tiempo estimado para retirar el título.\n' +
-                           '3.- Retiro del título: lugar y documentos necesarios.\n' +
-                           '0.- Regresar al menú principal.\n\n' +
-                           'Por favor, selecciona una opción (0-3).\n';
+                           '1.- Proceso de registro del título ante Senescyt\n' +
+                           '2.- Tiempo estimado para retirar el título\n' +
+                           '3.- Retiro del título: lugar y documentos necesarios\n' +
+                           '0.- Regresar al menú principal\n\n' +
+                           'Por favor, selecciona una opción (0-3)\n';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'title_management_menu', lifespan: 5 });
@@ -833,13 +833,13 @@ app.post('/', (req, res) => {
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                           'GESTIÓN DEL TÍTULO.\n' +
+                           'GESTIÓN DEL TÍTULO\n' +
                            '\n' +
-                           '1.- Proceso de registro del título ante Senescyt.\n' +
-                           '2.- Tiempo estimado para retirar el título.\n' +
-                           '3.- Retiro del título: lugar y documentos necesarios.\n' +
-                           '0.- Regresar al menú principal.\n\n' +
-                           'Por favor, selecciona una opción (0-3).\n';
+                           '1.- Proceso de registro del título ante Senescyt\n' +
+                           '2.- Tiempo estimado para retirar el título\n' +
+                           '3.- Retiro del título: lugar y documentos necesarios\n' +
+                           '0.- Regresar al menú principal\n\n' +
+                           'Por favor, selecciona una opción (0-3)\n';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'title_management_menu', lifespan: 5 });
@@ -849,11 +849,11 @@ app.post('/', (req, res) => {
         if (!input || typeof input !== 'string' || !['0', '1', '2', '3'].includes(input)) {
             console.log('Entrada inválida detectada:', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-3).\n\n' +
-                           'GESTIÓN DEL TÍTULO.\n' +
+                           'GESTIÓN DEL TÍTULO\n' +
                            '\n' +
-                           '1.- Proceso de registro del título ante Senescyt.\n' +
-                           '2.- Tiempo estimado para retirar el título.\n' +
-                           '3.- Retiro del título: lugar y documentos necesarios.\n' +
+                           '1.- Proceso de registro del título ante Senescyt\n' +
+                           '2.- Tiempo estimado para retirar el título\n' +
+                           '3.- Retiro del título: lugar y documentos necesarios\n' +
                            '0.- Regresar al menú principal\n';
             agent.add('');
             sendTelegramMessage(chatId, message);
@@ -897,7 +897,7 @@ app.post('/', (req, res) => {
                            '3) Proceso de sustentación\n' +
                            '4) Gestión del título\n' +
                            '5) Preguntas personalizadas\n' +
-                           '6) Contactar Asistente Académico\n' +
+                           '6) Contactar asistente académico\n' +
                            '0) Salir\n\n' +
                            'Por favor, selecciona una opción (0-6).';
             agent.add('');
@@ -926,7 +926,7 @@ app.post('/', (req, res) => {
                            '3) Proceso de sustentación\n' +
                            '4) Gestión del título\n' +
                            '5) Preguntas personalizadas\n' +
-                           '6) Contactar Asistente Académico\n' +
+                           '6) Contactar asistente académico\n' +
                            '0) Salir\n\n' +
                            'Por favor, selecciona una opción (0-6).';
             agent.add('');
