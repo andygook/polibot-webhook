@@ -174,7 +174,7 @@ app.post('/', (req, res) => {
             const message = 'Aceptas los términos del uso del canal y manejo de datos personales?, digita:\n' +
                             'S, para continuar.\n' +
                             'N, para regresar al menú principal.';
-            agent.add('');
+            agent.add(''); // Respuesta vacía para evitar duplicación
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'terms_acceptance', lifespan: 1 });
             agent.context.set({ name: 'main_menu', lifespan: 0 });
@@ -249,28 +249,17 @@ app.post('/', (req, res) => {
         let input = (agent.parameters.option || agent.query)?.toLowerCase().trim();
         console.log('Input validado:', input);
 
+        // Asegurar que el contexto esté activo y la entrada sea válida
         if (!termsAcceptanceContext || !input) {
             console.log('Entrada inválida o contexto no activo:', input);
-            const message = 'Opción inválida. Por favor, selecciona una opción válida.\n' +
-                            'Aceptas los términos del uso del canal y manejo de datos personales?, digita:\n' +
-                            'S, para continuar.\n' +
-                            'N, para regresar al menú principal.';
-            agent.add('');
-            sendTelegramMessage(chatId, message);
-            agent.context.set({ name: 'terms_acceptance', lifespan: 1 });
+            agent.setFollowupEvent('FALLBACK_TERMS'); // Activar fallback
             return;
         }
 
         // Validación de entrada vacía (posible GIF o sticker)
         if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
-            const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                            'Aceptas los términos del uso del canal y manejo de datos personales?, digita:\n' +
-                            'S, para continuar.\n' +
-                            'N, para regresar al menú principal.';
-            agent.add('');
-            sendTelegramMessage(chatId, message);
-            agent.context.set({ name: 'terms_acceptance', lifespan: 1 });
+            agent.setFollowupEvent('FALLBACK_TERMS');
             return;
         }
 
@@ -278,35 +267,30 @@ app.post('/', (req, res) => {
         const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/u;
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
-            const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                            'Aceptas los términos del uso del canal y manejo de datos personales?, digita:\n' +
-                            'S, para continuar.\n' +
-                            'N, para regresar al menú principal.';
-            agent.add('');
-            sendTelegramMessage(chatId, message);
-            agent.context.set({ name: 'terms_acceptance', lifespan: 1 });
+            agent.setFollowupEvent('FALLBACK_TERMS');
             return;
         }
 
+        // Validación estricta de "S" o "N"
         if (input === 's') {
-            // Solo enviar mensaje a Telegram y manejar contexto
             const message = 'Por favor ingresa tu número de identificación (debe tener exactamente 10 dígitos, sin puntos ni guiones)\n\n' +
-                            'Digita 0 para regresar al menú principal.';
-            sendTelegramMessage(chatId, message); // Sin agent.add() para evitar duplicación
+                           'Digita 0 para regresar al menú principal.';
+            agent.add(''); // Respuesta vacía para evitar duplicación
+            sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 }); // Limpiar contexto conflictivo
             agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
             agent.context.set({ name: 'terms_acceptance', lifespan: 0 });
         } else if (input === 'n') {
             const message = 'Menú Principal:\n' +
-                            '\n' +
-                            '1) Documentos y formatos\n' +
-                            '2) Ajustes en propuesta\n' +
-                            '3) Proceso de sustentación\n' +
-                            '4) Gestión del título\n' +
-                            '5) Preguntas personalizadas\n' +
-                            '6) Contactar Asistente Académico\n' +
-                            '0) Salir\n\n' +
-                            'Por favor, selecciona una opción (0-6).';
+                           '\n' +
+                           '1) Documentos y formatos\n' +
+                           '2) Ajustes en propuesta\n' +
+                           '3) Proceso de sustentación\n' +
+                           '4) Gestión del título\n' +
+                           '5) Preguntas personalizadas\n' +
+                           '6) Contactar Asistente Académico\n' +
+                           '0) Salir\n\n' +
+                           'Por favor, selecciona una opción (0-6).';
             agent.add(''); // Respuesta vacía para Dialogflow
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'terms_acceptance', lifespan: 0 });
@@ -314,14 +298,19 @@ app.post('/', (req, res) => {
             agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 }); // Limpiar contexto conflictivo
         } else {
             console.log('Opción no válida detectada:', input);
-            const message = 'Opción inválida. Por favor, selecciona una opción válida.\n' +
-                            'Aceptas los términos del uso del canal y manejo de datos personales?, digita:\n' +
-                            'S, para continuar.\n' +
-                            'N, para regresar al menú principal.';
-            agent.add('');
-            sendTelegramMessage(chatId, message);
-            agent.context.set({ name: 'terms_acceptance', lifespan: 1 });
+            agent.setFollowupEvent('FALLBACK_TERMS'); // Activar fallback para entradas inválidas
         }
+    }
+
+    function fallbackTermsHandler(agent) {
+        console.log('Procesando fallback para Terms Acceptance');
+        const message = 'Opción inválida. Por favor, selecciona una opción válida.\n' +
+                       'Aceptas los términos del uso del canal y manejo de datos personales?, digita:\n' +
+                       'S, para continuar.\n' +
+                       'N, para regresar al menú principal.';
+        agent.add(''); // Respuesta vacía para Dialogflow
+        sendTelegramMessage(chatId, message);
+        agent.context.set({ name: 'terms_acceptance', lifespan: 1 });
     }
 
     function personalizedQueriesMenuHandler(agent) {
@@ -350,15 +339,15 @@ app.post('/', (req, res) => {
             // Manejo explícito de "0" para regresar al menú principal
             if (idInput === '0') {
                 const message = 'Menú Principal:\n' +
-                                '\n' +
-                                '1) Documentos y formatos\n' +
-                                '2) Ajustes en propuesta\n' +
-                                '3) Proceso de sustentación\n' +
-                                '4) Gestión del título\n' +
-                                '5) Preguntas personalizadas\n' +
-                                '6) Contactar Asistente Académico\n' +
-                                '0) Salir\n\n' +
-                                'Por favor, selecciona una opción (0-6).';
+                               '\n' +
+                               '1) Documentos y formatos\n' +
+                               '2) Ajustes en propuesta\n' +
+                               '3) Proceso de sustentación\n' +
+                               '4) Gestión del título\n' +
+                               '5) Preguntas personalizadas\n' +
+                               '6) Contactar Asistente Académico\n' +
+                               '0) Salir\n\n' +
+                               'Por favor, selecciona una opción (0-6).';
                 agent.add('');
                 sendTelegramMessage(chatId, message);
                 agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
@@ -370,9 +359,9 @@ app.post('/', (req, res) => {
             const digitRegex = /^\d{10}$/;
             if (!digitRegex.test(idInput)) {
                 const message = 'Número de identificación inválido.\n' +
-                                'Ingrese nuevamente su N° de identificación (debe tener 10 dígitos, sin puntos ni guiones).\n' +
-                                '\n' +
-                                'Digite 0 para regresar al menú principal.';
+                               'Ingrese nuevamente su N° de identificación (debe tener 10 dígitos, sin puntos ni guiones).\n' +
+                               '\n' +
+                               'Digite 0 para regresar al menú principal.';
                 agent.add('');
                 sendTelegramMessage(chatId, message);
                 agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
@@ -383,14 +372,14 @@ app.post('/', (req, res) => {
             console.log('Estudiante encontrado:', student);
             if (student) {
                 const message = `Apellidos: ${student.apellidos}\nNombres: ${student.nombres}\nMaestría: ${student.maestria}\nCohorte: ${student.cohorte}\n\nSubmenú - Preguntas personalizadas:\n` +
-                                `a) Nombre del proyecto\n` +
-                                `b) Estado actual del proyecto\n` +
-                                `c) Plazos presentar propuesta\n` +
-                                `d) Miembros del tribunal de sustentación\n` +
-                                `e) Plazos para sustentar y costos\n` +
-                                `f) Fecha planificada de sustentación\n` +
-                                `g) Regresar al menú principal\n\n` +
-                                `Por favor, selecciona una opción (a-g).`;
+                               `a) Nombre del proyecto\n` +
+                               `b) Estado actual del proyecto\n` +
+                               `c) Plazos presentar propuesta\n` +
+                               `d) Miembros del tribunal de sustentación\n` +
+                               `e) Plazos para sustentar y costos\n` +
+                               `f) Fecha planificada de sustentación\n` +
+                               `g) Regresar al menú principal\n\n` +
+                               `Por favor, selecciona una opción (a-g).`;
                 agent.add('');
                 sendTelegramMessage(chatId, message);
                 agent.context.set({ name: 'personalized_queries_menu', lifespan: 5, parameters: { identification: student.id } });
@@ -419,14 +408,14 @@ app.post('/', (req, res) => {
         if (!personalizedQueriesContext || !input) {
             console.log('Entrada inválida detectada:', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (a-g).\n\n' +
-                            'Submenú - Preguntas personalizadas:\n' +
-                            'a) Nombre del proyecto\n' +
-                            'b) Estado actual del proyecto\n' +
-                            'c) Plazos presentar propuesta\n' +
-                            'd) Miembros del tribunal de sustentación\n' +
-                            'e) Plazos para sustentar y costos\n' +
-                            'f) Fecha planificada de sustentación\n' +
-                            'g) Regresar al menú principal\n';
+                           'Submenú - Preguntas personalizadas:\n' +
+                           'a) Nombre del proyecto\n' +
+                           'b) Estado actual del proyecto\n' +
+                           'c) Plazos presentar propuesta\n' +
+                           'd) Miembros del tribunal de sustentación\n' +
+                           'e) Plazos para sustentar y costos\n' +
+                           'f) Fecha planificada de sustentación\n' +
+                           'g) Regresar al menú principal\n';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'personalized_queries_menu', lifespan: 5 });
@@ -437,14 +426,14 @@ app.post('/', (req, res) => {
         if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                            'Submenú - Preguntas personalizadas:\n' +
-                            'a) Nombre del proyecto\n' +
-                            'b) Estado actual del proyecto\n' +
-                            'c) Plazos presentar propuesta\n' +
-                            'd) Miembros del tribunal de sustentación\n' +
-                            'e) Plazos para sustentar y costos\n' +
-                            'f) Fecha planificada de sustentación\n' +
-                            'g) Regresar al menú principal\n';
+                           'Submenú - Preguntas personalizadas:\n' +
+                           'a) Nombre del proyecto\n' +
+                           'b) Estado actual del proyecto\n' +
+                           'c) Plazos presentar propuesta\n' +
+                           'd) Miembros del tribunal de sustentación\n' +
+                           'e) Plazos para sustentar y costos\n' +
+                           'f) Fecha planificada de sustentación\n' +
+                           'g) Regresar al menú principal\n';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'personalized_queries_menu', lifespan: 5 });
@@ -456,14 +445,14 @@ app.post('/', (req, res) => {
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                            'Submenú - Preguntas personalizadas:\n' +
-                            'a) Nombre del proyecto\n' +
-                            'b) Estado actual del proyecto\n' +
-                            'c) Plazos presentar propuesta\n' +
-                            'd) Miembros del tribunal de sustentación\n' +
-                            'e) Plazos para sustentar y costos\n' +
-                            'f) Fecha planificada de sustentación\n' +
-                            'g) Regresar al menú principal\n';
+                           'Submenú - Preguntas personalizadas:\n' +
+                           'a) Nombre del proyecto\n' +
+                           'b) Estado actual del proyecto\n' +
+                           'c) Plazos presentar propuesta\n' +
+                           'd) Miembros del tribunal de sustentación\n' +
+                           'e) Plazos para sustentar y costos\n' +
+                           'f) Fecha planificada de sustentación\n' +
+                           'g) Regresar al menú principal\n';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'personalized_queries_menu', lifespan: 5 });
@@ -511,29 +500,29 @@ app.post('/', (req, res) => {
                 const isInSubmenu = personalizedQueriesContext.parameters?.isInSubmenu;
                 if (isInSubmenu) {
                     const message = 'Menú Principal:\n' +
-                                    '\n' +
-                                    '1) Documentos y formatos\n' +
-                                    '2) Ajustes en propuesta\n' +
-                                    '3) Proceso de sustentación\n' +
-                                    '4) Gestión del título\n' +
-                                    '5) Preguntas personalizadas\n' +
-                                    '6) Contactar Asistente Académico\n' +
-                                    '0) Salir\n\n' +
-                                    'Por favor, selecciona una opción (0-6).';
+                                   '\n' +
+                                   '1) Documentos y formatos\n' +
+                                   '2) Ajustes en propuesta\n' +
+                                   '3) Proceso de sustentación\n' +
+                                   '4) Gestión del título\n' +
+                                   '5) Preguntas personalizadas\n' +
+                                   '6) Contactar Asistente Académico\n' +
+                                   '0) Salir\n\n' +
+                                   'Por favor, selecciona una opción (0-6).';
                     agent.add('');
                     sendTelegramMessage(chatId, message);
                     agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 });
                     agent.context.set({ name: 'main_menu', lifespan: 5 });
                 } else {
                     const message = 'Submenú - Preguntas personalizadas:\n' +
-                                    'a) Nombre del proyecto\n' +
-                                    'b) Estado actual del proyecto\n' +
-                                    'c) Plazos presentar propuesta\n' +
-                                    'd) Miembros del tribunal de sustentación\n' +
-                                    'e) Plazos para sustentar y costos\n' +
-                                    'f) Fecha planificada de sustentación\n' +
-                                    'g) Regresar al menú principal\n\n' +
-                                    'Por favor, selecciona una opción (a-g).';
+                                   'a) Nombre del proyecto\n' +
+                                   'b) Estado actual del proyecto\n' +
+                                   'c) Plazos presentar propuesta\n' +
+                                   'd) Miembros del tribunal de sustentación\n' +
+                                   'e) Plazos para sustentar y costos\n' +
+                                   'f) Fecha planificada de sustentación\n' +
+                                   'g) Regresar al menú principal\n\n' +
+                                   'Por favor, selecciona una opción (a-g).';
                     agent.add('');
                     sendTelegramMessage(chatId, message);
                     agent.context.set({ name: 'personalized_queries_menu', lifespan: 5, parameters: { identification: studentId, isInSubmenu: true } });
@@ -554,10 +543,10 @@ app.post('/', (req, res) => {
         if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
-                            'DOCUMENTOS Y FORMATOS.\n\n' +
-                            '1. Formatos para elaborar la propuesta de titulación\n' +
-                            '2. Formatos para elaborar el trabajo de titulación\n' +
-                            '0. Regresar al menú principal';
+                           'DOCUMENTOS Y FORMATOS.\n\n' +
+                           '1. Formatos para elaborar la propuesta de titulación\n' +
+                           '2. Formatos para elaborar el trabajo de titulación\n' +
+                           '0. Regresar al menú principal';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'documents_menu', lifespan: 5 });
@@ -569,10 +558,10 @@ app.post('/', (req, res) => {
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
-                            'DOCUMENTOS Y FORMATOS.\n\n' +
-                            '1. Formatos para elaborar la propuesta de titulación\n' +
-                            '2. Formatos para elaborar el trabajo de titulación\n' +
-                            '0. Regresar al menú principal';
+                           'DOCUMENTOS Y FORMATOS.\n\n' +
+                           '1. Formatos para elaborar la propuesta de titulación\n' +
+                           '2. Formatos para elaborar el trabajo de titulación\n' +
+                           '0. Regresar al menú principal';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'documents_menu', lifespan: 5 });
@@ -582,10 +571,10 @@ app.post('/', (req, res) => {
         if (!input || typeof input !== 'string' || !['0', '1', '2'].includes(input)) {
             console.log('Entrada inválida detectada:', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
-                            'DOCUMENTOS Y FORMATOS.\n\n' +
-                            '1. Formatos para elaborar la propuesta de titulación\n' +
-                            '2. Formatos para elaborar el trabajo de titulación\n' +
-                            '0. Regresar al menú principal';
+                           'DOCUMENTOS Y FORMATOS.\n\n' +
+                           '1. Formatos para elaborar la propuesta de titulación\n' +
+                           '2. Formatos para elaborar el trabajo de titulación\n' +
+                           '0. Regresar al menú principal';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'documents_menu', lifespan: 5 });
@@ -602,15 +591,15 @@ app.post('/', (req, res) => {
             sendTelegramMessage(chatId, message);
         } else if (input === '0') {
             const message = 'Menú Principal:\n' +
-                            '\n' +
-                            '1) Documentos y formatos\n' +
-                            '2) Ajustes en propuesta\n' +
-                            '3) Proceso de sustentación\n' +
-                            '4) Gestión del título\n' +
-                            '5) Preguntas personalizadas\n' +
-                            '6) Contactar Asistente Académico\n' +
-                            '0) Salir\n\n' +
-                            'Por favor, selecciona una opción (0-6).';
+                           '\n' +
+                           '1) Documentos y formatos\n' +
+                           '2) Ajustes en propuesta\n' +
+                           '3) Proceso de sustentación\n' +
+                           '4) Gestión del título\n' +
+                           '5) Preguntas personalizadas\n' +
+                           '6) Contactar Asistente Académico\n' +
+                           '0) Salir\n\n' +
+                           'Por favor, selecciona una opción (0-6).';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'documents_menu', lifespan: 0 });
@@ -630,10 +619,10 @@ app.post('/', (req, res) => {
         if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
-                            'AJUSTES EN PROPUESTA\n' +
-                            '1.- Requisitos: Cambios en la propuesta.\n' +
-                            '2.- Requisitos: Cambios de miembros del tribunal de sustentación.\n' +
-                            '0.- Regresar al menú principal';
+                           'AJUSTES EN PROPUESTA\n' +
+                           '1.- Requisitos: Cambios en la propuesta.\n' +
+                           '2.- Requisitos: Cambios de miembros del tribunal de sustentación.\n' +
+                           '0.- Regresar al menú principal';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'adjustments_menu', lifespan: 5 });
@@ -645,10 +634,10 @@ app.post('/', (req, res) => {
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
-                            'AJUSTES EN PROPUESTA\n' +
-                            '1.- Requisitos: Cambios en la propuesta.\n' +
-                            '2.- Requisitos: Cambios de miembros del tribunal de sustentación.\n' +
-                            '0.- Regresar al menú principal';
+                           'AJUSTES EN PROPUESTA\n' +
+                           '1.- Requisitos: Cambios en la propuesta.\n' +
+                           '2.- Requisitos: Cambios de miembros del tribunal de sustentación.\n' +
+                           '0.- Regresar al menú principal';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'adjustments_menu', lifespan: 5 });
@@ -658,10 +647,10 @@ app.post('/', (req, res) => {
         if (!input || typeof input !== 'string' || !['0', '1', '2'].includes(input)) {
             console.log('Entrada inválida detectada:', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
-                            'AJUSTES EN PROPUESTA\n' +
-                            '1.- Requisitos: Cambios en la propuesta.\n' +
-                            '2.- Requisitos: Cambios de miembros del tribunal de sustentación.\n' +
-                            '0.- Regresar al menú principal';
+                           'AJUSTES EN PROPUESTA\n' +
+                           '1.- Requisitos: Cambios en la propuesta.\n' +
+                           '2.- Requisitos: Cambios de miembros del tribunal de sustentación.\n' +
+                           '0.- Regresar al menú principal';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'adjustments_menu', lifespan: 5 });
@@ -670,31 +659,31 @@ app.post('/', (req, res) => {
 
         if (input === '1') {
             const message = 'Los requisitos para el cambio en la propuesta de titulación son:\n' +
-                            '\n1.- Presentar una solicitud dirigida al coordinador de la maestría, indicando el motivo del cambio.\n' +
-                            '2.- Entregar la nueva propuesta de titulación firmada por los miembros del tribunal (tutor y vocal).\n' +
-                            '3.- Enviar por correo electrónico al coordinador de la maestría, con copia al personal administrativo, la solicitud y la propuesta firmada.\n' +
-                            '\nDigite 0 para regresar al menú principal';
+                           '\n1.- Presentar una solicitud dirigida al coordinador de la maestría, indicando el motivo del cambio.\n' +
+                           '2.- Entregar la nueva propuesta de titulación firmada por los miembros del tribunal (tutor y vocal).\n' +
+                           '3.- Enviar por correo electrónico al coordinador de la maestría, con copia al personal administrativo, la solicitud y la propuesta firmada.\n' +
+                           '\nDigite 0 para regresar al menú principal';
             agent.add('');
             sendTelegramMessage(chatId, message);
         } else if (input === '2') {
             const message = 'Los requisitos para cambios de miembros del tribunal de sustentación son:\n' +
-                            '\n1.- Presentar una solicitud indicando el motivo del cambio de tutor y/o revisor. Si ya se cuenta con los nombres de los nuevos miembros, incluirlos en la solicitud; de lo contrario, solicitar una reunión con el coordinador de la maestría para su designación.\n' +
-                            '2.- Entregar la nueva propuesta firmada por los nuevos miembros del tribunal de sustentación.\n' +
-                            '3.- Enviar por correo electrónico al coordinador de la maestría, con copia al personal administrativo, la solicitud y la propuesta firmadas.\n' +
-                            '\nDigite 0 para regresar al menú principal';
+                           '\n1.- Presentar una solicitud indicando el motivo del cambio de tutor y/o revisor. Si ya se cuenta con los nombres de los nuevos miembros, incluirlos en la solicitud; de lo contrario, solicitar una reunión con el coordinador de la maestría para su designación.\n' +
+                           '2.- Entregar la nueva propuesta firmada por los nuevos miembros del tribunal de sustentación.\n' +
+                           '3.- Enviar por correo electrónico al coordinador de la maestría, con copia al personal administrativo, la solicitud y la propuesta firmadas.\n' +
+                           '\nDigite 0 para regresar al menú principal';
             agent.add('');
             sendTelegramMessage(chatId, message);
         } else if (input === '0') {
             const message = 'Menú Principal:\n' +
-                            '\n' +
-                            '1) Documentos y formatos\n' +
-                            '2) Ajustes en propuesta\n' +
-                            '3) Proceso de sustentación\n' +
-                            '4) Gestión del título\n' +
-                            '5) Preguntas personalizadas\n' +
-                            '6) Contactar Asistente Académico\n' +
-                            '0) Salir\n\n' +
-                            'Por favor, selecciona una opción (0-6).';
+                           '\n' +
+                           '1) Documentos y formatos\n' +
+                           '2) Ajustes en propuesta\n' +
+                           '3) Proceso de sustentación\n' +
+                           '4) Gestión del título\n' +
+                           '5) Preguntas personalizadas\n' +
+                           '6) Contactar Asistente Académico\n' +
+                           '0) Salir\n\n' +
+                           'Por favor, selecciona una opción (0-6).';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'adjustments_menu', lifespan: 0 });
@@ -714,13 +703,13 @@ app.post('/', (req, res) => {
         if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                            'PROCESO DE SUSTENTACIÓN.\n' +
-                            '\n' +
-                            '1.- Requisitos: Solicitar fecha de sustentación.\n' +
-                            '2.- Proceso de aprobación del análisis antiplagio.\n' +
-                            '3.- Detalles importantes para la sustentación.\n' +
-                            '0.- Regresar al menú principal.\n\n' +
-                            'Por favor, selecciona una opción (0-3).';
+                           'PROCESO DE SUSTENTACIÓN.\n' +
+                           '\n' +
+                           '1.- Requisitos: Solicitar fecha de sustentación.\n' +
+                           '2.- Proceso de aprobación del análisis antiplagio.\n' +
+                           '3.- Detalles importantes para la sustentación.\n' +
+                           '0.- Regresar al menú principal.\n\n' +
+                           'Por favor, selecciona una opción (0-3).';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'sustenance_menu', lifespan: 5 });
@@ -732,13 +721,13 @@ app.post('/', (req, res) => {
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                            'PROCESO DE SUSTENTACIÓN.\n' +
-                            '\n' +
-                            '1.- Requisitos: Solicitar fecha de sustentación.\n' +
-                            '2.- Proceso de aprobación del análisis antiplagio.\n' +
-                            '3.- Detalles importantes para la sustentación.\n' +
-                            '0.- Regresar al menú principal.\n\n' +
-                            'Por favor, selecciona una opción (0-3).';
+                           'PROCESO DE SUSTENTACIÓN.\n' +
+                           '\n' +
+                           '1.- Requisitos: Solicitar fecha de sustentación.\n' +
+                           '2.- Proceso de aprobación del análisis antiplagio.\n' +
+                           '3.- Detalles importantes para la sustentación.\n' +
+                           '0.- Regresar al menú principal.\n\n' +
+                           'Por favor, selecciona una opción (0-3).';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'sustenance_menu', lifespan: 5 });
@@ -748,12 +737,12 @@ app.post('/', (req, res) => {
         if (!input || typeof input !== 'string' || !['0', '1', '2', '3'].includes(input)) {
             console.log('Entrada inválida detectada:', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-3).\n\n' +
-                            'PROCESO DE SUSTENTACIÓN.\n' +
-                            '\n' +
-                            '1.- Requisitos: Solicitar fecha de sustentación.\n' +
-                            '2.- Proceso de aprobación del análisis antiplagio.\n' +
-                            '3.- Detalles importantes para la sustentación.\n' +
-                            '0.- Regresar al menú principal.';
+                           'PROCESO DE SUSTENTACIÓN.\n' +
+                           '\n' +
+                           '1.- Requisitos: Solicitar fecha de sustentación.\n' +
+                           '2.- Proceso de aprobación del análisis antiplagio.\n' +
+                           '3.- Detalles importantes para la sustentación.\n' +
+                           '0.- Regresar al menú principal.';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'sustenance_menu', lifespan: 5 });
@@ -762,51 +751,51 @@ app.post('/', (req, res) => {
 
         if (input === '1') {
             const message = 'Los requisitos para solicitar fecha de sustentación son:\n' +
-                            '\n' +
-                            '1.- Carta de aprobación firmada por el tutor y revisor. Descarga el modelo [aquí](https://docs.google.com/document/d/1pHAoCHePsnKROQmkUrSxMvdtqHfbfOMr/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)\n' +
-                            '2.- Presentar en PDF la evidencia de la aprobación del análisis antiplagio.\n' +
-                            '3.- Presentar solicitud de fecha y hora de sustentación. Descarga el modelo [aquí](https://docs.google.com/document/d/1xct0rM4dXtE5I-LPf1YYhE9JXT8DXPhz/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)\n' +
-                            '4.- Copia de cédula y certificado de votación a color actualizado.\n' +
-                            '5.- Presentar la declaración de datos personales. Descarga el modelo [aquí](https://docs.google.com/document/d/1ulgWeN6Jk0ltoNXhaCk1J5wKD8tDikKE/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)\n' +
-                            '6.- Certificado de no adeudar a la IES (solicitarlo al departamento de contabilidad de la IES).\n' +
-                            '7.- Entregar el trabajo de titulación firmada por los miembros del tribunal de sustentación y los estudiantes.\n' +
-                            '\nDigite 0 para regresar al menú principal.';
+                           '\n' +
+                           '1.- Carta de aprobación firmada por el tutor y revisor. Descarga el modelo [aquí](https://docs.google.com/document/d/1pHAoCHePsnKROQmkUrSxMvdtqHfbfOMr/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)\n' +
+                           '2.- Presentar en PDF la evidencia de la aprobación del análisis antiplagio.\n' +
+                           '3.- Presentar solicitud de fecha y hora de sustentación. Descarga el modelo [aquí](https://docs.google.com/document/d/1xct0rM4dXtE5I-LPf1YYhE9JXT8DXPhz/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)\n' +
+                           '4.- Copia de cédula y certificado de votación a color actualizado.\n' +
+                           '5.- Presentar la declaración de datos personales. Descarga el modelo [aquí](https://docs.google.com/document/d/1ulgWeN6Jk0ltoNXhaCk1J5wKD8tDikKE/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true)\n' +
+                           '6.- Certificado de no adeudar a la IES (solicitarlo al departamento de contabilidad de la IES).\n' +
+                           '7.- Entregar el trabajo de titulación firmada por los miembros del tribunal de sustentación y los estudiantes.\n' +
+                           '\nDigite 0 para regresar al menú principal.';
             agent.add('');
             sendTelegramMessage(chatId, message);
         } else if (input === '2') {
             const message = 'Proceso de aprobación del análisis antiplagio:\n' +
-                            '\n' +
-                            '1.- Enviar al tutor el trabajo final de titulación sin firmas, para ser analizado por el sistema antiplagio.\n' +
-                            '2.- Si el resultado es menor al 10%, entonces el tutor genera la evidencia de aprobación deñ análisis antiplagio.\n' +
-                            '3.- Si el resultado es mayor al 10%, entonces el estudiante debe revisar y corregir el trabajo de titulación y vover a iniciar el proceso de aprobación del análisis antiplagio.\n' +
-                            '\nDigite 0 para regresar al menú principal.';
+                           '\n' +
+                           '1.- Enviar al tutor el trabajo final de titulación sin firmas, para ser analizado por el sistema antiplagio.\n' +
+                           '2.- Si el resultado es menor al 10%, entonces el tutor genera la evidencia de aprobación deñ análisis antiplagio.\n' +
+                           '3.- Si el resultado es mayor al 10%, entonces el estudiante debe revisar y corregir el trabajo de titulación y vover a iniciar el proceso de aprobación del análisis antiplagio.\n' +
+                           '\nDigite 0 para regresar al menú principal.';
             agent.add('');
             sendTelegramMessage(chatId, message);
         } else if (input === '3') {
             const message = 'Detalles importantes para la sustentación:\n' +
-                            '\n' +
-                            '1.- Vestir formalmente.\n' +
-                            '2.- Se recomienda que la presentación no esté sobrecargada.\n' +
-                            '3.- Tiempo máximo de espera para iniciar la sustentación 15min. Si algún participante no asiste, se suspende y se reprograma.\n' +
-                            '4.- Tiempo máximo para defender su trabajo de titulación es: 20min.\n' +
-                            '5.- Tiempo aproximado de la ronda de preguntas es: 10min.\n' +
-                            '6.- Después de que los estudiantes abandonen la sala de sustentación ya sea presencial o virtual, el tiempo máximo de deliveración de los miembros del tribunal de sustentación: 10min.\n' +
-                            '7.- Reingreso de los estudiantes a la sala de sustentación para lectura del acta de graduación.\n' +
-                            '8.- Investidura de magister. Si es presencial, requiere toga y birrete proporcionados por la IES. En modalidad virtual no aplica.\n' +
-                            '\nDigite 0 para regresar al menú principal.';
+                           '\n' +
+                           '1.- Vestir formalmente.\n' +
+                           '2.- Se recomienda que la presentación no esté sobrecargada.\n' +
+                           '3.- Tiempo máximo de espera para iniciar la sustentación 15min. Si algún participante no asiste, se suspende y se reprograma.\n' +
+                           '4.- Tiempo máximo para defender su trabajo de titulación es: 20min.\n' +
+                           '5.- Tiempo aproximado de la ronda de preguntas es: 10min.\n' +
+                           '6.- Después de que los estudiantes abandonen la sala de sustentación ya sea presencial o virtual, el tiempo máximo de deliveración de los miembros del tribunal de sustentación: 10min.\n' +
+                           '7.- Reingreso de los estudiantes a la sala de sustentación para lectura del acta de graduación.\n' +
+                           '8.- Investidura de magister. Si es presencial, requiere toga y birrete proporcionados por la IES. En modalidad virtual no aplica.\n' +
+                           '\nDigite 0 para regresar al menú principal.';
             agent.add('');
             sendTelegramMessage(chatId, message);
         } else if (input === '0') {
             const message = 'Menú Principal:\n' +
-                            '\n' +
-                            '1) Documentos y formatos\n' +
-                            '2) Ajustes en propuesta\n' +
-                            '3) Proceso de sustentación\n' +
-                            '4) Gestión del título\n' +
-                            '5) Preguntas personalizadas\n' +
-                            '6) Contactar Asistente Académico\n' +
-                            '0) Salir\n\n' +
-                            'Por favor, selecciona una opción (0-6).';
+                           '\n' +
+                           '1) Documentos y formatos\n' +
+                           '2) Ajustes en propuesta\n' +
+                           '3) Proceso de sustentación\n' +
+                           '4) Gestión del título\n' +
+                           '5) Preguntas personalizadas\n' +
+                           '6) Contactar Asistente Académico\n' +
+                           '0) Salir\n\n' +
+                           'Por favor, selecciona una opción (0-6).';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'sustenance_menu', lifespan: 0 });
@@ -826,13 +815,13 @@ app.post('/', (req, res) => {
         if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                            'GESTIÓN DEL TÍTULO.\n' +
-                            '\n' +
-                            '1.- Proceso de registro del título ante Senescyt.\n' +
-                            '2.- Tiempo estimado para retirar el título.\n' +
-                            '3.- Retiro del título: lugar y documentos necesarios.\n' +
-                            '0.- Regresar al menú principal.\n\n' +
-                            'Por favor, selecciona una opción (0-3).\n';
+                           'GESTIÓN DEL TÍTULO.\n' +
+                           '\n' +
+                           '1.- Proceso de registro del título ante Senescyt.\n' +
+                           '2.- Tiempo estimado para retirar el título.\n' +
+                           '3.- Retiro del título: lugar y documentos necesarios.\n' +
+                           '0.- Regresar al menú principal.\n\n' +
+                           'Por favor, selecciona una opción (0-3).\n';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'title_management_menu', lifespan: 5 });
@@ -844,13 +833,13 @@ app.post('/', (req, res) => {
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                            'GESTIÓN DEL TÍTULO.\n' +
-                            '\n' +
-                            '1.- Proceso de registro del título ante Senescyt.\n' +
-                            '2.- Tiempo estimado para retirar el título.\n' +
-                            '3.- Retiro del título: lugar y documentos necesarios.\n' +
-                            '0.- Regresar al menú principal.\n\n' +
-                            'Por favor, selecciona una opción (0-3).\n';
+                           'GESTIÓN DEL TÍTULO.\n' +
+                           '\n' +
+                           '1.- Proceso de registro del título ante Senescyt.\n' +
+                           '2.- Tiempo estimado para retirar el título.\n' +
+                           '3.- Retiro del título: lugar y documentos necesarios.\n' +
+                           '0.- Regresar al menú principal.\n\n' +
+                           'Por favor, selecciona una opción (0-3).\n';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'title_management_menu', lifespan: 5 });
@@ -860,12 +849,12 @@ app.post('/', (req, res) => {
         if (!input || typeof input !== 'string' || !['0', '1', '2', '3'].includes(input)) {
             console.log('Entrada inválida detectada:', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-3).\n\n' +
-                            'GESTIÓN DEL TÍTULO.\n' +
-                            '\n' +
-                            '1.- Proceso de registro del título ante Senescyt.\n' +
-                            '2.- Tiempo estimado para retirar el título.\n' +
-                            '3.- Retiro del título: lugar y documentos necesarios.\n' +
-                            '0.- Regresar al menú principal\n';
+                           'GESTIÓN DEL TÍTULO.\n' +
+                           '\n' +
+                           '1.- Proceso de registro del título ante Senescyt.\n' +
+                           '2.- Tiempo estimado para retirar el título.\n' +
+                           '3.- Retiro del título: lugar y documentos necesarios.\n' +
+                           '0.- Regresar al menú principal\n';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'title_management_menu', lifespan: 5 });
@@ -874,43 +863,43 @@ app.post('/', (req, res) => {
 
         if (input === '1') {
             const message = 'El proceso del registro oficial del título ante el Senescyt es realizado por la Secretaría Académica de la IES en un plazo aproximado de 15 a 30 días laborales. No necesita intervención del graduado.\n' +
-                            '\nDigite 0 para regresar al menú principal.';
+                           '\nDigite 0 para regresar al menú principal.';
             agent.add('');
             sendTelegramMessage(chatId, message);
         } else if (input === '2') {
             const message = 'Cuando tu título se encuentre oficialmente registrado en la página web del Senescyt (verificado con tu cédula de identidad), podrás retirarlo en la Secretaría Académica de la IES. Este proceso toma apróximadamente entre 15 a 30 días laborales después de la sustentación.\n' +
-                            '\nDigite 0 para regresar al menú principal.';
+                           '\nDigite 0 para regresar al menú principal.';
             agent.add('');
             sendTelegramMessage(chatId, message);
         } else if (input === '3') {
             const message = 'TRÁMITE PERSONAL:\n' +
-                            'Lugar: Oficina de la Secretaría Académica de la IES.\n' +
-                            'Horario de atención: De lunes a viernes de 08:00 a 15:30\n' +
-                            'Requisitos: Presentar documento de identificación original.\n' +
-                            '\n' +
-                            'TRÁMITE REALIZADO POR TERCERO:\n' +
-                            'Lugar: Oficina de la Secretaría Académica de la IES.\n' +
-                            'Horario de atención: De lunes a viernes de 08:00 a 15:30\n' +
-                            'Requisitos:\n' +
-                            '  a) Presentar documento de identificación original de la persona que retira el título.\n' +
-                            '  b) Presentar la declaración notarizada en la que se verifique que el graduado autoriza a otra persona a retirar el título (la declaración debe tener copia nítida de los documentos de identificacón de ambas personas).\n' +
-                            '\n' +
-                            '  Nota: Para mayor información sobre trámites realizados por terceros, contactarse con la Secretaría Académica de la IES.\n' +
-                            '\n' +
-                            'Digite 0 para regresar al menú principal.';
+                           'Lugar: Oficina de la Secretaría Académica de la IES.\n' +
+                           'Horario de atención: De lunes a viernes de 08:00 a 15:30\n' +
+                           'Requisitos: Presentar documento de identificación original.\n' +
+                           '\n' +
+                           'TRÁMITE REALIZADO POR TERCERO:\n' +
+                           'Lugar: Oficina de la Secretaría Académica de la IES.\n' +
+                           'Horario de atención: De lunes a viernes de 08:00 a 15:30\n' +
+                           'Requisitos:\n' +
+                           '  a) Presentar documento de identificación original de la persona que retira el título.\n' +
+                           '  b) Presentar la declaración notarizada en la que se verifique que el graduado autoriza a otra persona a retirar el título (la declaración debe tener copia nítida de los documentos de identificacón de ambas personas).\n' +
+                           '\n' +
+                           '  Nota: Para mayor información sobre trámites realizados por terceros, contactarse con la Secretaría Académica de la IES.\n' +
+                           '\n' +
+                           'Digite 0 para regresar al menú principal.';
             agent.add('');
             sendTelegramMessage(chatId, message);
         } else if (input === '0') {
             const message = 'Menú Principal:\n' +
-                            '\n' +
-                            '1) Documentos y formatos\n' +
-                            '2) Ajustes en propuesta\n' +
-                            '3) Proceso de sustentación\n' +
-                            '4) Gestión del título\n' +
-                            '5) Preguntas personalizadas\n' +
-                            '6) Contactar Asistente Académico\n' +
-                            '0) Salir\n\n' +
-                            'Por favor, selecciona una opción (0-6).';
+                           '\n' +
+                           '1) Documentos y formatos\n' +
+                           '2) Ajustes en propuesta\n' +
+                           '3) Proceso de sustentación\n' +
+                           '4) Gestión del título\n' +
+                           '5) Preguntas personalizadas\n' +
+                           '6) Contactar Asistente Académico\n' +
+                           '0) Salir\n\n' +
+                           'Por favor, selecciona una opción (0-6).';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'title_management_menu', lifespan: 0 });
@@ -931,22 +920,22 @@ app.post('/', (req, res) => {
 
         if (input === '0') {
             const message = 'Menú Principal:\n' +
-                            '\n' +
-                            '1) Documentos y formatos\n' +
-                            '2) Ajustes en propuesta\n' +
-                            '3) Proceso de sustentación\n' +
-                            '4) Gestión del título\n' +
-                            '5) Preguntas personalizadas\n' +
-                            '6) Contactar Asistente Académico\n' +
-                            '0) Salir\n\n' +
-                            'Por favor, selecciona una opción (0-6).';
+                           '\n' +
+                           '1) Documentos y formatos\n' +
+                           '2) Ajustes en propuesta\n' +
+                           '3) Proceso de sustentación\n' +
+                           '4) Gestión del título\n' +
+                           '5) Preguntas personalizadas\n' +
+                           '6) Contactar Asistente Académico\n' +
+                           '0) Salir\n\n' +
+                           'Por favor, selecciona una opción (0-6).';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'contact_assistance', lifespan: 0 });
             agent.context.set({ name: 'main_menu', lifespan: 5 });
         } else {
             const message = 'Opción inválida.\n' +
-                            'Digite 0 para regresar al menú principal.';
+                           'Digite 0 para regresar al menú principal.';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'contact_assistance', lifespan: 1 });
@@ -964,7 +953,8 @@ app.post('/', (req, res) => {
     intentMap.set('Sustenance Menu', sustenanceMenuHandler);
     intentMap.set('Title Management Menu', titleManagementHandler);
     intentMap.set('Contact Assistance', contactAssistanceHandler);
-    intentMap.set('Terms Acceptance', termsAcceptanceHandler); // Handler para términos
+    intentMap.set('Terms Acceptance', termsAcceptanceHandler); // Handler principal para términos
+    intentMap.set('Fallback - Terms Acceptance', fallbackTermsHandler); // Fallback para términos
     // Fallbacks para submenús
     intentMap.set('Fallback - Documents Menu', documentsMenuHandler);
     intentMap.set('Fallback - Adjustments Menu', adjustmentsMenuHandler);
