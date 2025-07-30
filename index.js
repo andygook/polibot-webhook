@@ -371,7 +371,7 @@ app.post('/', (req, res) => {
             const student = studentsData.find(s => s.id.trim() === idInput.trim());
             console.log('Estudiante encontrado:', student);
             if (student) {
-                const message = `Apellidos: ${student.apellidos}\nNombres: ${student.nombres}\nMaestría: ${student.maestria}\nCohorte: ${student.cohorte}\n\nSubmenú - Preguntas personalizadas:\n` +
+                const message = `Apellidos: ${student.apellidos}\nNombres: ${student.nombres}\nMaestría: ${student.maestria}\nCohorte: ${student.cohorte}\n\nPreguntas personalizadas:\n` +
                                `a) Nombre del proyecto\n` +
                                `b) Estado actual del proyecto\n` +
                                `c) Plazos presentar propuesta\n` +
