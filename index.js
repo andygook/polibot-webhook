@@ -113,7 +113,7 @@ app.post('/', (req, res) => {
         if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                            '\n' + // Salto de línea adicional
+                            '\n' +
                             'Menú Principal:\n' +
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
@@ -134,7 +134,7 @@ app.post('/', (req, res) => {
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                            '\n' + // Salto de línea adicional
+                            '\n' +
                             'Menú Principal:\n' +
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
@@ -154,7 +154,7 @@ app.post('/', (req, res) => {
         if (!input || typeof input !== 'string' || !['0', '1', '2', '3', '4', '5', '6'].includes(input)) {
             console.log('Entrada inválida detectada:', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                            '\n' + // Salto de línea adicional
+                            '\n' +
                             'Menú Principal:\n' +
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
@@ -289,17 +289,16 @@ app.post('/', (req, res) => {
         }
 
         if (input === 's') {
-            // Limpiar contextos no deseados
-            agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 });
-            agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
-            agent.context.set({ name: 'terms_acceptance', lifespan: 0 });
+            // Solo enviar mensaje a Telegram y manejar contexto
             const message = 'Por favor ingresa tu número de identificación (debe tener exactamente 10 dígitos, sin puntos ni guiones)\n\n' +
                             'Digita 0 para regresar al menú principal.';
-            agent.add(message); // Enviar el mensaje directamente
-            sendTelegramMessage(chatId, message).catch(err => console.error('Error al enviar mensaje de identificación:', err));
+            sendTelegramMessage(chatId, message); // Sin agent.add() para evitar duplicación
+            agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 }); // Limpiar contexto conflictivo
+            agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
+            agent.context.set({ name: 'terms_acceptance', lifespan: 0 });
         } else if (input === 'n') {
             const message = 'Menú Principal:\n' +
-                            '\n' + // Salto de línea adicional
+                            '\n' +
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
                             '3) Proceso de sustentación\n' +
@@ -308,10 +307,11 @@ app.post('/', (req, res) => {
                             '6) Contactar Asistente Académico\n' +
                             '0) Salir\n\n' +
                             'Por favor, selecciona una opción (0-6).';
-            agent.add('');
+            agent.add(''); // Respuesta vacía para Dialogflow
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'terms_acceptance', lifespan: 0 });
-            agent.context.set({ name: 'main_menu', lifespan: 5 });
+            agent.context.set({ name: 'main_menu', lifespan: 5 }); // Restablecer menú principal
+            agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 }); // Limpiar contexto conflictivo
         } else {
             console.log('Opción no válida detectada:', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida.\n' +
@@ -350,7 +350,7 @@ app.post('/', (req, res) => {
             // Manejo explícito de "0" para regresar al menú principal
             if (idInput === '0') {
                 const message = 'Menú Principal:\n' +
-                                '\n' + // Salto de línea adicional
+                                '\n' +
                                 '1) Documentos y formatos\n' +
                                 '2) Ajustes en propuesta\n' +
                                 '3) Proceso de sustentación\n' +
@@ -511,7 +511,7 @@ app.post('/', (req, res) => {
                 const isInSubmenu = personalizedQueriesContext.parameters?.isInSubmenu;
                 if (isInSubmenu) {
                     const message = 'Menú Principal:\n' +
-                                    '\n' + // Salto de línea adicional
+                                    '\n' +
                                     '1) Documentos y formatos\n' +
                                     '2) Ajustes en propuesta\n' +
                                     '3) Proceso de sustentación\n' +
@@ -602,7 +602,7 @@ app.post('/', (req, res) => {
             sendTelegramMessage(chatId, message);
         } else if (input === '0') {
             const message = 'Menú Principal:\n' +
-                            '\n' + // Salto de línea adicional
+                            '\n' +
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
                             '3) Proceso de sustentación\n' +
@@ -686,7 +686,7 @@ app.post('/', (req, res) => {
             sendTelegramMessage(chatId, message);
         } else if (input === '0') {
             const message = 'Menú Principal:\n' +
-                            '\n' + // Salto de línea adicional
+                            '\n' +
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
                             '3) Proceso de sustentación\n' +
@@ -798,7 +798,7 @@ app.post('/', (req, res) => {
             sendTelegramMessage(chatId, message);
         } else if (input === '0') {
             const message = 'Menú Principal:\n' +
-                            '\n' + // Salto de línea adicional
+                            '\n' +
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
                             '3) Proceso de sustentación\n' +
@@ -902,7 +902,7 @@ app.post('/', (req, res) => {
             sendTelegramMessage(chatId, message);
         } else if (input === '0') {
             const message = 'Menú Principal:\n' +
-                            '\n' + // Salto de línea adicional
+                            '\n' +
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
                             '3) Proceso de sustentación\n' +
@@ -931,7 +931,7 @@ app.post('/', (req, res) => {
 
         if (input === '0') {
             const message = 'Menú Principal:\n' +
-                            '\n' + // Salto de línea adicional
+                            '\n' +
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
                             '3) Proceso de sustentación\n' +
