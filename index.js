@@ -408,7 +408,7 @@ app.post('/', (req, res) => {
         if (!personalizedQueriesContext || !input) {
             console.log('Entrada inválida detectada:', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (a-g).\n\n' +
-                           'Submenú - Preguntas personalizadas:\n' +
+                           'Preguntas personalizadas:\n' +
                            'a) Nombre del proyecto\n' +
                            'b) Estado actual del proyecto\n' +
                            'c) Plazos presentar propuesta\n' +
@@ -426,7 +426,7 @@ app.post('/', (req, res) => {
         if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                           'Submenú - Preguntas personalizadas:\n' +
+                           'Preguntas personalizadas:\n' +
                            'a) Nombre del proyecto\n' +
                            'b) Estado actual del proyecto\n' +
                            'c) Plazos presentar propuesta\n' +
@@ -445,7 +445,7 @@ app.post('/', (req, res) => {
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                           'Submenú - Preguntas personalizadas:\n' +
+                           'Preguntas personalizadas:\n' +
                            'a) Nombre del proyecto\n' +
                            'b) Estado actual del proyecto\n' +
                            'c) Plazos presentar propuesta\n' +
@@ -514,7 +514,7 @@ app.post('/', (req, res) => {
                     agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 });
                     agent.context.set({ name: 'main_menu', lifespan: 5 });
                 } else {
-                    const message = 'Submenú - Preguntas personalizadas:\n' +
+                    const message = 'Preguntas personalizadas:\n' +
                                    'a) Nombre del proyecto\n' +
                                    'b) Estado actual del proyecto\n' +
                                    'c) Plazos presentar propuesta\n' +
