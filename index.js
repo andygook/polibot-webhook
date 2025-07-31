@@ -37,10 +37,9 @@ function loadData() {
                             proposalDeadline: r['Plazos presentar propuesta'] || 'No disponible',
                             tutor: r.Tutor || 'No disponible',
                             vocal: r.Vocal || 'No disponible',
-                            sustenanceDeadlines: `${r['Plazos para sustentar sin prórrogas'] || 'No disponible'} (0), ${r['Primera prórroga'] || 'No disponible'} (${r['Valores asociados a la primer prórroga'] || '0'})`,
+                            sustenanceDeadlines: `${r['Plazos para sustentar sin prórrogas'] || 'No disponible'} (0), ${r['Primera prórroga'] || 'No disponible'} (${r['Valores asociados a la primer prórroga'] || '0'}), ${r['Segunda prórroga'] || 'No disponible'} (${r['Valores asociados a la segunda prórroga'] || '0'}), ${r['Más de 3 periodos'] || 'No disponible'} (${r['Valores asociados a más de 3 periodos'] || '0'})`,
                             plannedSustenance: r['Fecha planificada de sustentación'] || 'No disponible'
                         }));
-                        console.log('Datos cargados en projectData para ID 0123456789:', projectData.find(p => p.id === '0123456789')?.proposalDeadline);
                         isDataLoaded = true;
                         console.log('Datos cargados:', studentsData.length, 'estudiantes,', projectData.length, 'proyectos');
                         resolve();
@@ -451,6 +450,12 @@ app.post('/', (req, res) => {
             return;
         }
 
+        const [noProrroga, primeraProrroga, segundaProrroga, masTresPeriodos] = project.sustenanceDeadlines.split(',').map(s => s.trim());
+        const [noProrrogaDate] = noProrroga.split(' (');
+        const [primeraProrrogaDate, primeraProrrogaCost] = primeraProrroga.split(' (').map(s => s.replace(')', ''));
+        const [segundaProrrogaDate, segundaProrrogaCost] = segundaProrroga.split(' (').map(s => s.replace(')', ''));
+        const [masTresPeriodosDate, masTresPeriodosCost] = masTresPeriodos.split(' (').map(s => s.replace(')', ''));
+
         if (['a', 'b', 'c', 'd', 'e', 'f', 'g'].includes(input)) {
             if (input === 'a') {
                 const message = `Nombre del proyecto: \n${project.projectName}.\n\nDigite g para regresar al menú anterior.`;
@@ -470,7 +475,13 @@ app.post('/', (req, res) => {
                 agent.add('');
                 sendTelegramMessage(chatId, message);
             } else if (input === 'e') {
-                const message = `Plazos para sustentar y costos: ${project.sustenanceDeadlines}\nDigite g para regresar al menú anterior.`;
+                const message = `Plazos para sustentar y costos:\n` +
+                               `-Periodo:  ${project.cohorte}\n` +
+                               `-Sin prórrogas:  ${noProrrogaDate}\n` +
+                               `-1ra prórroga:  ${primeraProrrogaDate} (${primeraProrrogaCost})\n` +
+                               `-2da prórroga:  ${segundaProrrogaDate} (${segundaProrrogaCost})\n` +
+                               `-Mas de 3 periodos: ${masTresPeriodosDate} (${masTresPeriodosCost})\n\n` +
+                               `Digite g para regresar al menú anterior`;
                 agent.add('');
                 sendTelegramMessage(chatId, message);
             } else if (input === 'f') {
