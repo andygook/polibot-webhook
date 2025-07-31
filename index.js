@@ -171,9 +171,7 @@ app.post('/', (req, res) => {
         }
 
         if (input === '5') {
-            const message = 'Aceptas los términos del uso del canal y manejo de datos personales?, digita:\n' +
-                            'S, para continuar.\n' +
-                            'N, para regresar al menú principal.';
+            const message = '¿Aceptas los términos de uso y el tratamiento de tus datos personales conforme a nuestra política de privacidad?\nResponde con:\n[ S ] para aceptar y continuar.\n[ N ] para regresar al menú principal.';
             agent.add(''); // Respuesta vacía para evitar duplicación
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'terms_acceptance', lifespan: 1 });
@@ -305,9 +303,7 @@ app.post('/', (req, res) => {
     function fallbackTermsHandler(agent) {
         console.log('Procesando fallback para Terms Acceptance');
         const message = 'Opción inválida. Por favor, selecciona una opción válida.\n' +
-                       'Aceptas los términos del uso del canal y manejo de datos personales?, digita:\n' +
-                       'S, para continuar.\n' +
-                       'N, para regresar al menú principal.';
+                       '¿Aceptas los términos de uso y el tratamiento de tus datos personales conforme a nuestra política de privacidad?\nResponde con:\n[ S ] para aceptar y continuar.\n[ N ] para regresar al menú principal.';
         agent.add(''); // Respuesta vacía para Dialogflow
         sendTelegramMessage(chatId, message);
         agent.context.set({ name: 'terms_acceptance', lifespan: 1 });
