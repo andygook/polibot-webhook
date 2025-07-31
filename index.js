@@ -10,7 +10,7 @@ let studentsData = [];
 let projectData = [];
 let isDataLoaded = false;
 
-// Configuración de Telegram (solo el token ahora, chat_id será dinámico)
+// Configuración de Telegram
 const TELEGRAM_BOT_TOKEN = '7253134218:AAFVF7q25Ukx24IcGOgw-T3-ohzMYQRN0Lk'; // Token proporcionado
 
 // Cargar datos en segundo plano
@@ -95,7 +95,7 @@ app.post('/', (req, res) => {
                         '6) Contactar asistente académico\n' +
                         '0) Salir\n\n' +
                         'Por favor, selecciona una opción (0-6).';
-        agent.add(''); // Respuesta vacía para Dialogflow
+        agent.add('');
         sendTelegramMessage(chatId, message).then(() => {
             agent.context.set({ name: 'main_menu', lifespan: 5 });
         }).catch(err => console.error('Error al enviar mensaje de bienvenida:', err));
@@ -109,11 +109,9 @@ app.post('/', (req, res) => {
         let input = agent.parameters.option || agent.query;
         console.log('Input validado:', input);
 
-        // Validación de entrada vacía (posible GIF o sticker)
         if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
-            const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                            '\n' +
+            const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n\n' +
                             'Menú Principal:\n' +
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
@@ -122,19 +120,17 @@ app.post('/', (req, res) => {
                             '5) Preguntas personalizadas\n' +
                             '6) Contactar asistente académico\n' +
                             '0) Salir\n\n' +
-                            'Por favor, selecciona una opción (0-6).\n';
+                            'Por favor, selecciona una opción (0-6).';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'main_menu', lifespan: 5 });
             return;
         }
 
-        // Validación de emojis
         const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/u;
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
-            const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                            '\n' +
+            const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n\n' +
                             'Menú Principal:\n' +
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
@@ -143,18 +139,16 @@ app.post('/', (req, res) => {
                             '5) Preguntas personalizadas\n' +
                             '6) Contactar asistente académico\n' +
                             '0) Salir\n\n' +
-                            'Por favor, selecciona una opción (0-6).\n';
+                            'Por favor, selecciona una opción (0-6).';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'main_menu', lifespan: 5 });
             return;
         }
 
-        // Validación de entrada numérica válida
         if (!input || typeof input !== 'string' || !['0', '1', '2', '3', '4', '5', '6'].includes(input)) {
             console.log('Entrada inválida detectada:', input);
-            const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-                            '\n' +
+            const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n\n' +
                             'Menú Principal:\n' +
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
@@ -163,7 +157,7 @@ app.post('/', (req, res) => {
                             '5) Preguntas personalizadas\n' +
                             '6) Contactar asistente académico\n' +
                             '0) Salir\n\n' +
-                            'Por favor, selecciona una opción (0-6).\n';
+                            'Por favor, selecciona una opción (0-6).';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'main_menu', lifespan: 5 });
@@ -171,8 +165,11 @@ app.post('/', (req, res) => {
         }
 
         if (input === '5') {
+            // Limpiar contextos previos antes de mostrar términos
+            agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 });
+            agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
             const message = '¿Aceptas los términos de uso y el tratamiento de tus datos personales conforme a nuestra política de privacidad?\nResponde con:\n( S ) para aceptar y continuar.\n( N ) para regresar al menú principal.';
-            agent.add(''); // Respuesta vacía para evitar duplicación
+            agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'terms_acceptance', lifespan: 1 });
             agent.context.set({ name: 'main_menu', lifespan: 0 });
@@ -262,7 +259,7 @@ app.post('/', (req, res) => {
         if (input === 's') {
             const message = 'Por favor ingresa tu número de identificación (debe tener exactamente 10 dígitos, sin puntos ni guiones)\n\n' +
                            'Digita 0 para regresar al menú principal.';
-            agent.add(''); // Respuesta vacía para evitar duplicación
+            agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
             agent.context.set({ name: 'terms_acceptance', lifespan: 0 });
@@ -277,7 +274,7 @@ app.post('/', (req, res) => {
                            '6) Contactar asistente académico\n' +
                            '0) Salir\n\n' +
                            'Por favor, selecciona una opción (0-6).';
-            agent.add(''); // Respuesta vacía para Dialogflow
+            agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'terms_acceptance', lifespan: 0 });
             agent.context.set({ name: 'main_menu', lifespan: 5 });
@@ -301,7 +298,7 @@ app.post('/', (req, res) => {
                        'Responde con:\n' +
                        '( S ) para aceptar y continuar.\n' +
                        '( N ) para regresar al menú principal.';
-        agent.add(''); // Respuesta vacía para Dialogflow
+        agent.add('');
         sendTelegramMessage(chatId, message);
         agent.context.set({ name: 'terms_acceptance', lifespan: 1 });
     }
@@ -329,7 +326,6 @@ app.post('/', (req, res) => {
             let idInput = (agent.parameters.identification || agent.query).trim();
             console.log('Validando y buscando estudiante con ID:', idInput);
 
-            // Manejo explícito de "0" para regresar al menú principal
             if (idInput === '0') {
                 const message = 'Menú Principal:\n' +
                                '\n' +
@@ -348,7 +344,6 @@ app.post('/', (req, res) => {
                 return;
             }
 
-            // Validación estricta de identificación
             const digitRegex = /^\d{10}$/;
             if (!digitRegex.test(idInput)) {
                 const message = 'Número de identificación inválido.\n' +
@@ -415,7 +410,6 @@ app.post('/', (req, res) => {
             return;
         }
 
-        // Validación de entrada vacía (posible GIF o sticker)
         if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
@@ -433,7 +427,6 @@ app.post('/', (req, res) => {
             return;
         }
 
-        // Validación de emojis
         const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/u;
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
@@ -532,7 +525,6 @@ app.post('/', (req, res) => {
         let input = agent.parameters.option || agent.query;
         console.log('Input validado:', input);
 
-        // Validación de entrada vacía (posible GIF o sticker)
         if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
@@ -546,7 +538,6 @@ app.post('/', (req, res) => {
             return;
         }
 
-        // Validación de emojis
         const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/u;
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
@@ -608,7 +599,6 @@ app.post('/', (req, res) => {
         let input = agent.parameters.option || agent.query;
         console.log('Input validado:', input);
 
-        // Validación de entrada vacía (posible GIF o sticker)
         if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Opción inválida. Por favor, selecciona una opción válida (0-2).\n\n' +
@@ -622,7 +612,6 @@ app.post('/', (req, res) => {
             return;
         }
 
-        // Validación de emojis
         const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/u;
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
@@ -692,7 +681,6 @@ app.post('/', (req, res) => {
         let input = agent.parameters.option || agent.query;
         console.log('Input validado:', input);
 
-        // Validación de entrada vacía (posible GIF o sticker)
         if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
@@ -709,7 +697,6 @@ app.post('/', (req, res) => {
             return;
         }
 
-        // Validación de emojis
         const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/u;
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
@@ -804,7 +791,6 @@ app.post('/', (req, res) => {
         let input = agent.parameters.option || agent.query;
         console.log('Input validado:', input);
 
-        // Validación de entrada vacía (posible GIF o sticker)
         if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
@@ -821,7 +807,6 @@ app.post('/', (req, res) => {
             return;
         }
 
-        // Validación de emojis
         const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/u;
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
@@ -938,7 +923,7 @@ app.post('/', (req, res) => {
     let intentMap = new Map();
     intentMap.set('Default Welcome Intent', welcomeHandler);
     intentMap.set('Main Menu', mainMenuHandler);
-    intentMap.set('Default Fallback Intent', mainMenuHandler); // Fallback para main_menu
+    intentMap.set('Default Fallback Intent', mainMenuHandler);
     intentMap.set('Personalized Queries Menu', personalizedQueriesMenuHandler);
     intentMap.set('Process Personalized Queries', processPersonalizedQueriesHandler);
     intentMap.set('Documents Menu', documentsMenuHandler);
@@ -946,9 +931,8 @@ app.post('/', (req, res) => {
     intentMap.set('Sustenance Menu', sustenanceMenuHandler);
     intentMap.set('Title Management Menu', titleManagementHandler);
     intentMap.set('Contact Assistance', contactAssistanceHandler);
-    intentMap.set('Terms Acceptance', termsAcceptanceHandler); // Handler principal para términos
-    intentMap.set('Fallback - Terms Acceptance', fallbackTermsHandler); // Fallback para términos
-    // Fallbacks para submenús
+    intentMap.set('Terms Acceptance', termsAcceptanceHandler);
+    intentMap.set('Fallback - Terms Acceptance', fallbackTermsHandler);
     intentMap.set('Fallback - Documents Menu', documentsMenuHandler);
     intentMap.set('Fallback - Adjustments Menu', adjustmentsMenuHandler);
     intentMap.set('Fallback - Sustenance Menu', sustenanceMenuHandler);
@@ -963,5 +947,5 @@ app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
     setTimeout(() => {
         console.log('Servidor completamente listo para recibir solicitudes');
-    }, 5000); // Espera 5 segundos adicionales
+    }, 5000);
 });
