@@ -247,29 +247,14 @@ app.post('/', (req, res) => {
         let input = (agent.parameters.option || agent.query)?.toLowerCase().trim();
         console.log('Input validado:', input);
 
-        // Asegurar que el contexto esté activo y la entrada sea válida
-        if (!termsAcceptanceContext || !input) {
-            console.log('Entrada inválida o contexto no activo:', input);
-            agent.setFollowupEvent('FALLBACK_TERMS'); // Activar fallback
-            return;
-        }
-
-        // Validación de entrada vacía (posible GIF o sticker)
-        if (!input || input.trim() === '') {
-            console.log('Entrada vacía detectada (posible GIF o sticker):', input);
+        // Asegurar que el contexto esté activo
+        if (!termsAcceptanceContext) {
+            console.log('Contexto no activo:', input);
             agent.setFollowupEvent('FALLBACK_TERMS');
             return;
         }
 
-        // Validación de emojis
-        const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/u;
-        if (emojiRegex.test(input)) {
-            console.log('Entrada con emojis detectada:', input);
-            agent.setFollowupEvent('FALLBACK_TERMS');
-            return;
-        }
-
-        // Validación estricta de "S" o "N"
+        // Validación estricta de solo "s" o "n"
         if (input === 's') {
             const message = 'Por favor ingresa tu número de identificación (debe tener exactamente 10 dígitos, sin puntos ni guiones)\n\n' +
                            'Digita 0 para regresar al menú principal.';
@@ -295,15 +280,25 @@ app.post('/', (req, res) => {
             agent.context.set({ name: 'main_menu', lifespan: 5 }); // Restablecer menú principal
             agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 }); // Limpiar contexto conflictivo
         } else {
-            console.log('Opción no válida detectada:', input);
-            agent.setFollowupEvent('FALLBACK_TERMS'); // Activar fallback para entradas inválidas
+            console.log('Opción inválida detectada:', input);
+            const message = 'Opción inválida.\n\n' +
+                           '¿Aceptas los términos de uso y el tratamiento de tus datos personales conforme a nuestra política de privacidad?\n' +
+                           'Responde con:\n' +
+                           '( S ) para aceptar y continuar.\n' +
+                           '( N ) para regresar al menú principal.';
+            agent.add('');
+            sendTelegramMessage(chatId, message);
+            agent.context.set({ name: 'terms_acceptance', lifespan: 1 });
         }
     }
 
     function fallbackTermsHandler(agent) {
         console.log('Procesando fallback para Terms Acceptance');
-        const message = 'Opción inválida. Por favor, selecciona una opción válida.\n' +
-                       '¿Aceptas los términos de uso y el tratamiento de tus datos personales conforme a nuestra política de privacidad?\nResponde con:\n( S ) para aceptar y continuar.\n( N ) para regresar al menú principal.';
+        const message = 'Opción inválida.\n\n' +
+                       '¿Aceptas los términos de uso y el tratamiento de tus datos personales conforme a nuestra política de privacidad?\n' +
+                       'Responde con:\n' +
+                       '( S ) para aceptar y continuar.\n' +
+                       '( N ) para regresar al menú principal.';
         agent.add(''); // Respuesta vacía para Dialogflow
         sendTelegramMessage(chatId, message);
         agent.context.set({ name: 'terms_acceptance', lifespan: 1 });
