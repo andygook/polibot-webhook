@@ -254,13 +254,16 @@ app.post('/', (req, res) => {
             return;
         }
 
+        // Limpiar contextos conflictivos
+        agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 });
+        agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
+
         // Validación estricta de solo "s" o "n"
         if (input === 's') {
             const message = 'Por favor ingresa tu número de identificación (debe tener exactamente 10 dígitos, sin puntos ni guiones)\n\n' +
                            'Digita 0 para regresar al menú principal.';
             agent.add(''); // Respuesta vacía para evitar duplicación
             sendTelegramMessage(chatId, message);
-            agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 }); // Limpiar contexto conflictivo
             agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
             agent.context.set({ name: 'terms_acceptance', lifespan: 0 });
         } else if (input === 'n') {
@@ -277,8 +280,7 @@ app.post('/', (req, res) => {
             agent.add(''); // Respuesta vacía para Dialogflow
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'terms_acceptance', lifespan: 0 });
-            agent.context.set({ name: 'main_menu', lifespan: 5 }); // Restablecer menú principal
-            agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 }); // Limpiar contexto conflictivo
+            agent.context.set({ name: 'main_menu', lifespan: 5 });
         } else {
             console.log('Opción inválida detectada:', input);
             const message = 'Opción inválida.\n\n' +
