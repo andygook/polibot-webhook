@@ -466,7 +466,7 @@ app.post('/', (req, res) => {
                 sendTelegramMessage(chatId, message);
                 console.log('proposalDeadline para ID', studentId, ':', project.proposalDeadline);
             } else if (input === 'd') {
-                const message = `Miembros del tribunal de sustentación: ${project.tutor} (Miembro 1), ${project.vocal} (Miembro 2)\nDigite g para regresar al menú anterior.`;
+                const message = `Miembros del tribunal de sustentación: \n${project.tutor} (Miembro 1), \n${project.vocal} (Miembro 2)\n\nDigite g para regresar al menú anterior`;
                 agent.add('');
                 sendTelegramMessage(chatId, message);
             } else if (input === 'e') {
