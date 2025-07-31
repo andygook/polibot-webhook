@@ -38,7 +38,8 @@ function loadData() {
                             tutor: r.Tutor || 'No disponible',
                             vocal: r.Vocal || 'No disponible',
                             sustenanceDeadlines: `${r['Plazos para sustentar sin prórrogas'] || 'No disponible'} (0), ${r['Primera prórroga'] || 'No disponible'} (${r['Valores asociados a la primer prórroga'] || '0'}), ${r['Segunda prórroga'] || 'No disponible'} (${r['Valores asociados a la segunda prórroga'] || '0'}), ${r['Más de 3 periodos'] || 'No disponible'} (${r['Valores asociados a más de 3 periodos'] || '0'})`,
-                            plannedSustenance: r['Fecha planificada de sustentación'] || 'No disponible'
+                            plannedSustenance: r['Fecha planificada de sustentación'] || 'No disponible',
+                            period: r['Periodo Académico Correspondiente'] || 'PAO 2-2025' // Nueva columna mapeada
                         }));
                         isDataLoaded = true;
                         console.log('Datos cargados:', studentsData.length, 'estudiantes,', projectData.length, 'proyectos');
@@ -476,7 +477,7 @@ app.post('/', (req, res) => {
                 sendTelegramMessage(chatId, message);
             } else if (input === 'e') {
                 const message = `Plazos para sustentar y costos:\n` +
-                               `-Periodo:  ${project.cohorte}\n` +
+                               `-Periodo:  ${project.period}\n` + // Usar el campo period en lugar de cohorte
                                `-Sin prórrogas:  ${noProrrogaDate}\n` +
                                `-1ra prórroga:  ${primeraProrrogaDate} (${primeraProrrogaCost})\n` +
                                `-2da prórroga:  ${segundaProrrogaDate} (${segundaProrrogaCost})\n` +
