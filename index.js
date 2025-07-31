@@ -453,7 +453,7 @@ app.post('/', (req, res) => {
 
         if (['a', 'b', 'c', 'd', 'e', 'f', 'g'].includes(input)) {
             if (input === 'a') {
-                const message = `Nombre del proyecto: ${project.projectName}\nDigite g para regresar al menú anterior.`;
+                const message = `Nombre del proyecto: \n${project.projectName}.\n\nDigite g para regresar al menú anterior.`;
                 agent.add('');
                 sendTelegramMessage(chatId, message);
             } else if (input === 'b') {
