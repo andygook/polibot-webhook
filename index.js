@@ -457,7 +457,7 @@ app.post('/', (req, res) => {
                 agent.add('');
                 sendTelegramMessage(chatId, message);
             } else if (input === 'b') {
-                const message = `Estado actual del proyecto: ${project.status}\nDigite g para regresar al menú anterior.`;
+                const message = `Estado actual del proyecto: \n${project.status}.\n\nDigite g para regresar al menú anterior.`;
                 agent.add('');
                 sendTelegramMessage(chatId, message);
             } else if (input === 'c') {
