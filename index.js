@@ -461,7 +461,7 @@ app.post('/', (req, res) => {
                 agent.add('');
                 sendTelegramMessage(chatId, message);
             } else if (input === 'c') {
-                const message = `Plazos presentar propuesta: ${project.proposalDeadline}\nDigite g para regresar al menú anterior.`;
+                const message = `Plazos presentar propuesta: \n${project.proposalDeadline}\n\nDigite g para regresar al menú anterior.`;
                 agent.add('');
                 sendTelegramMessage(chatId, message);
                 console.log('proposalDeadline para ID', studentId, ':', project.proposalDeadline);
