@@ -244,7 +244,6 @@ app.post('/', (req, res) => {
         let input = (agent.parameters.option || agent.query)?.toLowerCase().trim();
         console.log('Input validado:', input);
 
-        // Asegurar que el contexto esté activo
         if (!termsAcceptanceContext) {
             console.log('Contexto no activo:', input);
             agent.setFollowupEvent('FALLBACK_TERMS');
@@ -255,7 +254,6 @@ app.post('/', (req, res) => {
         agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 });
         agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
 
-        // Validación estricta de solo "s" o "n"
         if (input === 's') {
             const message = 'Por favor ingresa tu número de identificación (debe tener exactamente 10 dígitos, sin puntos ni guiones)\n\n' +
                            'Digita 0 para regresar al menú principal.';
@@ -306,12 +304,10 @@ app.post('/', (req, res) => {
     function personalizedQueriesMenuHandler(agent) {
         console.log('Procesando personalizedQueriesMenuHandler');
         const awaitingIdentification = agent.context.get('awaiting_identification');
-        const personalizedQueriesContext = agent.context.get('personalized_queries_menu');
-        let input = agent.query;
+        console.log('Contexto awaiting_identification:', awaitingIdentification);
+        let input = (agent.parameters.identification || agent.query)?.trim();
 
         console.log('Input recibido:', input);
-        console.log('Contexto awaiting_identification:', awaitingIdentification);
-        console.log('Contexto personalized_queries_menu:', personalizedQueriesContext);
         console.log('Parámetros detallados:', agent.parameters);
         console.log('Datos cargados en handler:', isDataLoaded);
 
@@ -322,11 +318,10 @@ app.post('/', (req, res) => {
             return;
         }
 
-        if (awaitingIdentification && (agent.parameters.identification || agent.query)) {
-            let idInput = (agent.parameters.identification || agent.query).trim();
-            console.log('Validando y buscando estudiante con ID:', idInput);
+        if (awaitingIdentification) {
+            console.log('Validando identificación con input:', input);
 
-            if (idInput === '0') {
+            if (input === '0') {
                 const message = 'Menú Principal:\n' +
                                '\n' +
                                '1) Documentos y formatos\n' +
@@ -345,7 +340,7 @@ app.post('/', (req, res) => {
             }
 
             const digitRegex = /^\d{10}$/;
-            if (!digitRegex.test(idInput)) {
+            if (!digitRegex.test(input)) {
                 const message = 'Número de identificación inválido.\n' +
                                'Ingrese nuevamente su N° de identificación (debe tener 10 dígitos, sin puntos ni guiones).\n' +
                                '\n' +
@@ -356,7 +351,7 @@ app.post('/', (req, res) => {
                 return;
             }
 
-            const student = studentsData.find(s => s.id.trim() === idInput.trim());
+            const student = studentsData.find(s => s.id.trim() === input.trim());
             console.log('Estudiante encontrado:', student);
             if (student) {
                 const message = `Apellidos: ${student.apellidos}\nNombres: ${student.nombres}\nMaestría: ${student.maestria}\nCohorte: ${student.cohorte}\n\nPreguntas personalizadas:\n` +
