@@ -1,5 +1,5 @@
 const express = require('express');
-const { WebhookClient } = require('dialogflow-fulfillment');
+const { WebhookClient, Payload } = require('dialogflow-fulfillment');
 const axios = require('axios');
 const { parse } = require('csv-parse');
 
@@ -95,7 +95,7 @@ app.post('/', (req, res) => {
                         '6) Contactar asistente académico\n' +
                         '0) Salir\n\n' +
                         'Por favor, selecciona una opción (0-6).';
-        agent.add('');
+        agent.add(new Payload(agent.TELEGRAM, { text: message }));
         sendTelegramMessage(chatId, message).then(() => {
             agent.context.set({ name: 'main_menu', lifespan: 5 });
         }).catch(err => console.error('Error al enviar mensaje de bienvenida:', err));
@@ -121,7 +121,7 @@ app.post('/', (req, res) => {
                             '6) Contactar asistente académico\n' +
                             '0) Salir\n\n' +
                             'Por favor, selecciona una opción (0-6).';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'main_menu', lifespan: 5 });
             return;
@@ -140,7 +140,7 @@ app.post('/', (req, res) => {
                             '6) Contactar asistente académico\n' +
                             '0) Salir\n\n' +
                             'Por favor, selecciona una opción (0-6).';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'main_menu', lifespan: 5 });
             return;
@@ -158,7 +158,7 @@ app.post('/', (req, res) => {
                             '6) Contactar asistente académico\n' +
                             '0) Salir\n\n' +
                             'Por favor, selecciona una opción (0-6).';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'main_menu', lifespan: 5 });
             return;
@@ -169,7 +169,7 @@ app.post('/', (req, res) => {
             agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 });
             agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
             const message = '¿Aceptas los términos de uso y el tratamiento de tus datos personales conforme a nuestra política de privacidad?\nResponde con:\n( S ) para aceptar y continuar.\n( N ) para regresar al menú principal.';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'terms_acceptance', lifespan: 1 });
             agent.context.set({ name: 'main_menu', lifespan: 0 });
@@ -179,7 +179,7 @@ app.post('/', (req, res) => {
                             '2.- Formato para elaborar el trabajo de titulación\n' +
                             '0.- Regresar al menú principal\n\n' +
                             'Por favor, selecciona una opción (0-2).';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'documents_menu', lifespan: 5 });
             agent.context.set({ name: 'main_menu', lifespan: 0 });
@@ -189,7 +189,7 @@ app.post('/', (req, res) => {
                             '2.- Requisitos: Cambios de miembros del tribunal de sustentación\n' +
                             '0.- Regresar al menú principal\n\n' +
                             'Por favor, selecciona una opción (0-2).';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'adjustments_menu', lifespan: 5 });
             agent.context.set({ name: 'main_menu', lifespan: 0 });
@@ -201,7 +201,7 @@ app.post('/', (req, res) => {
                             '3.- Detalles importantes para la sustentación\n' +
                             '0.- Regresar al menú principal\n\n' +
                             'Por favor, selecciona una opción (0-3).';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'sustenance_menu', lifespan: 5 });
             agent.context.set({ name: 'main_menu', lifespan: 0 });
@@ -213,7 +213,7 @@ app.post('/', (req, res) => {
                             '3.- Retiro del título: lugar y documentos necesarios\n' +
                             '0.- Regresar al menú principal\n\n' +
                             'Por favor, selecciona una opción (0-3).';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'title_management_menu', lifespan: 5 });
             agent.context.set({ name: 'main_menu', lifespan: 0 });
@@ -224,13 +224,13 @@ app.post('/', (req, res) => {
                             'Escríbenos a asistente.academico@ies.edu.ec o llama al +59321234567 y con gusto te atenderemos.\n' +
                             '\n' +
                             'Digite 0 para regresar al menú principal.';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'contact_assistance', lifespan: 1 });
             agent.context.set({ name: 'main_menu', lifespan: 0 });
         } else if (input === '0') {
             const message = 'Gracias por usar PoliBOT. ¡Espero verte pronto para más consultas!';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'main_menu', lifespan: 0 });
         }
@@ -257,7 +257,7 @@ app.post('/', (req, res) => {
         if (input === 's') {
             const message = 'Por favor ingresa tu número de identificación (debe tener exactamente 10 dígitos, sin puntos ni guiones)\n\n' +
                            'Digita 0 para regresar al menú principal.';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
             agent.context.set({ name: 'terms_acceptance', lifespan: 0 });
@@ -272,7 +272,7 @@ app.post('/', (req, res) => {
                            '6) Contactar asistente académico\n' +
                            '0) Salir\n\n' +
                            'Por favor, selecciona una opción (0-6).';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'terms_acceptance', lifespan: 0 });
             agent.context.set({ name: 'main_menu', lifespan: 5 });
@@ -283,7 +283,7 @@ app.post('/', (req, res) => {
                            'Responde con:\n' +
                            '( S ) para aceptar y continuar.\n' +
                            '( N ) para regresar al menú principal.';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'terms_acceptance', lifespan: 1 });
         }
@@ -296,7 +296,7 @@ app.post('/', (req, res) => {
                        'Responde con:\n' +
                        '( S ) para aceptar y continuar.\n' +
                        '( N ) para regresar al menú principal.';
-        agent.add('');
+        agent.add(new Payload(agent.TELEGRAM, { text: message }));
         sendTelegramMessage(chatId, message);
         agent.context.set({ name: 'terms_acceptance', lifespan: 1 });
     }
@@ -313,7 +313,7 @@ app.post('/', (req, res) => {
 
         if (!isDataLoaded) {
             const message = 'Error: Los datos no están cargados. Por favor, intenta de nuevo más tarde.';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             return;
         }
@@ -332,7 +332,7 @@ app.post('/', (req, res) => {
                                '6) Contactar Asistente Académico\n' +
                                '0) Salir\n\n' +
                                'Por favor, selecciona una opción (0-6).';
-                agent.add('');
+                agent.add(new Payload(agent.TELEGRAM, { text: message }));
                 sendTelegramMessage(chatId, message);
                 agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
                 agent.context.set({ name: 'main_menu', lifespan: 5 });
@@ -345,7 +345,7 @@ app.post('/', (req, res) => {
                                'Ingrese nuevamente su N° de identificación (debe tener 10 dígitos, sin puntos ni guiones).\n' +
                                '\n' +
                                'Digite 0 para regresar al menú principal.';
-                agent.add('');
+                agent.add(new Payload(agent.TELEGRAM, { text: message }));
                 sendTelegramMessage(chatId, message);
                 agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
                 return;
@@ -363,13 +363,13 @@ app.post('/', (req, res) => {
                                `f) Fecha planificada de sustentación\n` +
                                `g) Regresar al menú principal\n\n` +
                                `Por favor, selecciona una opción (a-g).`;
-                agent.add('');
+                agent.add(new Payload(agent.TELEGRAM, { text: message }));
                 sendTelegramMessage(chatId, message);
                 agent.context.set({ name: 'personalized_queries_menu', lifespan: 5, parameters: { identification: student.id } });
                 agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
             } else {
                 const message = 'Número de identificación no encontrado. Por favor, ingresa un número válido de 10 dígitos o selecciona 0 para regresar al menú principal.';
-                agent.add('');
+                agent.add(new Payload(agent.TELEGRAM, { text: message }));
                 sendTelegramMessage(chatId, message);
                 agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
             }
@@ -377,7 +377,7 @@ app.post('/', (req, res) => {
         }
 
         const message = 'Ha ocurrido un error. Por favor, selecciona la opción 5 nuevamente para ingresar tu identificación.';
-        agent.add('');
+        agent.add(new Payload(agent.TELEGRAM, { text: message }));
         sendTelegramMessage(chatId, message);
     }
 
@@ -399,7 +399,7 @@ app.post('/', (req, res) => {
                            'e) Plazos para sustentar y costos\n' +
                            'f) Fecha planificada de sustentación\n' +
                            'g) Regresar al menú principal\n';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'personalized_queries_menu', lifespan: 5 });
             return;
@@ -416,7 +416,7 @@ app.post('/', (req, res) => {
                            'e) Plazos para sustentar y costos\n' +
                            'f) Fecha planificada de sustentación\n' +
                            'g) Regresar al menú principal\n';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'personalized_queries_menu', lifespan: 5 });
             return;
@@ -434,7 +434,7 @@ app.post('/', (req, res) => {
                            'e) Plazos para sustentar y costos\n' +
                            'f) Fecha planificada de sustentación\n' +
                            'g) Regresar al menú principal\n';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'personalized_queries_menu', lifespan: 5 });
             return;
@@ -446,7 +446,7 @@ app.post('/', (req, res) => {
 
         if (!project) {
             const message = 'Lo sentimos, no se encontraron datos del proyecto asociado a tu identificación. Por favor, verifica que el número de identificación sea correcto (10 dígitos) o selecciona \'g\' para regresar al menú anterior.';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             return;
         }
@@ -460,20 +460,20 @@ app.post('/', (req, res) => {
         if (['a', 'b', 'c', 'd', 'e', 'f', 'g'].includes(input)) {
             if (input === 'a') {
                 const message = `Nombre del proyecto: \n${project.projectName}.\n\nDigite g para regresar al menú anterior.`;
-                agent.add('');
+                agent.add(new Payload(agent.TELEGRAM, { text: message }));
                 sendTelegramMessage(chatId, message);
             } else if (input === 'b') {
                 const message = `Estado actual del proyecto: \n${project.status}.\n\nDigite g para regresar al menú anterior.`;
-                agent.add('');
+                agent.add(new Payload(agent.TELEGRAM, { text: message }));
                 sendTelegramMessage(chatId, message);
             } else if (input === 'c') {
                 const message = `Plazos presentar propuesta: \n${project.proposalDeadline}\n\nDigite g para regresar al menú anterior.`;
-                agent.add('');
+                agent.add(new Payload(agent.TELEGRAM, { text: message }));
                 sendTelegramMessage(chatId, message);
                 console.log('proposalDeadline para ID', studentId, ':', project.proposalDeadline);
             } else if (input === 'd') {
                 const message = `Miembros del tribunal de sustentación: \n${project.tutor} (Miembro 1), \n${project.vocal} (Miembro 2)\n\nDigite g para regresar al menú anterior`;
-                agent.add('');
+                agent.add(new Payload(agent.TELEGRAM, { text: message }));
                 sendTelegramMessage(chatId, message);
             } else if (input === 'e') {
                 const message = `Plazos para sustentar y costos:\n` +
@@ -483,11 +483,11 @@ app.post('/', (req, res) => {
                                `-2da prórroga:  ${segundaProrrogaDate} (${segundaProrrogaCost})\n` +
                                `-Mas de 3 periodos: ${masTresPeriodosDate} (${masTresPeriodosCost})\n\n` +
                                `Digite g para regresar al menú anterior`;
-                agent.add('');
+                agent.add(new Payload(agent.TELEGRAM, { text: message }));
                 sendTelegramMessage(chatId, message);
             } else if (input === 'f') {
                 const message = `Fecha planificada de sustentación: \n${project.plannedSustenance === 'No disponible' ? 'NO TIENE' : project.plannedSustenance}\n\nDigite g para regresar al menú anterior.`;
-                agent.add('');
+                agent.add(new Payload(agent.TELEGRAM, { text: message }));
                 sendTelegramMessage(chatId, message);
             } else if (input === 'g') {
                 const isInSubmenu = personalizedQueriesContext.parameters?.isInSubmenu;
@@ -502,7 +502,7 @@ app.post('/', (req, res) => {
                                    '6) Contactar asistente académico\n' +
                                    '0) Salir\n\n' +
                                    'Por favor, selecciona una opción (0-6).';
-                    agent.add('');
+                    agent.add(new Payload(agent.TELEGRAM, { text: message }));
                     sendTelegramMessage(chatId, message);
                     agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 });
                     agent.context.set({ name: 'main_menu', lifespan: 5 });
@@ -516,11 +516,24 @@ app.post('/', (req, res) => {
                                    'f) Fecha planificada de sustentación\n' +
                                    'g) Regresar al menú principal\n\n' +
                                    'Por favor, selecciona una opción (a-g).';
-                    agent.add('');
+                    agent.add(new Payload(agent.TELEGRAM, { text: message }));
                     sendTelegramMessage(chatId, message);
                     agent.context.set({ name: 'personalized_queries_menu', lifespan: 5, parameters: { identification: studentId, isInSubmenu: true } });
                 }
             }
+        } else {
+            const message = 'Opción inválida. Por favor, selecciona una opción válida (a-g).\n\n' +
+                           'Preguntas personalizadas:\n' +
+                           'a) Nombre del proyecto\n' +
+                           'b) Estado actual del proyecto\n' +
+                           'c) Plazos presentar propuesta\n' +
+                           'd) Miembros del tribunal de sustentación\n' +
+                           'e) Plazos para sustentar y costos\n' +
+                           'f) Fecha planificada de sustentación\n' +
+                           'g) Regresar al menú principal\n';
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
+            sendTelegramMessage(chatId, message);
+            agent.context.set({ name: 'personalized_queries_menu', lifespan: 5 });
         }
     }
 
@@ -539,7 +552,7 @@ app.post('/', (req, res) => {
                            '1. Formatos para elaborar la propuesta de titulación\n' +
                            '2. Formatos para elaborar el trabajo de titulación\n' +
                            '0. Regresar al menú principal';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'documents_menu', lifespan: 5 });
             return;
@@ -553,7 +566,7 @@ app.post('/', (req, res) => {
                            '1. Formatos para elaborar la propuesta de titulación\n' +
                            '2. Formatos para elaborar el trabajo de titulación\n' +
                            '0. Regresar al menú principal';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'documents_menu', lifespan: 5 });
             return;
@@ -566,7 +579,7 @@ app.post('/', (req, res) => {
                            '1. Formatos para elaborar la propuesta de titulación\n' +
                            '2. Formatos para elaborar el trabajo de titulación\n' +
                            '0. Regresar al menú principal';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'documents_menu', lifespan: 5 });
             return;
@@ -574,11 +587,11 @@ app.post('/', (req, res) => {
 
         if (input === '1') {
             const message = 'Descarga el formato para elaborar la propuesta de titulación, [aquí](https://docs.google.com/document/d/1toHHm36VScxfI7YbgGnVf9lvW4Ca8SE0/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true).\n\nDigite 0 para regresar al menú principal';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
         } else if (input === '2') {
             const message = 'Descarga el formato para elaborar el trabajo de titulación, [aquí](https://docs.google.com/document/d/16w1HRQ5LBNqLesaZdDJiJQdS98-GCupa/edit?usp=sharing&ouid=108703142689418861440&rtpof=true&sd=true).\n\nDigite 0 para regresar al menú principal';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
         } else if (input === '0') {
             const message = 'Menú Principal:\n' +
@@ -591,7 +604,7 @@ app.post('/', (req, res) => {
                            '6) Contactar asistente académico\n' +
                            '0) Salir\n\n' +
                            'Por favor, selecciona una opción (0-6).';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'documents_menu', lifespan: 0 });
             agent.context.set({ name: 'main_menu', lifespan: 5 });
@@ -613,7 +626,7 @@ app.post('/', (req, res) => {
                            '1.- Requisitos: Cambios en la propuesta\n' +
                            '2.- Requisitos: Cambios de miembros del tribunal de sustentación\n' +
                            '0.- Regresar al menú principal';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'adjustments_menu', lifespan: 5 });
             return;
@@ -627,7 +640,7 @@ app.post('/', (req, res) => {
                            '1.- Requisitos: Cambios en la propuesta\n' +
                            '2.- Requisitos: Cambios de miembros del tribunal de sustentación\n' +
                            '0.- Regresar al menú principal';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'adjustments_menu', lifespan: 5 });
             return;
@@ -640,7 +653,7 @@ app.post('/', (req, res) => {
                            '1.- Requisitos: Cambios en la propuesta\n' +
                            '2.- Requisitos: Cambios de miembros del tribunal de sustentación\n' +
                            '0.- Regresar al menú principal';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'adjustments_menu', lifespan: 5 });
             return;
@@ -652,7 +665,7 @@ app.post('/', (req, res) => {
                            '2.- Entregar la nueva propuesta de titulación firmada por los miembros del tribunal (tutor y vocal).\n' +
                            '3.- Enviar por correo electrónico al coordinador de la maestría, con copia al personal administrativo, la solicitud y la propuesta firmada.\n' +
                            '\nDigite 0 para regresar al menú principal';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
         } else if (input === '2') {
             const message = 'Los requisitos para cambios de miembros del tribunal de sustentación son:\n' +
@@ -660,7 +673,7 @@ app.post('/', (req, res) => {
                            '2.- Entregar la nueva propuesta firmada por los nuevos miembros del tribunal de sustentación.\n' +
                            '3.- Enviar por correo electrónico al coordinador de la maestría, con copia al personal administrativo, la solicitud y la propuesta firmadas.\n' +
                            '\nDigite 0 para regresar al menú principal';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
         } else if (input === '0') {
             const message = 'Menú Principal:\n' +
@@ -673,7 +686,7 @@ app.post('/', (req, res) => {
                            '6) Contactar asistente académico\n' +
                            '0) Salir\n\n' +
                            'Por favor, selecciona una opción (0-6).';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'adjustments_menu', lifespan: 0 });
             agent.context.set({ name: 'main_menu', lifespan: 5 });
@@ -698,7 +711,7 @@ app.post('/', (req, res) => {
                            '3.- Detalles importantes para la sustentación\n' +
                            '0.- Regresar al menú principal\n\n' +
                            'Por favor, selecciona una opción (0-3).';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'sustenance_menu', lifespan: 5 });
             return;
@@ -715,7 +728,7 @@ app.post('/', (req, res) => {
                            '3.- Detalles importantes para la sustentación\n' +
                            '0.- Regresar al menú principal\n\n' +
                            'Por favor, selecciona una opción (0-3).';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'sustenance_menu', lifespan: 5 });
             return;
@@ -730,7 +743,7 @@ app.post('/', (req, res) => {
                            '2.- Proceso de aprobación del análisis antiplagio\n' +
                            '3.- Detalles importantes para la sustentación\n' +
                            '0.- Regresar al menú principal';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'sustenance_menu', lifespan: 5 });
             return;
@@ -747,7 +760,7 @@ app.post('/', (req, res) => {
                            '6.- Certificado de no adeudar a la IES (solicitarlo al departamento de contabilidad de la IES).\n' +
                            '7.- Entregar el trabajo de titulación firmada por los miembros del tribunal de sustentación y los estudiantes.\n' +
                            '\nDigite 0 para regresar al menú principal.';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
         } else if (input === '2') {
             const message = 'Proceso de aprobación del análisis antiplagio:\n' +
@@ -756,7 +769,7 @@ app.post('/', (req, res) => {
                            '2.- Si el resultado es menor al 10%, entonces el tutor genera la evidencia de aprobación deñ análisis antiplagio.\n' +
                            '3.- Si el resultado es mayor al 10%, entonces el estudiante debe revisar y corregir el trabajo de titulación y vover a iniciar el proceso de aprobación del análisis antiplagio.\n' +
                            '\nDigite 0 para regresar al menú principal.';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
         } else if (input === '3') {
             const message = 'Detalles importantes para la sustentación:\n' +
@@ -770,7 +783,7 @@ app.post('/', (req, res) => {
                            '7.- Reingreso de los estudiantes a la sala de sustentación para lectura del acta de graduación.\n' +
                            '8.- Investidura de magister. Si es presencial, requiere toga y birrete proporcionados por la IES. En modalidad virtual no aplica.\n' +
                            '\nDigite 0 para regresar al menú principal.';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
         } else if (input === '0') {
             const message = 'Menú Principal:\n' +
@@ -783,7 +796,7 @@ app.post('/', (req, res) => {
                            '6) Contactar asistente académico\n' +
                            '0) Salir\n\n' +
                            'Por favor, selecciona una opción (0-6).';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'sustenance_menu', lifespan: 0 });
             agent.context.set({ name: 'main_menu', lifespan: 5 });
@@ -808,7 +821,7 @@ app.post('/', (req, res) => {
                            '3.- Retiro del título: lugar y documentos necesarios\n' +
                            '0.- Regresar al menú principal\n\n' +
                            'Por favor, selecciona una opción (0-3)\n';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'title_management_menu', lifespan: 5 });
             return;
@@ -825,7 +838,7 @@ app.post('/', (req, res) => {
                            '3.- Retiro del título: lugar y documentos necesarios\n' +
                            '0.- Regresar al menú principal\n\n' +
                            'Por favor, selecciona una opción (0-3)\n';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'title_management_menu', lifespan: 5 });
             return;
@@ -840,7 +853,7 @@ app.post('/', (req, res) => {
                            '2.- Tiempo estimado para retirar el título\n' +
                            '3.- Retiro del título: lugar y documentos necesarios\n' +
                            '0.- Regresar al menú principal\n';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'title_management_menu', lifespan: 5 });
             return;
@@ -849,12 +862,12 @@ app.post('/', (req, res) => {
         if (input === '1') {
             const message = 'El proceso del registro oficial del título ante el Senescyt es realizado por la Secretaría Académica de la IES en un plazo aproximado de 15 a 30 días laborales. No necesita intervención del graduado.\n' +
                            '\nDigite 0 para regresar al menú principal.';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
         } else if (input === '2') {
             const message = 'Cuando tu título se encuentre oficialmente registrado en la página web del Senescyt (verificado con tu cédula de identidad), podrás retirarlo en la Secretaría Académica de la IES. Este proceso toma apróximadamente entre 15 a 30 días laborales después de la sustentación.\n' +
                            '\nDigite 0 para regresar al menú principal.';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
         } else if (input === '3') {
             const message = 'TRÁMITE PERSONAL:\n' +
@@ -872,7 +885,7 @@ app.post('/', (req, res) => {
                            '  Nota: Para mayor información sobre trámites realizados por terceros, contactarse con la Secretaría Académica de la IES.\n' +
                            '\n' +
                            'Digite 0 para regresar al menú principal.';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
         } else if (input === '0') {
             const message = 'Menú Principal:\n' +
@@ -885,7 +898,7 @@ app.post('/', (req, res) => {
                            '6) Contactar asistente académico\n' +
                            '0) Salir\n\n' +
                            'Por favor, selecciona una opción (0-6).';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'title_management_menu', lifespan: 0 });
             agent.context.set({ name: 'main_menu', lifespan: 5 });
@@ -899,7 +912,7 @@ app.post('/', (req, res) => {
         let input = agent.query || agent.parameters.option;
 
         if (!contactAssistanceContext) {
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: '' }));
             return;
         }
 
@@ -914,13 +927,13 @@ app.post('/', (req, res) => {
                            '6) Contactar asistente académico\n' +
                            '0) Salir\n\n' +
                            'Por favor, selecciona una opción (0-6).';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'contact_assistance', lifespan: 0 });
             agent.context.set({ name: 'main_menu', lifespan: 5 });
         } else {
             const message = 'Opción inválida.\n\nDigite 0 para regresar al menú principal.';
-            agent.add('');
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'contact_assistance', lifespan: 1 });
         }
