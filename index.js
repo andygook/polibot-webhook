@@ -919,8 +919,7 @@ app.post('/', (req, res) => {
             agent.context.set({ name: 'contact_assistance', lifespan: 0 });
             agent.context.set({ name: 'main_menu', lifespan: 5 });
         } else {
-            const message = 'Opción inválida.\n' +
-                           'Digite 0 para regresar al menú principal.';
+            const message = 'Opción inválida.\n\nDigite 0 para regresar al menú principal.';
             agent.add('');
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'contact_assistance', lifespan: 1 });
