@@ -486,7 +486,7 @@ app.post('/', (req, res) => {
                 agent.add('');
                 sendTelegramMessage(chatId, message);
             } else if (input === 'f') {
-                const message = `Fecha planificada de sustentación: ${project.plannedSustenance}\nDigite g para regresar al menú anterior.`;
+                const message = `Fecha planificada de sustentación: \n${project.plannedSustenance === 'No disponible' ? 'NO TIENE' : project.plannedSustenance}\n\nDigite g para regresar al menú anterior.`;
                 agent.add('');
                 sendTelegramMessage(chatId, message);
             } else if (input === 'g') {
