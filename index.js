@@ -1,4 +1,4 @@
-const functions = require('firebase-functions');
+const express = require('express');
 const { WebhookClient } = require('dialogflow-fulfillment');
 const fetch = require('node-fetch');
 const csv = require('csv-parser');
@@ -62,7 +62,13 @@ Responde con:
 ( S ) para aceptar y continuar.
 ( N ) para regresar al menú principal.`);
     case '6':
-      return agent.add("Para asistencia personalizada, por favor contacta al asistente académico al correo: asistente@postgrado.edu.ec");
+      agent.context.set({ name: 'contact_assistance', lifespan: 5 });
+      return agent.add(`ASISTENCIA PERSONALIZADA.
+
+Si tienes dudas, necesitas ayuda con algún proceso o requieres atención específica, puedes comunicarte con el Asistente Académico.
+Escríbenos a asistente.academico@ies.edu.ec o llama al +59321234567 y con gusto te atenderemos.
+
+Digite 0 para regresar al menú principal.`);
     case '0':
       return agent.add("¡Gracias por usar PoliBOT! Hasta pronto.");
     default:
@@ -76,7 +82,7 @@ function termsAcceptanceHandler(agent) {
     agent.context.set({ name: 'awaiting_identification', lifespan: 5 });
     return agent.add(`Por favor ingresa tu número de identificación (debe tener exactamente 10 dígitos, sin puntos ni guiones)
 
-Digita 0 para regresar al menú principal.`);
+Digite 0 para regresar al menú principal.`);
   } else if (input === 'N') {
     agent.context.set({ name: 'main_menu', lifespan: 5 });
     return agent.add(getMainMenu());
@@ -87,6 +93,18 @@ Digita 0 para regresar al menú principal.`);
 Responde con:
 ( S ) para aceptar y continuar.
 ( N ) para regresar al menú principal.`);
+  }
+}
+
+function contactAssistanceHandler(agent) {
+  const input = (agent.parameters.option || '').trim();
+  if (input === '0') {
+    agent.context.set({ name: 'main_menu', lifespan: 5 });
+    return agent.add(getMainMenu());
+  } else {
+    return agent.add(`Opción inválida.
+
+Digite 0 para regresar al menú principal.`);
   }
 }
 
@@ -137,8 +155,11 @@ Por favor, selecciona una opción (a-f).
 Digite 0 para regresar al menú principal.`);
 }
 
-exports.dialogflowFirebaseFulfillment = functions.https.onRequest(async (request, response) => {
-  const agent = new WebhookClient({ request, response });
+const app = express();
+app.use(express.json());
+
+app.post('/', async (req, res) => {
+  const agent = new WebhookClient({ request: req, response: res });
   console.log("Intención recibida:", agent.intent);
   console.log("Parámetros recibidos:", agent.parameters);
   console.log("Query Text:", agent.query);
@@ -155,7 +176,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest(async (request
     }
   }
 
-  const chatId = request.body.originalDetectIntentRequest?.payload?.data?.chat?.id;
+  const chatId = req.body.originalDetectIntentRequest?.payload?.data?.chat?.id;
   if (chatId) {
     agent.context.set({
       name: 'telegram_chat_context',
@@ -171,9 +192,16 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest(async (request
       return mainMenuHandler(agent);
     case 'Terms Acceptance':
       return termsAcceptanceHandler(agent);
+    case 'Contact Assistance':
+      return contactAssistanceHandler(agent);
     case 'Personalized Queries Menu':
       return processPersonalizedQueriesHandler(agent);
     default:
       return agent.add("Lo siento, no entendí eso. Por favor intenta nuevamente.");
   }
+});
+
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => {
+  console.log(`Servidor webhook escuchando en puerto ${PORT}`);
 });
