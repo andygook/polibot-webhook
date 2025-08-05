@@ -382,12 +382,58 @@ app.post('/', (req, res) => {
     }
 
 	function processPersonalizedQueriesHandler(agent) {
+		console.log('Procesando processPersonalizedQueriesHandler');
 		const personalizedQueriesContext = agent.context.get('personalized_queries_menu');
 		let input = agent.parameters.option?.toLowerCase();
-		const chatId = agent.originalRequest?.payload?.data?.chat?.id || agent.sessionInfo?.parameters?.chat_id;
 
+		console.log('Input recibido:', input);
+		console.log('Contexto personalized_queries_menu:', personalizedQueriesContext);
 		if (!personalizedQueriesContext || !input) {
-			const message = 'Opción inválida. Selecciona una opción válida (a-g).';
+			console.log('Entrada inválida detectada:', input);
+			const message = 'Opción inválida. Por favor, selecciona una opción válida (a-g).\n\n' +
+						   'Preguntas personalizadas:\n' +
+						   'a) Nombre del proyecto\n' +
+						   'b) Estado actual del proyecto\n' +
+						   'c) Plazos presentar propuesta\n' +
+						   'd) Miembros del tribunal de sustentación\n' +
+						   'e) Plazos para sustentar y costos\n' +
+						   'f) Fecha planificada de sustentación\n' +
+						   'g) Regresar al menú anterior\n';
+			agent.add(new Payload(agent.TELEGRAM, { text: message }));
+			sendTelegramMessage(chatId, message);
+			agent.context.set({ name: 'personalized_queries_menu', lifespan: 5 });
+			return;
+		}
+
+		if (!input || input.trim() === '') {
+			console.log('Entrada vacía detectada (posible GIF o sticker):', input);
+			const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
+						   'Preguntas personalizadas:\n' +
+						   'a) Nombre del proyecto\n' +
+						   'b) Estado actual del proyecto\n' +
+						   'c) Plazos presentar propuesta\n' +
+						   'd) Miembros del tribunal de sustentación\n' +
+						   'e) Plazos para sustentar y costos\n' +
+						   'f) Fecha planificada de sustentación\n' +
+						   'g) Regresar al menú anterior\n';
+			agent.add(new Payload(agent.TELEGRAM, { text: message }));
+			sendTelegramMessage(chatId, message);
+			agent.context.set({ name: 'personalized_queries_menu', lifespan: 5 });
+			return;
+		}
+
+		const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/u;
+		if (emojiRegex.test(input)) {
+			console.log('Entrada con emojis detectada:', input);
+			const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
+						   'Preguntas personalizadas:\n' +
+						   'a) Nombre del proyecto\n' +
+						   'b) Estado actual del proyecto\n' +
+						   'c) Plazos presentar propuesta\n' +
+						   'd) Miembros del tribunal de sustentación\n' +
+						   'e) Plazos para sustentar y costos\n' +
+						   'f) Fecha planificada de sustentación\n' +
+						   'g) Regresar al menú anterior\n';
 			agent.add(new Payload(agent.TELEGRAM, { text: message }));
 			sendTelegramMessage(chatId, message);
 			agent.context.set({ name: 'personalized_queries_menu', lifespan: 5 });
@@ -396,134 +442,94 @@ app.post('/', (req, res) => {
 
 		const studentId = personalizedQueriesContext.parameters.identification;
 		const project = projectData.find(p => p.id.trim() === studentId.trim());
+		console.log('Proyecto encontrado para ID', studentId, ':', project);
 
 		if (!project) {
-			const message = 'No se encontraron datos del proyecto. Verifica tu número de identificación.';
+			const message = 'Lo sentimos, no se encontraron datos del proyecto asociado a tu identificación. Por favor, verifica que el número de identificación sea correcto (10 dígitos) o selecciona \'g\' para regresar al menú anterior.';
 			agent.add(new Payload(agent.TELEGRAM, { text: message }));
 			sendTelegramMessage(chatId, message);
 			return;
 		}
 
-		const showMenu = () => {
-			const message = 'Preguntas personalizadas:
-	' +
-				'a) Nombre del proyecto
-	' +
-				'b) Estado actual del proyecto
-	' +
-				'c) Plazos presentar propuesta
-	' +
-				'd) Miembros del tribunal de sustentación
-	' +
-				'e) Plazos para sustentar y costos
-	' +
-				'f) Fecha planificada de sustentación
-	' +
-				'g) Regresar al menú principal
-
-	' +
-				'Por favor, selecciona una opción (a-g).';
-			agent.add(new Payload(agent.TELEGRAM, { text: message }));
-			sendTelegramMessage(chatId, message);
-			agent.context.set({
-				name: 'personalized_queries_menu',
-				lifespan: 5,
-				parameters: {
-					identification: studentId,
-					backToMain: personalizedQueriesContext.parameters?.backToMain === true ? true : false
-				}
-			});
-		};
+		const [noProrroga, primeraProrroga, segundaProrroga, masTresPeriodos] = project.sustenanceDeadlines.split(',').map(s => s.trim());
+		const [noProrrogaDate] = noProrroga.split(' (');
+		const [primeraProrrogaDate, primeraProrrogaCost] = primeraProrroga.split(' (').map(s => s.replace(')', ''));
+		const [segundaProrrogaDate, segundaProrrogaCost] = segundaProrroga.split(' (').map(s => s.replace(')', ''));
+		const [masTresPeriodosDate, masTresPeriodosCost] = masTresPeriodos.split(' (').map(s => s.replace(')', ''));
 
 		if (['a', 'b', 'c', 'd', 'e', 'f'].includes(input)) {
-			let response = '';
+			let message = '';
 			switch (input) {
-				case 'a': response = `Nombre del proyecto:
-	${project.projectName}`; break;
-				case 'b': response = `Estado actual del proyecto:
-	${project.status}`; break;
-				case 'c': response = `Plazos presentar propuesta:
-	${project.proposalDeadline}`; break;
-				case 'd': response = `Miembros del tribunal:
-	${project.tutor} (Tutor), ${project.vocal} (Vocal)`; break;
-				case 'e':
-					const [np, pp, sp, mp] = project.sustenanceDeadlines.split(',').map(s => s.trim());
-					const [npDate] = np.split(' (');
-					const [ppDate, ppCost] = pp.split(' (').map(s => s.replace(')', ''));
-					const [spDate, spCost] = sp.split(' (').map(s => s.replace(')', ''));
-					const [mpDate, mpCost] = mp.split(' (').map(s => s.replace(')', ''));
-					response = `Plazos y costos:
-	Periodo: ${project.period}
-	Sin prórrogas: ${npDate}
-	1ra prórroga: ${ppDate} (${ppCost})
-	2da prórroga: ${spDate} (${spCost})
-	Más de 3 periodos: ${mpDate} (${mpCost})`;
+				case 'a':
+					message = `Nombre del proyecto: \n${project.projectName}.\n\nDigite g para regresar al menú anterior.`;
 					break;
-				case 'f': response = `Fecha planificada de sustentación:
-	${project.plannedSustenance}`; break;
+				case 'b':
+					message = `Estado actual del proyecto: \n${project.status}.\n\nDigite g para regresar al menú anterior.`;
+					break;
+				case 'c':
+					message = `Plazos presentar propuesta: \n${project.proposalDeadline}\n\nDigite g para regresar al menú anterior.`;
+					break;
+				case 'd':
+					message = `Miembros del tribunal de sustentación: \n${project.tutor} (Miembro 1), \n${project.vocal} (Miembro 2)\n\nDigite g para regresar al menú anterior.`;
+					break;
+				case 'e':
+					message = `Plazos para sustentar y costos:\n` +
+							  `-Periodo:  ${project.period}\n` +
+							  `-Sin prórrogas:  ${noProrrogaDate}\n` +
+							  `-1ra prórroga:  ${primeraProrrogaDate} (${primeraProrrogaCost})\n` +
+							  `-2da prórroga:  ${segundaProrrogaDate} (${segundaProrrogaCost})\n` +
+							  `-Más de 3 periodos: ${masTresPeriodosDate} (${masTresPeriodosCost})\n\n` +
+							  `Digite g para regresar al menú anterior.`;
+					break;
+				case 'f':
+					message = `Fecha planificada de sustentación: \n${project.plannedSustenance === 'No disponible' ? 'NO TIENE' : project.plannedSustenance}\n\nDigite g para regresar al menú anterior.`;
+					break;
 			}
-			response += '
+			agent.add(new Payload(agent.TELEGRAM, { text: message }));
+			sendTelegramMessage(chatId, message);
 
-	Digite g para regresar al menú anterior.';
-			agent.add(new Payload(agent.TELEGRAM, { text: response }));
-			sendTelegramMessage(chatId, response);
+			// Se mantiene en el submenú
 			agent.context.set({
 				name: 'personalized_queries_menu',
 				lifespan: 5,
-				parameters: {
-					identification: studentId,
-					backToMain: false
-				}
+				parameters: { identification: studentId, isInSubmenu: true }
 			});
-			return;
+		} else if (input === 'g') {
+			const message = `Preguntas personalizadas:\n` +
+							`a) Nombre del proyecto\n` +
+							`b) Estado actual del proyecto\n` +
+							`c) Plazos presentar propuesta\n` +
+							`d) Miembros del tribunal de sustentación\n` +
+							`e) Plazos para sustentar y costos\n` +
+							`f) Fecha planificada de sustentación\n` +
+							`g) Regresar al menú principal\n\n` +
+							`Por favor, selecciona una opción (a-g).`;
+			agent.add(new Payload(agent.TELEGRAM, { text: message }));
+			sendTelegramMessage(chatId, message);
+			agent.context.set({
+				name: 'personalized_queries_menu',
+				lifespan: 5,
+				parameters: { identification: studentId, isInSubmenu: true }
+			});
+		} else {
+			const message = 'Opción inválida. Por favor, selecciona una opción válida (a-g).\n\n' +
+							'Preguntas personalizadas:\n' +
+							'a) Nombre del proyecto\n' +
+							'b) Estado actual del proyecto\n' +
+							'c) Plazos presentar propuesta\n' +
+							'd) Miembros del tribunal de sustentación\n' +
+							'e) Plazos para sustentar y costos\n' +
+							'f) Fecha planificada de sustentación\n' +
+							'g) Regresar al menú principal\n';
+			agent.add(new Payload(agent.TELEGRAM, { text: message }));
+			sendTelegramMessage(chatId, message);
+			agent.context.set({
+				name: 'personalized_queries_menu',
+				lifespan: 5,
+				parameters: { identification: studentId }
+			});
 		}
-
-		if (input === 'g') {
-			const backToMain = personalizedQueriesContext.parameters?.backToMain;
-			if (backToMain === true) {
-				const message = 'Menú Principal:
-	' +
-					'1) Documentos y formatos
-	' +
-					'2) Ajustes en propuesta
-	' +
-					'3) Proceso de sustentación
-	' +
-					'4) Gestión del título
-	' +
-					'5) Preguntas personalizadas
-	' +
-					'6) Contactar asistente académico
-	' +
-					'0) Salir
-
-	Selecciona una opción (0-6).';
-				agent.add(new Payload(agent.TELEGRAM, { text: message }));
-				sendTelegramMessage(chatId, message);
-				agent.context.set({ name: 'main_menu', lifespan: 5 });
-			} else {
-				showMenu(); // Mostrar submenú y activar bandera backToMain
-				agent.context.set({
-					name: 'personalized_queries_menu',
-					lifespan: 5,
-					parameters: {
-						identification: studentId,
-						backToMain: true
-					}
-				});
-			}
-			return;
-		}
-
-		// Entrada inválida
-		showMenu();
-	}	
-	
-	
-	
-	
-	
-	
+	}
 
     function documentsMenuHandler(agent) {
         console.log('Procesando documentsMenuHandler');
