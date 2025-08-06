@@ -385,11 +385,11 @@ app.post('/', (req, res) => {
 		console.log('Procesando processPersonalizedQueriesHandler');
 		const personalizedQueriesContext = agent.context.get('personalized_queries_menu');
 		let input = agent.parameters.option?.toLowerCase();
-
 		console.log('Input recibido:', input);
 		console.log('Contexto personalized_queries_menu:', personalizedQueriesContext);
+
 		if (!personalizedQueriesContext || !input) {
-			console.log('Entrada inválida detectada:', input);
+			// Mostrar menú si no hay contexto válido o input vacío
 			const message = 'Opción inválida. Por favor, selecciona una opción válida (a-g).\n\n' +
 						   'Preguntas personalizadas:\n' +
 						   'a) Nombre del proyecto\n' +
@@ -401,48 +401,12 @@ app.post('/', (req, res) => {
 						   'g) Regresar al menú anterior\n';
 			agent.add(new Payload(agent.TELEGRAM, { text: message }));
 			sendTelegramMessage(chatId, message);
-			agent.context.set({ name: 'personalized_queries_menu', lifespan: 5 });
-			return;
-		}
-
-		if (!input || input.trim() === '') {
-			console.log('Entrada vacía detectada (posible GIF o sticker):', input);
-			const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-						   'Preguntas personalizadas:\n' +
-						   'a) Nombre del proyecto\n' +
-						   'b) Estado actual del proyecto\n' +
-						   'c) Plazos presentar propuesta\n' +
-						   'd) Miembros del tribunal de sustentación\n' +
-						   'e) Plazos para sustentar y costos\n' +
-						   'f) Fecha planificada de sustentación\n' +
-						   'g) Regresar al menú anterior\n';
-			agent.add(new Payload(agent.TELEGRAM, { text: message }));
-			sendTelegramMessage(chatId, message);
-			agent.context.set({ name: 'personalized_queries_menu', lifespan: 5 });
-			return;
-		}
-
-		const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/u;
-		if (emojiRegex.test(input)) {
-			console.log('Entrada con emojis detectada:', input);
-			const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n' +
-						   'Preguntas personalizadas:\n' +
-						   'a) Nombre del proyecto\n' +
-						   'b) Estado actual del proyecto\n' +
-						   'c) Plazos presentar propuesta\n' +
-						   'd) Miembros del tribunal de sustentación\n' +
-						   'e) Plazos para sustentar y costos\n' +
-						   'f) Fecha planificada de sustentación\n' +
-						   'g) Regresar al menú anterior\n';
-			agent.add(new Payload(agent.TELEGRAM, { text: message }));
-			sendTelegramMessage(chatId, message);
-			agent.context.set({ name: 'personalized_queries_menu', lifespan: 5 });
+			agent.context.set({ name: 'personalized_queries_menu', lifespan: 5, parameters: { ...personalizedQueriesContext.parameters, backCount: 0 } });
 			return;
 		}
 
 		const studentId = personalizedQueriesContext.parameters.identification;
 		const project = projectData.find(p => p.id.trim() === studentId.trim());
-		console.log('Proyecto encontrado para ID', studentId, ':', project);
 
 		if (!project) {
 			const message = 'Lo sentimos, no se encontraron datos del proyecto asociado a tu identificación. Por favor, verifica que el número de identificación sea correcto (10 dígitos) o selecciona \'g\' para regresar al menú anterior.';
@@ -461,72 +425,79 @@ app.post('/', (req, res) => {
 			let message = '';
 			switch (input) {
 				case 'a':
-					message = `Nombre del proyecto: \n${project.projectName}.\n\nDigite g para regresar al menú anterior.`;
+					message = `Nombre del proyecto:\n${project.projectName}.\n\nDigite g para regresar al menú anterior.`;
 					break;
 				case 'b':
-					message = `Estado actual del proyecto: \n${project.status}.\n\nDigite g para regresar al menú anterior.`;
+					message = `Estado actual del proyecto:\n${project.status}.\n\nDigite g para regresar al menú anterior.`;
 					break;
 				case 'c':
-					message = `Plazos presentar propuesta: \n${project.proposalDeadline}\n\nDigite g para regresar al menú anterior.`;
+					message = `Plazos presentar propuesta:\n${project.proposalDeadline}\n\nDigite g para regresar al menú anterior.`;
 					break;
 				case 'd':
-					message = `Miembros del tribunal de sustentación: \n${project.tutor} (Miembro 1), \n${project.vocal} (Miembro 2)\n\nDigite g para regresar al menú anterior.`;
+					message = `Miembros del tribunal de sustentación:\n${project.tutor} (Miembro 1)\n${project.vocal} (Miembro 2)\n\nDigite g para regresar al menú anterior.`;
 					break;
 				case 'e':
-					message = `Plazos para sustentar y costos:\n` +
-							  `-Periodo:  ${project.period}\n` +
-							  `-Sin prórrogas:  ${noProrrogaDate}\n` +
-							  `-1ra prórroga:  ${primeraProrrogaDate} (${primeraProrrogaCost})\n` +
-							  `-2da prórroga:  ${segundaProrrogaDate} (${segundaProrrogaCost})\n` +
-							  `-Más de 3 periodos: ${masTresPeriodosDate} (${masTresPeriodosCost})\n\n` +
-							  `Digite g para regresar al menú anterior.`;
+					message = `Plazos para sustentar y costos:\n-Periodo: ${project.period}\n-Sin prórrogas: ${noProrrogaDate}\n-1ra prórroga: ${primeraProrrogaDate} (${primeraProrrogaCost})\n-2da prórroga: ${segundaProrrogaDate} (${segundaProrrogaCost})\n-Más de 3 periodos: ${masTresPeriodosDate} (${masTresPeriodosCost})\n\nDigite g para regresar al menú anterior.`;
 					break;
 				case 'f':
-					message = `Fecha planificada de sustentación: \n${project.plannedSustenance === 'No disponible' ? 'NO TIENE' : project.plannedSustenance}\n\nDigite g para regresar al menú anterior.`;
+					message = `Fecha planificada de sustentación:\n${project.plannedSustenance === 'No disponible' ? 'NO TIENE' : project.plannedSustenance}\n\nDigite g para regresar al menú anterior.`;
 					break;
 			}
 			agent.add(new Payload(agent.TELEGRAM, { text: message }));
 			sendTelegramMessage(chatId, message);
 
-			// Se mantiene en el submenú
 			agent.context.set({
 				name: 'personalized_queries_menu',
 				lifespan: 5,
-				parameters: { identification: studentId, isInSubmenu: true }
+				parameters: { identification: studentId, backCount: 0 }
 			});
 		} else if (input === 'g') {
-			const message = `Preguntas personalizadas:\n` +
-							`a) Nombre del proyecto\n` +
-							`b) Estado actual del proyecto\n` +
-							`c) Plazos presentar propuesta\n` +
-							`d) Miembros del tribunal de sustentación\n` +
-							`e) Plazos para sustentar y costos\n` +
-							`f) Fecha planificada de sustentación\n` +
-							`g) Regresar al menú principal\n\n` +
-							`Por favor, selecciona una opción (a-g).`;
-			agent.add(new Payload(agent.TELEGRAM, { text: message }));
-			sendTelegramMessage(chatId, message);
-			agent.context.set({
-				name: 'personalized_queries_menu',
-				lifespan: 5,
-				parameters: { identification: studentId, isInSubmenu: true }
-			});
+			const backCount = personalizedQueriesContext.parameters.backCount || 0;
+
+			if (backCount >= 1) {
+				// Regresar al menú principal
+				const message = 'Menú Principal:\n\n1) Documentos y formatos\n2) Ajustes en propuesta\n3) Proceso de sustentación\n4) Gestión del título\n5) Preguntas personalizadas\n6) Contactar asistente académico\n0) Salir\n\nPor favor, selecciona una opción (0-6).';
+				agent.add(new Payload(agent.TELEGRAM, { text: message }));
+				sendTelegramMessage(chatId, message);
+				agent.context.set({ name: 'main_menu', lifespan: 5 });
+				agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 });
+			} else {
+				// Mostrar nuevamente el submenú
+				const message = 'Preguntas personalizadas:\n' +
+					'a) Nombre del proyecto\n' +
+					'b) Estado actual del proyecto\n' +
+					'c) Plazos presentar propuesta\n' +
+					'd) Miembros del tribunal de sustentación\n' +
+					'e) Plazos para sustentar y costos\n' +
+					'f) Fecha planificada de sustentación\n' +
+					'g) Regresar al menú principal\n\n' +
+					'Por favor, selecciona una opción (a-g).';
+				agent.add(new Payload(agent.TELEGRAM, { text: message }));
+				sendTelegramMessage(chatId, message);
+
+				agent.context.set({
+					name: 'personalized_queries_menu',
+					lifespan: 5,
+					parameters: { identification: studentId, backCount: 1 }
+				});
+			}
 		} else {
 			const message = 'Opción inválida. Por favor, selecciona una opción válida (a-g).\n\n' +
-							'Preguntas personalizadas:\n' +
-							'a) Nombre del proyecto\n' +
-							'b) Estado actual del proyecto\n' +
-							'c) Plazos presentar propuesta\n' +
-							'd) Miembros del tribunal de sustentación\n' +
-							'e) Plazos para sustentar y costos\n' +
-							'f) Fecha planificada de sustentación\n' +
-							'g) Regresar al menú principal\n';
+				'Preguntas personalizadas:\n' +
+				'a) Nombre del proyecto\n' +
+				'b) Estado actual del proyecto\n' +
+				'c) Plazos presentar propuesta\n' +
+				'd) Miembros del tribunal de sustentación\n' +
+				'e) Plazos para sustentar y costos\n' +
+				'f) Fecha planificada de sustentación\n' +
+				'g) Regresar al menú principal\n';
 			agent.add(new Payload(agent.TELEGRAM, { text: message }));
 			sendTelegramMessage(chatId, message);
+
 			agent.context.set({
 				name: 'personalized_queries_menu',
 				lifespan: 5,
-				parameters: { identification: studentId }
+				parameters: { identification: studentId, backCount: 0 }
 			});
 		}
 	}
