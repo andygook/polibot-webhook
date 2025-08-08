@@ -101,7 +101,7 @@ app.post('/', (req, res) => {
     }
 	
     function mainMenuHandler(agent) {
-        const input = (agent.parameters.option || agent.query || '').trim();
+        //const input = (agent.parameters.option || agent.query || '').trim();
         console.log('Procesando mainMenuHandler');
         const mainMenuContext = agent.context.get('main_menu');
         console.log('Contexto main_menu activo:', !!mainMenuContext);
