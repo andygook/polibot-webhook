@@ -106,10 +106,10 @@ app.post('/', (req, res) => {
         const mainMenuContext = agent.context.get('main_menu');
         console.log('Contexto main_menu activo:', !!mainMenuContext);
         console.log('Input recibido en mainMenuHandler:', agent.query || agent.parameters.option);
-        let input = agent.parameters.option || agent.query;
+        let input = (agent.parameters.option || agent.query || '').trim();
         console.log('Input validado:', input);
 		
-		if (!input || input.trim() === '') {
+		if (!input) {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n\n' +
                             'Menú Principal:\n' +
@@ -241,7 +241,8 @@ app.post('/', (req, res) => {
     // Nuevo handler: Submenú de Asistencia Académica (opciones 1,2,0)
     // ——————————————————————————————————————————
     function academicAssistanceSubmenuHandler(agent) {
-        const input = (agent.query || agent.parameters.option || '').trim();
+        let input = (agent.parameters.option || agent.query || '').trim();
+        console.log('Procesando academicAssistanceSubmenuHandler. Input:', input);
 
         if (!['0','1','2'].includes(input)) {
             const message = 'Opción inválida.\n\n' +
@@ -256,7 +257,6 @@ app.post('/', (req, res) => {
         }
 
         if (input === '0') {
-            // Regresar al menú principal
             const message = 'Menú Principal:\n\n' +
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
@@ -274,7 +274,6 @@ app.post('/', (req, res) => {
         }
 
         if (input === '1') {
-            // Mostrar contacto del asistente
             const message = 'Si tienes dudas, necesitas ayuda con algún proceso o requieres atención específica, puedes comunicarte con el asistente académico.\n' +
                             'Escríbenos a asistente.academico@ies.edu.ec o llama al +59321234567 y con gusto te atenderemos.\n\n' +
                             'Digite 0 para regresar al menú principal.';
@@ -286,7 +285,6 @@ app.post('/', (req, res) => {
         }
 
         if (input === '2') {
-            // Pendiente: lógica para “Enviar notificación”
             const message = 'Has seleccionado: Enviar notificación al asistente académico.\n\n(Contenido pendiente de definir).';
             agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
@@ -297,11 +295,11 @@ app.post('/', (req, res) => {
     // ——————————————————————————————————————————
     // Nuevo handler: Validación tras mostrar “Información de contacto”
     // ——————————————————————————————————————————
-    function academicAssistanceContactHandler(agent) {
-        const input = (agent.query || agent.parameters.option || '').trim();
+     function academicAssistanceContactHandler(agent) {
+        let input = (agent.parameters.option || agent.query || '').trim();
+        console.log('Procesando academicAssistanceContactHandler. Input:', input);
 
         if (input === '0') {
-            // Regresar al menú principal
             const message = 'Menú Principal:\n\n' +
                             '1) Documentos y formatos\n' +
                             '2) Ajustes en propuesta\n' +
@@ -316,7 +314,6 @@ app.post('/', (req, res) => {
             agent.context.set({ name: 'main_menu', lifespan: 5 });
             agent.context.set({ name: 'academic_assistance_contact', lifespan: 0 });
         } else {
-            // Repetir contenido hasta que digite '0'
             const message = 'Opción inválida.\n\n' +
                             'Si tienes dudas, necesitas ayuda con algún proceso o requieres atención específica, puedes comunicarte con el asistente académico.\n' +
                             'Escríbenos a asistente.academico@ies.edu.ec o llama al +59321234567 y con gusto te atenderemos.\n\n' +
