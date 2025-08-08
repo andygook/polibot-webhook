@@ -53,11 +53,7 @@ function loadData() {
             });
     });
 }
-
-// Iniciar carga de datos al arrancar el servidor
-loadData().catch(error => {
-    console.error('Error al cargar los datos iniciales:', error);
-});
+loadData().catch(err => console.error('Error al cargar datos iniciales:', err));
 
 async function sendTelegramMessage(chatId, text) {
     try {
@@ -66,7 +62,6 @@ async function sendTelegramMessage(chatId, text) {
             text: text,
             parse_mode: 'Markdown'
         });
-        console.log(`Mensaje enviado a Telegram (chat_id: ${chatId}):`, text);
     } catch (error) {
         console.error('Error enviando mensaje a Telegram:', error.response ? error.response.data : error.message);
     }
@@ -74,14 +69,18 @@ async function sendTelegramMessage(chatId, text) {
 
 app.post('/', (req, res) => {
     const agent = new WebhookClient({ request: req, response: res });
-    const chatId = req.body.originalDetectIntentRequest?.payload?.data?.chat?.id || req.body.sessionInfo?.parameters?.chat_id;
+    const chatId = req.body.originalDetectIntentRequest?.payload?.data?.chat?.id
+                 || req.body.sessionInfo?.parameters?.chat_id;
 
-    console.log('Intención recibida:', agent.intent);
+	console.log('Intención recibida:', agent.intent);
     console.log('Parámetros recibidos:', agent.parameters);
     console.log('Query Text:', agent.query);
     console.log('Contextos activos:', agent.contexts);
     console.log('Datos cargados:', isDataLoaded ? 'Sí' : 'No');
     console.log('Chat ID recibido:', chatId);
+    // ——————————————————————————————————————————
+    // Handlers existentes (welcomeHandler, mainMenuHandler, termsAcceptanceHandler, etc.)
+    // ——————————————————————————————————————————
 
     function welcomeHandler(agent) {
         console.log('Procesando welcomeHandler');
@@ -100,16 +99,17 @@ app.post('/', (req, res) => {
             agent.context.set({ name: 'main_menu', lifespan: 5 });
         }).catch(err => console.error('Error al enviar mensaje de bienvenida:', err));
     }
-
+	
     function mainMenuHandler(agent) {
+        const input = (agent.parameters.option || agent.query || '').trim();
         console.log('Procesando mainMenuHandler');
         const mainMenuContext = agent.context.get('main_menu');
         console.log('Contexto main_menu activo:', !!mainMenuContext);
         console.log('Input recibido en mainMenuHandler:', agent.query || agent.parameters.option);
         let input = agent.parameters.option || agent.query;
         console.log('Input validado:', input);
-
-        if (!input || input.trim() === '') {
+		
+		if (!input || input.trim() === '') {
             console.log('Entrada vacía detectada (posible GIF o sticker):', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n\n' +
                             'Menú Principal:\n' +
@@ -126,8 +126,9 @@ app.post('/', (req, res) => {
             agent.context.set({ name: 'main_menu', lifespan: 5 });
             return;
         }
-
-        const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/u;
+		
+		// ... validaciones previas (vacío, emoji, inválido) sin cambios ...
+		const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/u;
         if (emojiRegex.test(input)) {
             console.log('Entrada con emojis detectada:', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n\n' +
@@ -145,8 +146,9 @@ app.post('/', (req, res) => {
             agent.context.set({ name: 'main_menu', lifespan: 5 });
             return;
         }
-
-        if (!input || typeof input !== 'string' || !['0', '1', '2', '3', '4', '5', '6'].includes(input)) {
+		
+        // Otras opciones (1–5, 0) quedan igual...
+		 if (!input || typeof input !== 'string' || !['0', '1', '2', '3', '4', '5', '6'].includes(input)) {
             console.log('Entrada inválida detectada:', input);
             const message = 'Lo siento, no entendí tu solicitud. Por favor, selecciona una opción válida.\n\n' +
                             'Menú Principal:\n' +
@@ -163,8 +165,7 @@ app.post('/', (req, res) => {
             agent.context.set({ name: 'main_menu', lifespan: 5 });
             return;
         }
-
-        if (input === '5') {
+		 if (input === '5') {
             // Limpiar contextos previos antes de mostrar términos
             agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 });
             agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
@@ -217,17 +218,17 @@ app.post('/', (req, res) => {
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'title_management_menu', lifespan: 5 });
             agent.context.set({ name: 'main_menu', lifespan: 0 });
-        } else if (input === '6') {
-            const message = 'ASISTENCIA PERSONALIZADA.\n' +
-                            '\n' +
-                            'Si tienes dudas, necesitas ayuda con algún proceso o requieres atención específica, puedes comunicarte con el Asistente Académico.\n' +
-                            'Escríbenos a asistente.academico@ies.edu.ec o llama al +59321234567 y con gusto te atenderemos.\n' +
-                            '\n' +
+        }else if (input === '6') {
+            // ← Nueva implementación para la opción 6
+            const message = 'ASISTENCIA PERSONALIZADA.\n\n' +
+                            '1.- Información de contacto del asistente académico.\n' +
+                            '2.- Enviar notificación al asistente académico.\n\n' +
                             'Digite 0 para regresar al menú principal.';
             agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
-            agent.context.set({ name: 'contact_assistance', lifespan: 1 });
+            agent.context.set({ name: 'academic_assistance_submenu', lifespan: 5 });
             agent.context.set({ name: 'main_menu', lifespan: 0 });
+            return;
         } else if (input === '0') {
             const message = 'Gracias por usar PoliBOT. ¡Espero verte pronto para más consultas!';
             agent.add(new Payload(agent.TELEGRAM, { text: message }));
@@ -236,7 +237,97 @@ app.post('/', (req, res) => {
         }
     }
 
-    function termsAcceptanceHandler(agent) {
+    // ——————————————————————————————————————————
+    // Nuevo handler: Submenú de Asistencia Académica (opciones 1,2,0)
+    // ——————————————————————————————————————————
+    function academicAssistanceSubmenuHandler(agent) {
+        const input = (agent.query || agent.parameters.option || '').trim();
+
+        if (!['0','1','2'].includes(input)) {
+            const message = 'Opción inválida.\n\n' +
+                            'ASISTENCIA PERSONALIZADA.\n\n' +
+                            '1.- Información de contacto del asistente académico.\n' +
+                            '2.- Enviar notificación al asistente académico.\n\n' +
+                            'Digite 0 para regresar al menú principal.';
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
+            sendTelegramMessage(chatId, message);
+            agent.context.set({ name: 'academic_assistance_submenu', lifespan: 5 });
+            return;
+        }
+
+        if (input === '0') {
+            // Regresar al menú principal
+            const message = 'Menú Principal:\n\n' +
+                            '1) Documentos y formatos\n' +
+                            '2) Ajustes en propuesta\n' +
+                            '3) Proceso de sustentación\n' +
+                            '4) Gestión del título\n' +
+                            '5) Preguntas personalizadas\n' +
+                            '6) Contactar asistente académico\n' +
+                            '0) Salir\n\n' +
+                            'Por favor, selecciona una opción (0-6).';
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
+            sendTelegramMessage(chatId, message);
+            agent.context.set({ name: 'main_menu', lifespan: 5 });
+            agent.context.set({ name: 'academic_assistance_submenu', lifespan: 0 });
+            return;
+        }
+
+        if (input === '1') {
+            // Mostrar contacto del asistente
+            const message = 'Si tienes dudas, necesitas ayuda con algún proceso o requieres atención específica, puedes comunicarte con el asistente académico.\n' +
+                            'Escríbenos a asistente.academico@ies.edu.ec o llama al +59321234567 y con gusto te atenderemos.\n\n' +
+                            'Digite 0 para regresar al menú principal.';
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
+            sendTelegramMessage(chatId, message);
+            agent.context.set({ name: 'academic_assistance_contact', lifespan: 5 });
+            agent.context.set({ name: 'academic_assistance_submenu', lifespan: 0 });
+            return;
+        }
+
+        if (input === '2') {
+            // Pendiente: lógica para “Enviar notificación”
+            const message = 'Has seleccionado: Enviar notificación al asistente académico.\n\n(Contenido pendiente de definir).';
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
+            sendTelegramMessage(chatId, message);
+            agent.context.set({ name: 'academic_assistance_submenu', lifespan: 5 });
+        }
+    }
+
+    // ——————————————————————————————————————————
+    // Nuevo handler: Validación tras mostrar “Información de contacto”
+    // ——————————————————————————————————————————
+    function academicAssistanceContactHandler(agent) {
+        const input = (agent.query || agent.parameters.option || '').trim();
+
+        if (input === '0') {
+            // Regresar al menú principal
+            const message = 'Menú Principal:\n\n' +
+                            '1) Documentos y formatos\n' +
+                            '2) Ajustes en propuesta\n' +
+                            '3) Proceso de sustentación\n' +
+                            '4) Gestión del título\n' +
+                            '5) Preguntas personalizadas\n' +
+                            '6) Contactar asistente académico\n' +
+                            '0) Salir\n\n' +
+                            'Por favor, selecciona una opción (0-6).';
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
+            sendTelegramMessage(chatId, message);
+            agent.context.set({ name: 'main_menu', lifespan: 5 });
+            agent.context.set({ name: 'academic_assistance_contact', lifespan: 0 });
+        } else {
+            // Repetir contenido hasta que digite '0'
+            const message = 'Opción inválida.\n\n' +
+                            'Si tienes dudas, necesitas ayuda con algún proceso o requieres atención específica, puedes comunicarte con el asistente académico.\n' +
+                            'Escríbenos a asistente.academico@ies.edu.ec o llama al +59321234567 y con gusto te atenderemos.\n\n' +
+                            'Digite 0 para regresar al menú principal.';
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
+            sendTelegramMessage(chatId, message);
+            agent.context.set({ name: 'academic_assistance_contact', lifespan: 5 });
+        }
+    }
+	
+	function termsAcceptanceHandler(agent) {
         console.log('Procesando termsAcceptanceHandler');
         const termsAcceptanceContext = agent.context.get('terms_acceptance');
         console.log('Contexto terms_acceptance activo:', !!termsAcceptanceContext);
@@ -904,11 +995,14 @@ app.post('/', (req, res) => {
             agent.context.set({ name: 'contact_assistance', lifespan: 1 });
         }
     }
-
+	
+    // ——————————————————————————————————————————
+    // Mapeo de intenciones
+    // ——————————————————————————————————————————
     let intentMap = new Map();
     intentMap.set('Default Welcome Intent', welcomeHandler);
     intentMap.set('Main Menu', mainMenuHandler);
-    intentMap.set('Default Fallback Intent', mainMenuHandler);
+	intentMap.set('Default Fallback Intent', mainMenuHandler);
     intentMap.set('Personalized Queries Menu', personalizedQueriesMenuHandler);
     intentMap.set('Process Personalized Queries', processPersonalizedQueriesHandler);
     intentMap.set('Documents Menu', documentsMenuHandler);
@@ -924,6 +1018,12 @@ app.post('/', (req, res) => {
     intentMap.set('Fallback - Title Management Menu', titleManagementHandler);
     intentMap.set('Fallback - Personalized Queries Menu', processPersonalizedQueriesHandler);
     intentMap.set('Fallback - Contact Assistance', contactAssistanceHandler);
+    // ... conservas aquí todos los mappings de tus menús y submenús existentes ...
+    intentMap.set('Academic Assistance Submenu', academicAssistanceSubmenuHandler);
+    intentMap.set('Fallback - Assistance Submenu', academicAssistanceSubmenuHandler);
+    intentMap.set('Academic Assistance Contact', academicAssistanceContactHandler);
+    intentMap.set('Fallback - Assistance Contact', academicAssistanceContactHandler);
+
     agent.handleRequest(intentMap);
 });
 
