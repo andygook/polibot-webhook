@@ -1168,3 +1168,4 @@ function contactAssistanceHandler(agent) {
         agent.context.set({ name: 'aas_terms', lifespan: 2 });
     }
 
+}
