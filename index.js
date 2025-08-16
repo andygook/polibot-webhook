@@ -2,8 +2,8 @@ const express = require('express');
 const { WebhookClient, Payload } = require('dialogflow-fulfillment');
 const axios = require('axios');
 const { parse } = require('csv-parse');
-
 const nodemailer = require('nodemailer');
+
 
 const app = express();
 app.use(express.json());
@@ -12,57 +12,7 @@ let studentsData = [];
 let projectData = [];
 let isDataLoaded = false;
 
-
-// === Validadores ===
-function isValidCedula10(value) {
-    return /^\d{10}$/.test((value || '').trim());
-}
-function isValidYesNo(value) {
-    const v = (value || '').trim().toLowerCase();
-    return v === 's' || v === 'n';
-}
-function isValidPhone(value) {
-    const v = (value || '').trim();
-    // Acepta 10-15 dígitos o formato con prefijo + (E.164). Permite +5939######## para Ecuador.
-    return /^\+?\d{10,15}$/.test(v) || /^(?:\+5939\d{8}|09\d{8})$/.test(v);
-}
-
-
 // Configuración de Telegram
-
-// Configuración de correo (Gmail SMTP con contraseña de aplicación)
-const EMAIL_USER = process.env.EMAIL_USER; // ej: polibot.aa@gmail.com
-const EMAIL_PASS = process.env.EMAIL_PASS; // ej: contraseña de aplicación
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: { user: EMAIL_USER, pass: EMAIL_PASS },
-});
-
-async function sendAssistanceEmail({ name, identification, phone }) {
-    if (!EMAIL_USER || !EMAIL_PASS) {
-        console.error('EMAIL_USER/EMAIL_PASS no configurados.');
-        throw new Error('Email no configurado');
-    }
-    const mailOptions = {
-        from: `PoliBOT <${EMAIL_USER}>`,
-        to: EMAIL_USER,
-        subject: `PoliBOT: Solicitud de contacto — ${name}`,
-        text: [
-            'Se ha recibido una solicitud de contacto desde PoliBOT:',
-            `Nombre: ${name}`,
-            `Identificación: ${identification}`,
-            `Celular: ${phone}`,
-            '',
-            'Por favor, contacta al usuario a la brevedad.'
-        ].join('\n'),
-    };
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Correo enviado:', info.messageId);
-    return info;
-}
-
 const TELEGRAM_BOT_TOKEN = '7253134218:AAFVF7q25Ukx24IcGOgw-T3-ohzMYQRN0Lk'; // Token proporcionado
 
 // Cargar datos en segundo plano
@@ -72,7 +22,15 @@ function loadData() {
             .then(response => {
                 parse(response.data, { columns: true, skip_empty_lines: true }, (err, records) => {
                     if (err) {
-                        console.error('Error parsing CSV:', err);
+ 
+// Configuración de correo (usar variables de entorno en Render)
+const EMAIL_USER = process.env.EMAIL_USER || 'polibot.aa@gmail.com';
+const EMAIL_PASS = process.env.EMAIL_PASS || process.env.EMAIL_PASSWORD || '';
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user: EMAIL_USER, pass: EMAIL_PASS }
+});
+                       console.error('Error parsing CSV:', err);
                         reject(err);
                     } else {
                         studentsData = records.map(r => ({
@@ -279,6 +237,7 @@ app.post('/', (req, res) => {
             agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
             agent.context.set({ name: 'contact_assistance', lifespan: 5 });
+            agent.context.set({ name: 'main_menu', lifespan: 0 });
             agent.context.set({ name: 'main_menu', lifespan: 0 });
         } else if (input === '0') {
             const message = 'Gracias por usar PoliBOT. ¡Espero verte pronto para más consultas!';
@@ -924,215 +883,288 @@ app.post('/', (req, res) => {
 
     
 function contactAssistanceHandler(agent) {
-    console.log('Procesando contactAssistanceHandler');
-    const contactAssistanceContext = agent.context.get('contact_assistance');
-    let input = (agent.parameters.option || agent.query || '').trim();
-    if (!contactAssistanceContext) {
-        agent.add(new Payload(agent.TELEGRAM, { text: '' }));
-        return;
-    }
-    if (input === '0') {
-        const message = 'Menú Principal:\n\n1) Documentos y formatos\n2) Ajustes en propuesta\n3) Proceso de sustentación\n4) Gestión del título\n5) Preguntas personalizadas\n6) Contactar asistente académico\n0) Salir\n\nPor favor, selecciona una opción (0-6).';
-        agent.add(new Payload(agent.TELEGRAM, { text: message }));
-        sendTelegramMessage(chatId, message);
-        agent.context.set({ name: 'contact_assistance', lifespan: 0 });
-        agent.context.set({ name: 'main_menu', lifespan: 5 });
-        return;
-    }
-    if (input === '1') {
-        const message = 'Si tienes dudas, necesitas ayuda con algún proceso o requieres atención específica, puedes comunicarte con el asistente académico.\nEscríbenos a asistente.academico@ies.edu.ec o llama al +59321234567 y con gusto te atenderemos.\n\nDigite 0 para regresar al menú principal.';
-        agent.add(new Payload(agent.TELEGRAM, { text: message }));
-        sendTelegramMessage(chatId, message);
-        // Mantener el contexto para permitir '0' para volver
-        agent.context.set({ name: 'contact_assistance', lifespan: 5 });
-        agent.context.set({ name: 'main_menu', lifespan: 0 });
-        return;
-    }
-    if (input === '2') {
-        const message = '¿Aceptas los términos de uso y el tratamiento de tus datos personales conforme a nuestra política de privacidad?\nResponde con:\n( S ) para aceptar y continuar.\n( N ) para regresar al menú principal.';
-        agent.add(new Payload(agent.TELEGRAM, { text: message }));
-        sendTelegramMessage(chatId, message);
-        agent.context.set({ name: 'contact_assistance', lifespan: 0 });
-        agent.context.set({ name: 'contact_assistance_terms', lifespan: 5 });
-        return;
-    }
-    // Entrada inválida -> re-mostrar submenú
-    const message = 'ASISTENCIA PERSONALIZADA.\n\n1.- Información de contacto del asistente académico.\n2.- Enviar notificación al asistente académico.\n\nDigite 0 para regresar al menú principal.';
-    agent.add(new Payload(agent.TELEGRAM, { text: message }));
-    sendTelegramMessage(chatId, message);
-    agent.context.set({ name: 'contact_assistance', lifespan: 5 });
-}
+        console.log('Procesando contactAssistanceHandler');
+        const contactAssistanceContext = agent.context.get('contact_assistance');
+        console.log('Contexto contact_assistance activo:', !!contactAssistanceContext);
+        let input = (agent.parameters.option || agent.query || '').trim();
 
+        const chatId = agent.originalRequest?.payload?.data?.chat?.id || agent.request_.body?.originalDetectIntentRequest?.payload?.data?.chat?.id;
 
-    
-function contactAssistanceTermsHandler(agent) {
-    console.log('Procesando contactAssistanceTermsHandler');
-    const ctx = agent.context.get('contact_assistance_terms');
-    const input = (agent.parameters.option || agent.query || '').trim().toLowerCase();
-    if (!ctx) {
-        agent.add(new Payload(agent.TELEGRAM, { text: '' }));
-        return;
-    }
-    if (input === 'n') {
-        const message = 'Menú Principal:\n\n1) Documentos y formatos\n2) Ajustes en propuesta\n3) Proceso de sustentación\n4) Gestión del título\n5) Preguntas personalizadas\n6) Contactar asistente académico\n0) Salir\n\nPor favor, selecciona una opción (0-6).';
-        agent.add(new Payload(agent.TELEGRAM, { text: message }));
-        sendTelegramMessage(chatId, message);
-        agent.context.set({ name: 'contact_assistance_terms', lifespan: 0 });
-        agent.context.set({ name: 'main_menu', lifespan: 5 });
-        return;
-    }
-    if (input === 's') {
-        const message = 'Por favor ingresa tu nombre completo:\n\nDigite 0 para regresar al menú principal.';
-        agent.add(new Payload(agent.TELEGRAM, { text: message }));
-        sendTelegramMessage(chatId, message);
-        agent.context.set({ name: 'contact_assistance_terms', lifespan: 0 });
-        agent.context.set({ name: 'contact_assistance_name', lifespan: 5 });
-        return;
-    }
-    // inválido
-    const message = '¿Aceptas los términos de uso y el tratamiento de tus datos personales conforme a nuestra política de privacidad?\nResponde con:\n( S ) para aceptar y continuar.\n( N ) para regresar al menú principal.';
-    agent.add(new Payload(agent.TELEGRAM, { text: message }));
-    sendTelegramMessage(chatId, message);
-    agent.context.set({ name: 'contact_assistance_terms', lifespan: 5 });
-}
-
-function contactAssistanceNameHandler(agent) {
-    console.log('Procesando contactAssistanceNameHandler');
-    const ctx = agent.context.get('contact_assistance_name');
-    const name = (agent.query || agent.parameters.any || '').trim();
-    if (!ctx) { agent.add(new Payload(agent.TELEGRAM, { text: '' })); return; }
-    if (name === '0') {
-        const message = 'Menú Principal:\n\n1) Documentos y formatos\n2) Ajustes en propuesta\n3) Proceso de sustentación\n4) Gestión del título\n5) Preguntas personalizadas\n6) Contactar asistente académico\n0) Salir\n\nPor favor, selecciona una opción (0-6).';
-        agent.add(new Payload(agent.TELEGRAM, { text: message }));
-        sendTelegramMessage(chatId, message);
-        agent.context.set({ name: 'contact_assistance_name', lifespan: 0 });
-        agent.context.set({ name: 'main_menu', lifespan: 5 });
-        return;
-    }
-    if (!/^[-A-Za-zÁÉÍÓÚÑáéíóúñ\s'.]{3,}$/.test(name)) {
-        const message = 'Nombre inválido. Ingresa tu nombre completo (solo letras y espacios).\n\nDigite 0 para regresar al menú principal.';
-        agent.add(new Payload(agent.TELEGRAM, { text: message }));
-        sendTelegramMessage(chatId, message);
-        agent.context.set({ name: 'contact_assistance_name', lifespan: 5 });
-        return;
-    }
-    agent.context.set({ name: 'contact_assistance_data', lifespan: 10, parameters: { name } });
-    const message = 'Ingresa tu número de identificación (10 dígitos, sin puntos ni guiones):\n\nDigite 0 para regresar al menú principal.';
-    agent.add(new Payload(agent.TELEGRAM, { text: message }));
-    sendTelegramMessage(chatId, message);
-    agent.context.set({ name: 'contact_assistance_name', lifespan: 0 });
-    agent.context.set({ name: 'contact_assistance_id', lifespan: 5 });
-}
-
-function contactAssistanceIdHandler(agent) {
-    console.log('Procesando contactAssistanceIdHandler');
-    const ctx = agent.context.get('contact_assistance_id');
-    const input = (agent.query || agent.parameters.any || '').trim();
-    if (!ctx) { agent.add(new Payload(agent.TELEGRAM, { text: '' })); return; }
-    if (input == '0') {
-        const message = 'Menú Principal:\n\n1) Documentos y formatos\n2) Ajustes en propuesta\n3) Proceso de sustentación\n4) Gestión del título\n5) Preguntas personalizadas\n6) Contactar asistente académico\n0) Salir\n\nPor favor, selecciona una opción (0-6).';
-        agent.add(new Payload(agent.TELEGRAM, { text: message }));
-        sendTelegramMessage(chatId, message);
-        agent.context.set({ name: 'contact_assistance_id', lifespan: 0 });
-        agent.context.set({ name: 'main_menu', lifespan: 5 });
-        return;
-    }
-    if (!/^\d{10}$/.test(input)) {
-        const message = 'Número de identificación inválido.\nIngrese nuevamente su N° de identificación (debe tener 10 dígitos, sin puntos ni guiones).\n\nDigite 0 para regresar al menú principal.';
-        agent.add(new Payload(agent.TELEGRAM, { text: message }));
-        sendTelegramMessage(chatId, message);
-        agent.context.set({ name: 'contact_assistance_id', lifespan: 5 });
-        return;
-    }
-    const dataCtx = agent.context.get('contact_assistance_data') || { parameters: {} };
-    dataCtx.parameters.identification = input;
-    agent.context.set({ name: 'contact_assistance_data', lifespan: 10, parameters: dataCtx.parameters });
-    const message = 'Ingresa tu número de celular (10 dígitos o formato internacional con +):\n\nDigite 0 para regresar al menú principal.';
-    agent.add(new Payload(agent.TELEGRAM, { text: message }));
-    sendTelegramMessage(chatId, message);
-    agent.context.set({ name: 'contact_assistance_id', lifespan: 0 });
-    agent.context.set({ name: 'contact_assistance_phone', lifespan: 5 });
-}
-
-function contactAssistancePhoneHandler(agent) {
-    console.log('Procesando contactAssistancePhoneHandler');
-    const ctx = agent.context.get('contact_assistance_phone');
-    const input = (agent.query || agent.parameters.any || '').trim();
-    if (!ctx) { agent.add(new Payload(agent.TELEGRAM, { text: '' })); return; }
-    if (input == '0') {
-        const message = 'Menú Principal:\n\n1) Documentos y formatos\n2) Ajustes en propuesta\n3) Proceso de sustentación\n4) Gestión del título\n5) Preguntas personalizadas\n6) Contactar asistente académico\n0) Salir\n\nPor favor, selecciona una opción (0-6).';
-        agent.add(new Payload(agent.TELEGRAM, { text: message }));
-        sendTelegramMessage(chatId, message);
-        agent.context.set({ name: 'contact_assistance_phone', lifespan: 0 });
-        agent.context.set({ name: 'main_menu', lifespan: 5 });
-        return;
-    }
-    if (!/^\+?\d{10,15}$/.test(input) && !/^(?:\+5939\d{8}|09\d{8})$/.test(input)) {
-        const message = 'Número de celular inválido. Ingresa tu número de celular (10 dígitos o con prefijo +593).\n\nDigite 0 para regresar al menú principal.';
-        agent.add(new Payload(agent.TELEGRAM, { text: message }));
-        sendTelegramMessage(chatId, message);
-        agent.context.set({ name: 'contact_assistance_phone', lifespan: 5 });
-        return;
-    }
-    const dataCtx = agent.context.get('contact_assistance_data') || { parameters: {} };
-    dataCtx.parameters.phone = input;
-    agent.context.set({ name: 'contact_assistance_data', lifespan: 10, parameters: dataCtx.parameters });
-    const { name, identification, phone } = dataCtx.parameters;
-    // Enviar correo
-    return sendAssistanceEmail({ name, identification, phone })
-        .then(() => {
-            const message = 'Notificación enviada.';
+        if (!contactAssistanceContext) {
+            // Si no está el contexto, re-mostramos el submenú 6
+            const message = 'ASISTENCIA PERSONALIZADA.\n\n' +
+                            '1.- Información de contacto del asistente académico.\n' +
+                            '2.- Enviar notificación al asistente académico.\n\n' +
+                            'Digite 0 para regresar al menú principal.';
             agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
-        })
-        .catch((err) => {
-            console.error('Error al enviar correo:', err);
-            const message = 'Ocurrió un error al enviar la notificación. Inténtalo más tarde.';
+            agent.context.set({ name: 'contact_assistance', lifespan: 5 });
+            return;
+        }
+
+        if (input === '0') {
+            const message = 'Menú Principal:\n\n' +
+                            '1) Documentos y formatos\n' +
+                            '2) Ajustes en propuesta\n' +
+                            '3) Proceso de sustentación\n' +
+                            '4) Gestión del título\n' +
+                            '5) Preguntas personalizadas\n' +
+                            '6) Contactar asistente académico\n' +
+                            '0) Salir\n\n' +
+                            'Por favor, selecciona una opción (0-6).';
             agent.add(new Payload(agent.TELEGRAM, { text: message }));
             sendTelegramMessage(chatId, message);
-        })
-        .finally(() => {
-            const message2 = 'Menú Principal:\n\n1) Documentos y formatos\n2) Ajustes en propuesta\n3) Proceso de sustentación\n4) Gestión del título\n5) Preguntas personalizadas\n6) Contactar asistente académico\n0) Salir\n\nPor favor, selecciona una opción (0-6).';
-            agent.add(new Payload(agent.TELEGRAM, { text: message2 }));
-            sendTelegramMessage(chatId, message2);
-            agent.context.set({ name: 'contact_assistance_phone', lifespan: 0 });
-            agent.context.set({ name: 'contact_assistance_terms', lifespan: 0 });
-            agent.context.set({ name: 'contact_assistance', lifespan: 0 });
             agent.context.set({ name: 'main_menu', lifespan: 5 });
-        });
+            agent.context.set({ name: 'contact_assistance', lifespan: 0 });
+            return;
+        }
+
+        if (input === '1') {
+            const message = 'Si tienes dudas, necesitas ayuda con algún proceso o requieres atención específica, puedes comunicarte con el asistente académico.\n' +
+                            'Escríbenos a asistente.academico@ies.edu.ec o llama al +59321234567 y con gusto te atenderemos.\n\n' +
+                            'Digite 0 para regresar al menú principal.';
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
+            sendTelegramMessage(chatId, message);
+            agent.context.set({ name: 'contact_assistance', lifespan: 5 });
+            return;
+        }
+
+        if (input === '2') {
+            const message = '¿Aceptas los términos de uso y el tratamiento de tus datos personales conforme a nuestra política de privacidad?\n' +
+                            'Responde con:\n' +
+                            '( S ) para aceptar y continuar.\n' +
+                            '( N ) para regresar al menú principal.';
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
+            sendTelegramMessage(chatId, message);
+            // Guardamos el flujo de origen en el contexto de términos
+            agent.context.set({ name: 'aas_terms', lifespan: 2 });
+            // Preparamos un contexto para ir guardando datos
+            agent.context.set({ name: 'aas_data', lifespan: 5, parameters: { user_name: '', user_id: '', user_phone: '' } });
+            agent.context.set({ name: 'contact_assistance', lifespan: 5 });
+            return;
+        }
+
+        // Entrada inválida
+        const message = 'Opción inválida.\n\n' +
+                        'ASISTENCIA PERSONALIZADA.\n\n' +
+                        '1.- Información de contacto del asistente académico.\n' +
+                        '2.- Enviar notificación al asistente académico.\n\n' +
+                        'Digite 0 para regresar al menú principal.';
+        agent.add(new Payload(agent.TELEGRAM, { text: message }));
+        sendTelegramMessage(chatId, message);
+        agent.context.set({ name: 'contact_assistance', lifespan: 5 });
 }
 
+    function aasCollectNameHandler(agent) {
+        console.log('Procesando aasCollectNameHandler');
+        const ctxData = agent.context.get('aas_data') || { parameters: {} };
+        const input = (agent.parameters.user_name || agent.query || '').trim();
+        const chatId = agent.originalRequest?.payload?.data?.chat?.id || agent.request_.body?.originalDetectIntentRequest?.payload?.data?.chat?.id;
 
-    let intentMap = new Map();
-    intentMap.set('Default Welcome Intent', welcomeHandler);
-    intentMap.set('Main Menu', mainMenuHandler);
-    intentMap.set('Default Fallback Intent', mainMenuHandler);
-    intentMap.set('Personalized Queries Menu', personalizedQueriesMenuHandler);
-    intentMap.set('Process Personalized Queries', processPersonalizedQueriesHandler);
-    intentMap.set('Documents Menu', documentsMenuHandler);
-    intentMap.set('Adjustments Menu', adjustmentsMenuHandler);
-    intentMap.set('Sustenance Menu', sustenanceMenuHandler);
-    intentMap.set('Title Management Menu', titleManagementHandler);
-    intentMap.set('Contact Assistance', contactAssistanceHandler);
-    intentMap.set('Terms Acceptance', termsAcceptanceHandler);
-    intentMap.set('Fallback - Terms Acceptance', fallbackTermsHandler);
-    intentMap.set('Fallback - Documents Menu', documentsMenuHandler);
-    intentMap.set('Fallback - Adjustments Menu', adjustmentsMenuHandler);
-    intentMap.set('Fallback - Sustenance Menu', sustenanceMenuHandler);
-    intentMap.set('Fallback - Title Management Menu', titleManagementHandler);
-    intentMap.set('Fallback - Personalized Queries Menu', processPersonalizedQueriesHandler);
-    intentMap.set('Fallback - Contact Assistance', contactAssistanceHandler);
-    intentMap.set('Fallback - Contact Assistance Terms', contactAssistanceTermsHandler);
-    intentMap.set('Fallback - Contact Assistance Name', contactAssistanceNameHandler);
-    intentMap.set('Fallback - Contact Assistance ID', contactAssistanceIdHandler);
-    intentMap.set('Fallback - Contact Assistance Phone', contactAssistancePhoneHandler);
-    agent.handleRequest(intentMap);
-});
+        if (!agent.context.get('aas_collect_name')) {
+            agent.add(new Payload(agent.TELEGRAM, { text: '' }));
+            return;
+        }
 
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto ${PORT}`);
-    setTimeout(() => {
-        console.log('Servidor completamente listo para recibir solicitudes');
-    }, 5000);
-});
+        if (input === '0') {
+            const message = 'Menú Principal:\n\n' +
+                            '1) Documentos y formatos\n' +
+                            '2) Ajustes en propuesta\n' +
+                            '3) Proceso de sustentación\n' +
+                            '4) Gestión del título\n' +
+                            '5) Preguntas personalizadas\n' +
+                            '6) Contactar asistente académico\n' +
+                            '0) Salir\n\n' +
+                            'Por favor, selecciona una opción (0-6).';
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
+            sendTelegramMessage(chatId, message);
+            agent.context.set({ name: 'main_menu', lifespan: 5 });
+            agent.context.set({ name: 'aas_collect_name', lifespan: 0 });
+            agent.context.set({ name: 'aas_data', lifespan: 0 });
+            return;
+        }
+
+        // Guardar nombre
+        agent.context.set({ name: 'aas_data', lifespan: 5, parameters: { ...ctxData.parameters, user_name: input } });
+        const askId = 'Ingresa tu número de identificación (10 dígitos):';
+        agent.add(new Payload(agent.TELEGRAM, { text: askId }));
+        sendTelegramMessage(chatId, askId);
+        agent.context.set({ name: 'aas_collect_id', lifespan: 2 });
+        agent.context.set({ name: 'aas_collect_name', lifespan: 0 });
+    }
+
+    function aasCollectIdHandler(agent) {
+        console.log('Procesando aasCollectIdHandler');
+        const ctxData = agent.context.get('aas_data') || { parameters: {} };
+        const inputRaw = (agent.parameters.user_id || agent.query || '').trim();
+        const chatId = agent.originalRequest?.payload?.data?.chat?.id || agent.request_.body?.originalDetectIntentRequest?.payload?.data?.chat?.id;
+
+        if (!agent.context.get('aas_collect_id')) {
+            agent.add(new Payload(agent.TELEGRAM, { text: '' }));
+            return;
+        }
+
+        if (inputRaw === '0') {
+            const message = 'Menú Principal:\n\n' +
+                            '1) Documentos y formatos\n' +
+                            '2) Ajustes en propuesta\n' +
+                            '3) Proceso de sustentación\n' +
+                            '4) Gestión del título\n' +
+                            '5) Preguntas personalizadas\n' +
+                            '6) Contactar asistente académico\n' +
+                            '0) Salir\n\n' +
+                            'Por favor, selecciona una opción (0-6).';
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
+            sendTelegramMessage(chatId, message);
+            agent.context.set({ name: 'main_menu', lifespan: 5 });
+            agent.context.set({ name: 'aas_collect_id', lifespan: 0 });
+            agent.context.set({ name: 'aas_data', lifespan: 0 });
+            return;
+        }
+
+        const digitRegex = /^\d{10}$/;
+        if (!digitRegex.test(inputRaw)) {
+            const message = 'Número de identificación inválido.\n' +
+                            'Ingrese nuevamente su N° de identificación (debe tener 10 dígitos, sin puntos ni guiones).\n\n' +
+                            'Digite 0 para regresar al menú principal.';
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
+            sendTelegramMessage(chatId, message);
+            agent.context.set({ name: 'aas_collect_id', lifespan: 2 });
+            return;
+        }
+
+        agent.context.set({ name: 'aas_data', lifespan: 5, parameters: { ...ctxData.parameters, user_id: inputRaw } });
+        const askPhone = 'Ingresa tu número de celular (10 dígitos):';
+        agent.add(new Payload(agent.TELEGRAM, { text: askPhone }));
+        sendTelegramMessage(chatId, askPhone);
+        agent.context.set({ name: 'aas_collect_phone', lifespan: 2 });
+        agent.context.set({ name: 'aas_collect_id', lifespan: 0 });
+    }
+
+    function aasCollectPhoneHandler(agent) {
+        console.log('Procesando aasCollectPhoneHandler');
+        const ctxData = agent.context.get('aas_data') || { parameters: {} };
+        const inputRaw = (agent.parameters.user_phone || agent.query || '').trim();
+        const chatId = agent.originalRequest?.payload?.data?.chat?.id || agent.request_.body?.originalDetectIntentRequest?.payload?.data?.chat?.id;
+
+        if (!agent.context.get('aas_collect_phone')) {
+            agent.add(new Payload(agent.TELEGRAM, { text: '' }));
+            return;
+        }
+
+        if (inputRaw === '0') {
+            const message = 'Menú Principal:\n\n' +
+                            '1) Documentos y formatos\n' +
+                            '2) Ajustes en propuesta\n' +
+                            '3) Proceso de sustentación\n' +
+                            '4) Gestión del título\n' +
+                            '5) Preguntas personalizadas\n' +
+                            '6) Contactar asistente académico\n' +
+                            '0) Salir\n\n' +
+                            'Por favor, selecciona una opción (0-6).';
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
+            sendTelegramMessage(chatId, message);
+            agent.context.set({ name: 'main_menu', lifespan: 5 });
+            agent.context.set({ name: 'aas_collect_phone', lifespan: 0 });
+            agent.context.set({ name: 'aas_data', lifespan: 0 });
+            return;
+        }
+
+        const phoneRegex = /^\d{10}$/;
+        if (!phoneRegex.test(inputRaw)) {
+            const message = 'Número de celular inválido.\n' +
+                            'Ingrese nuevamente su N° de celular (debe tener 10 dígitos, sin puntos ni guiones).\n\n' +
+                            'Digite 0 para regresar al menú principal.';
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
+            sendTelegramMessage(chatId, message);
+            agent.context.set({ name: 'aas_collect_phone', lifespan: 2 });
+            return;
+        }
+
+        const data = { ...ctxData.parameters, user_phone: inputRaw };
+        agent.context.set({ name: 'aas_data', lifespan: 1, parameters: data });
+
+        // Enviar correo
+        const mailOptions = {
+            from: EMAIL_USER,
+            to: 'polibot.aa@gmail.com',
+            subject: 'PoliBOT - Notificación de contacto',
+            text: `El usuario ${data.user_name} con número de cédula ${data.user_id} y celular ${data.user_phone} desea contactarse.`
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Error al enviar correo:', error);
+                const msg = 'Lo sentimos, ocurrió un error al enviar la notificación. Inténtalo nuevamente más tarde.';
+                agent.add(new Payload(agent.TELEGRAM, { text: msg }));
+                sendTelegramMessage(chatId, msg);
+            } else {
+                console.log('Correo enviado:', info.response);
+                const confirm = 'Notificacion enviada.';
+                agent.add(new Payload(agent.TELEGRAM, { text: confirm }));
+                sendTelegramMessage(chatId, confirm);
+            }
+            // Volver al menú principal
+            const menu = 'Menú Principal:\n\n' +
+                         '1) Documentos y formatos\n' +
+                         '2) Ajustes en propuesta\n' +
+                         '3) Proceso de sustentación\n' +
+                         '4) Gestión del título\n' +
+                         '5) Preguntas personalizadas\n' +
+                         '6) Contactar asistente académico\n' +
+                         '0) Salir\n\n' +
+                         'Por favor, selecciona una opción (0-6).';
+            agent.add(new Payload(agent.TELEGRAM, { text: menu }));
+            sendTelegramMessage(chatId, menu);
+            agent.context.set({ name: 'main_menu', lifespan: 5 });
+            agent.context.set({ name: 'aas_collect_phone', lifespan: 0 });
+            agent.context.set({ name: 'contact_assistance', lifespan: 0 });
+            agent.context.set({ name: 'terms_acceptance', lifespan: 0 });
+            agent.context.set({ name: 'aas_data', lifespan: 0 });
+        });
+    }
+
+    function aasTermsHandler(agent) {
+        console.log('Procesando aasTermsHandler');
+        const aasTerms = agent.context.get('aas_terms');
+        const input = (agent.parameters.option || agent.query || '').toLowerCase().trim();
+        const chatId = agent.originalRequest?.payload?.data?.chat?.id || agent.request_.body?.originalDetectIntentRequest?.payload?.data?.chat?.id;
+
+        if (!aasTerms) {
+            agent.add(new Payload(agent.TELEGRAM, { text: '' }));
+            return;
+        }
+
+        if (input === 's') {
+            const askName = 'Por favor, ingresa tu nombre completo:';
+            agent.add(new Payload(agent.TELEGRAM, { text: askName }));
+            sendTelegramMessage(chatId, askName);
+            agent.context.set({ name: 'aas_collect_name', lifespan: 2 });
+            agent.context.set({ name: 'aas_data', lifespan: 5, parameters: { user_name: '', user_id: '', user_phone: '' } });
+            agent.context.set({ name: 'aas_terms', lifespan: 0 });
+            return;
+        } else if (input === 'n') {
+            const message = 'Menú Principal:\n\n' +
+                            '1) Documentos y formatos\n' +
+                            '2) Ajustes en propuesta\n' +
+                            '3) Proceso de sustentación\n' +
+                            '4) Gestión del título\n' +
+                            '5) Preguntas personalizadas\n' +
+                            '6) Contactar asistente académico\n' +
+                            '0) Salir\n\n' +
+                            'Por favor, selecciona una opción (0-6).';
+            agent.add(new Payload(agent.TELEGRAM, { text: message }));
+            sendTelegramMessage(chatId, message);
+            agent.context.set({ name: 'main_menu', lifespan: 5 });
+            agent.context.set({ name: 'aas_terms', lifespan: 0 });
+            return;
+        }
+
+        const msg = 'Opción inválida.\n\n' +
+                    '¿Aceptas los términos de uso y el tratamiento de tus datos personales conforme a nuestra política de privacidad?\n' +
+                    'Responde con:\n( S ) para aceptar y continuar.\n( N ) para regresar al menú principal.';
+        agent.add(new Payload(agent.TELEGRAM, { text: msg }));
+        sendTelegramMessage(chatId, msg);
+        agent.context.set({ name: 'aas_terms', lifespan: 2 });
+    }
+
