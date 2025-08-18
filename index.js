@@ -167,6 +167,17 @@ app.post('/', (req, res) => {
   }
 
   function mainMenuHandler(agent) {
+    // --- ROUTER DEFENSIVO ---
+    if (agent.context.get('contact_assistance_collect_name')) {
+      return contactAssistanceNameHandler(agent);
+    }
+    if (agent.context.get('contact_assistance_collect_id')) {
+      return contactAssistanceIdHandler(agent);
+    }
+    if (agent.context.get('contact_assistance_collect_phone')) {
+      return contactAssistancePhoneHandler(agent);
+    }
+
     // Antes de procesar, limpia subflujos para evitar bleed-over
     clearContexts(agent, [
       'terms_acceptance',
@@ -286,7 +297,6 @@ app.post('/', (req, res) => {
     const input = (agent.parameters.option || agent.query || '').toLowerCase().trim();
     const ctx = agent.context.get('terms_acceptance');
     if (!ctx) {
-      // Re-preguntar términos
       const message = 'Opción inválida.\n\n' +
         '¿Aceptas los términos de uso y el tratamiento de tus datos personales conforme a nuestra política de privacidad?\n' +
         'Responde con:\n' +
@@ -307,6 +317,7 @@ app.post('/', (req, res) => {
       sendTelegramMessage(chatId, message);
       agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
       agent.context.set({ name: 'terms_acceptance', lifespan: 0 });
+      agent.context.set({ name: 'main_menu', lifespan: 0 }); // evitar capturas indebidas
       return;
     }
 
@@ -352,6 +363,7 @@ app.post('/', (req, res) => {
         agent.add(new Payload(agent.TELEGRAM, { text: message }));
         sendTelegramMessage(chatId, message);
         agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
+        agent.context.set({ name: 'main_menu', lifespan: 0 });
         return;
       }
 
@@ -370,11 +382,13 @@ app.post('/', (req, res) => {
         sendTelegramMessage(chatId, message);
         agent.context.set({ name: 'personalized_queries_menu', lifespan: 5, parameters: { identification: student.id, backCount: 0 } });
         agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
+        agent.context.set({ name: 'main_menu', lifespan: 0 });
       } else {
         const message = 'Número de identificación no encontrado. Por favor, ingresa un número válido de 10 dígitos o selecciona 0 para regresar al menú principal.';
         agent.add(new Payload(agent.TELEGRAM, { text: message }));
         sendTelegramMessage(chatId, message);
         agent.context.set({ name: 'awaiting_identification', lifespan: 1 });
+        agent.context.set({ name: 'main_menu', lifespan: 0 });
       }
       return;
     }
@@ -389,12 +403,10 @@ app.post('/', (req, res) => {
     const input = (agent.parameters.option || '').toLowerCase().trim();
 
     if (!personalizedCtx) {
-      // No debería entrar aquí sin contexto: redirigir a principal
       showMainMenu(agent, chatId);
       return;
     }
 
-    // 1) VALIDAR OPCIÓN PRIMERO (a..f o g). Nada de revisar proyecto todavía.
     if (!['a','b','c','d','e','f','g'].includes(input)) {
       const msg = 'Opción inválida. Por favor, selecciona una opción válida (a-g).\n\n' +
                   'Preguntas personalizadas:\n' +
@@ -408,12 +420,12 @@ app.post('/', (req, res) => {
       agent.add(new Payload(agent.TELEGRAM, { text: msg }));
       sendTelegramMessage(chatId, msg);
       agent.context.set({ name: 'personalized_queries_menu', lifespan: 5, parameters: { identification: personalizedCtx.parameters.identification, backCount: personalizedCtx.parameters.backCount || 0 } });
+      agent.context.set({ name: 'main_menu', lifespan: 0 });
       return;
     }
 
     const studentId = (personalizedCtx.parameters.identification || '').toString().trim();
 
-    // 2) Si la opción es "g", gestionar regreso sin tocar proyectos.
     if (input === 'g') {
       const backCount = personalizedCtx.parameters.backCount || 0;
       if (backCount >= 1) {
@@ -432,17 +444,18 @@ app.post('/', (req, res) => {
         agent.add(new Payload(agent.TELEGRAM, { text: msg }));
         sendTelegramMessage(chatId, msg);
         agent.context.set({ name: 'personalized_queries_menu', lifespan: 5, parameters: { identification: studentId, backCount: 1 } });
+        agent.context.set({ name: 'main_menu', lifespan: 0 });
       }
       return;
     }
 
-    // 3) Para a..f – recién aquí mirar datos del proyecto.
     const project = projectData.find(p => (p.id || '').trim() === studentId);
     if (!project) {
       const msg = 'Lo sentimos, no se encontraron datos del proyecto asociado a tu identificación. Por favor, verifica que el número de identificación sea correcto (10 dígitos) o selecciona \'g\' para regresar al menú anterior.';
       agent.add(new Payload(agent.TELEGRAM, { text: msg }));
       sendTelegramMessage(chatId, msg);
       agent.context.set({ name: 'personalized_queries_menu', lifespan: 5, parameters: { identification: studentId, backCount: personalizedCtx.parameters.backCount || 0 } });
+      agent.context.set({ name: 'main_menu', lifespan: 0 });
       return;
     }
 
@@ -476,6 +489,7 @@ app.post('/', (req, res) => {
     agent.add(new Payload(agent.TELEGRAM, { text: message }));
     sendTelegramMessage(chatId, message);
     agent.context.set({ name: 'personalized_queries_menu', lifespan: 5, parameters: { identification: studentId, backCount: 0 } });
+    agent.context.set({ name: 'main_menu', lifespan: 0 });
   }
 
   // -------- Menú 1: Documentos --------
@@ -699,6 +713,7 @@ app.post('/', (req, res) => {
       agent.add(new Payload(agent.TELEGRAM, { text: message }));
       sendTelegramMessage(chatId, message);
       agent.context.set({ name: 'contact_assistance_menu', lifespan: 5 });
+      agent.context.set({ name: 'main_menu', lifespan: 0 });
       return;
     }
 
@@ -709,6 +724,7 @@ app.post('/', (req, res) => {
       agent.add(new Payload(agent.TELEGRAM, { text: message }));
       sendTelegramMessage(chatId, message);
       agent.context.set({ name: 'contact_assistance_menu', lifespan: 2 });
+      agent.context.set({ name: 'main_menu', lifespan: 0 });
       return;
     }
 
@@ -721,6 +737,7 @@ app.post('/', (req, res) => {
       sendTelegramMessage(chatId, message);
       agent.context.set({ name: 'contact_assistance_terms', lifespan: 1 });
       agent.context.set({ name: 'contact_assistance_menu', lifespan: 0 });
+      agent.context.set({ name: 'main_menu', lifespan: 0 });
       return;
     }
 
@@ -743,6 +760,7 @@ app.post('/', (req, res) => {
       agent.add(new Payload(agent.TELEGRAM, { text: message }));
       sendTelegramMessage(chatId, message);
       agent.context.set({ name: 'contact_assistance_menu', lifespan: 5 });
+      agent.context.set({ name: 'main_menu', lifespan: 0 });
       return;
     }
 
@@ -753,6 +771,7 @@ app.post('/', (req, res) => {
       sendTelegramMessage(chatId, message);
       agent.context.set({ name: 'contact_assistance_collect_name', lifespan: 2 });
       agent.context.set({ name: 'contact_assistance_terms', lifespan: 0 });
+      agent.context.set({ name: 'main_menu', lifespan: 0 }); // clave para no competir con Main Menu
       return;
     }
 
@@ -770,6 +789,7 @@ app.post('/', (req, res) => {
     agent.add(new Payload(agent.TELEGRAM, { text: message }));
     sendTelegramMessage(chatId, message);
     agent.context.set({ name: 'contact_assistance_terms', lifespan: 1 });
+    agent.context.set({ name: 'main_menu', lifespan: 0 });
   }
 
   function contactAssistanceNameHandler(agent) {
@@ -788,6 +808,7 @@ app.post('/', (req, res) => {
       agent.add(new Payload(agent.TELEGRAM, { text: message }));
       sendTelegramMessage(chatId, message);
       agent.context.set({ name: 'contact_assistance_collect_name', lifespan: 2 });
+      agent.context.set({ name: 'main_menu', lifespan: 0 });
       return;
     }
 
@@ -797,6 +818,7 @@ app.post('/', (req, res) => {
     sendTelegramMessage(chatId, message);
     agent.context.set({ name: 'contact_assistance_collect_id', lifespan: 2, parameters: { fullName: input } });
     agent.context.set({ name: 'contact_assistance_collect_name', lifespan: 0 });
+    agent.context.set({ name: 'main_menu', lifespan: 0 });
   }
 
   function contactAssistanceIdHandler(agent) {
@@ -818,6 +840,7 @@ app.post('/', (req, res) => {
       agent.add(new Payload(agent.TELEGRAM, { text: message }));
       sendTelegramMessage(chatId, message);
       agent.context.set({ name: 'contact_assistance_collect_id', lifespan: 2, parameters: { fullName } });
+      agent.context.set({ name: 'main_menu', lifespan: 0 });
       return;
     }
 
@@ -827,6 +850,7 @@ app.post('/', (req, res) => {
     sendTelegramMessage(chatId, message);
     agent.context.set({ name: 'contact_assistance_collect_phone', lifespan: 2, parameters: { fullName, identification: input } });
     agent.context.set({ name: 'contact_assistance_collect_id', lifespan: 0 });
+    agent.context.set({ name: 'main_menu', lifespan: 0 });
   }
 
   function contactAssistancePhoneHandler(agent) {
@@ -848,10 +872,10 @@ app.post('/', (req, res) => {
       agent.add(new Payload(agent.TELEGRAM, { text: message }));
       sendTelegramMessage(chatId, message);
       agent.context.set({ name: 'contact_assistance_collect_phone', lifespan: 2, parameters: { fullName, identification } });
+      agent.context.set({ name: 'main_menu', lifespan: 0 });
       return;
     }
 
-    // Enviar correo
     sendEmailNotification({ fullName, identification, phone: input, chatId })
       .then(ok => {
         const msg = ok
