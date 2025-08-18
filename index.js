@@ -13,9 +13,9 @@ let projectData = [];
 let isDataLoaded = false;
 
 // === Configuración Telegram ===
-const TELEGRAM_BOT_TOKEN = '7253134218:AAFVF7q25Ukx24IcGOgw-T3-ohzMYQRN0Lk'; // de tu código actual
+const TELEGRAM_BOT_TOKEN = '7253134218:AAFVF7q25Ukx24IcGOgw-T3-ohzMYQRN0Lk'; // tu token actual
 
-// === Configuración email (usar ENV en Render; fallback a las credenciales provistas) ===
+// === Configuración email (usar ENV en Render; fallback a credenciales provistas) ===
 const EMAIL_USER = process.env.EMAIL_USER || 'polibot.aa@gmail.com';
 const EMAIL_PASS = process.env.EMAIL_PASS || 'jwlo uuuh ztsq jtmw';
 const transporter = nodemailer.createTransport({
@@ -23,7 +23,7 @@ const transporter = nodemailer.createTransport({
   auth: { user: EMAIL_USER, pass: EMAIL_PASS }
 });
 
-// === Cargar CSV desde GitHub (igual que tienes) ===
+// === Cargar CSV desde GitHub ===
 function loadData() {
   return new Promise((resolve, reject) => {
     axios
@@ -69,6 +69,7 @@ loadData().catch(e => console.error('Error al cargar datos:', e));
 // === Utilidades ===
 async function sendTelegramMessage(chatId, text) {
   try {
+    if (!chatId) return;
     await axios.post(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       chat_id: chatId,
       text,
@@ -80,11 +81,9 @@ async function sendTelegramMessage(chatId, text) {
 }
 
 function normalizePhone(input) {
-  // Quitar espacios y guiones
   let p = (input || '').toString().replace(/[\s-]/g, '');
-  // +5939XXXXXXXX -> 09XXXXXXXXX
   if (p.startsWith('+5939') && p.length === 13) {
-    p = '0' + p.slice(4); // +5939xxxxxxxx -> 09xxxxxxxxx
+    p = '0' + p.slice(4);
   }
   return p;
 }
@@ -173,7 +172,6 @@ app.post('/', (req, res) => {
     }
 
     if (input === '5') {
-      // Términos de la opción 5 (flujo existente)
       agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 });
       agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
       const message =
@@ -189,8 +187,6 @@ app.post('/', (req, res) => {
     }
 
     if (input === '6') {
-      // === NUEVO SUBMENÚ 6 ===
-      // Limpiar contextos que no aplican
       agent.context.set({ name: 'terms_acceptance', lifespan: 0 });
       agent.context.set({ name: 'personalized_queries_menu', lifespan: 0 });
       agent.context.set({ name: 'awaiting_identification', lifespan: 0 });
@@ -208,7 +204,6 @@ app.post('/', (req, res) => {
       return;
     }
 
-    // Resto de opciones (1–4, 0)
     if (input === '1') {
       const message =
         'DOCUMENTOS Y FORMATOS.\n\n' +
@@ -1040,7 +1035,8 @@ app.post('/', (req, res) => {
     agent.context.set({ name: 'notify_collect_id', lifespan: 2, parameters: { name: ctx?.parameters?.name } });
   }
 
-  function collectUserPhoneHandler(agent) {
+  // >>>>>>>>>>>> FIX: handler async + await + return antes de salir <<<<<<<<<<<<<<
+  async function collectUserPhoneHandler(agent) {
     const ctx = agent.context.get('notify_collect_phone');
     let raw = (agent.query || '').toString().trim();
 
@@ -1061,22 +1057,22 @@ app.post('/', (req, res) => {
         '0) Salir\n\n' +
         'Por favor, selecciona una opción (0-6).';
       agent.add(new Payload(agent.TELEGRAM, { text: message }));
-      sendTelegramMessage(chatId, message);
+      await sendTelegramMessage(chatId, message);
       agent.context.set({ name: 'notify_collect_phone', lifespan: 0 });
       agent.context.set({ name: 'main_menu', lifespan: 5 });
       return;
     }
 
     raw = normalizePhone(raw);
-    const ecRegex = /^09\d{8}$/;          // 10 dígitos (celular EC)
-    const intlRegex = /^\+5939\d{8}$/;    // por si llega sin normalizar
+    const ecRegex = /^09\d{8}$/;
+    const intlRegex = /^\+5939\d{8}$/;
 
     if (!(ecRegex.test(raw) || intlRegex.test(raw))) {
       const message =
         'Número de celular inválido. Ingrese un número de *10 dígitos* (ej. 0991234567) o en formato internacional *+5939########*.\n\n' +
         'Digite 0 para regresar al menú principal.';
       agent.add(new Payload(agent.TELEGRAM, { text: message }));
-      sendTelegramMessage(chatId, message);
+      await sendTelegramMessage(chatId, message);
       agent.context.set({
         name: 'notify_collect_phone',
         lifespan: 2,
@@ -1085,35 +1081,47 @@ app.post('/', (req, res) => {
       return;
     }
 
-    // Normalizar si vino +5939...
     const phone = raw.startsWith('+5939') ? ('0' + raw.slice(4)) : raw;
 
-    // Enviar email
-    sendEmailNotification({
-      name: ctx.parameters.name,
-      identification: ctx.parameters.identification,
-      phone
-    }).then(sent => {
+    try {
+      const sent = await sendEmailNotification({
+        name: ctx.parameters.name,
+        identification: ctx.parameters.identification,
+        phone
+      });
+
+      if (sent) {
+        const message =
+          'Notificación enviada.\n\n' +
+          `Resumen:\n` +
+          `- Nombre: ${ctx.parameters.name}\n` +
+          `- Identificación: ${ctx.parameters.identification}\n` +
+          `- Celular: ${phone}\n\n` +
+          'Digite 0 para regresar al menú principal.';
+        agent.add(new Payload(agent.TELEGRAM, { text: message }));
+        await sendTelegramMessage(chatId, message);
+        agent.context.set({ name: 'notify_collect_phone', lifespan: 0 });
+        agent.context.set({ name: 'main_menu', lifespan: 5 });
+      } else {
+        const message =
+          'Ocurrió un problema enviando la notificación por correo. Intenta nuevamente más tarde o usa los canales de contacto.\n\n' +
+          'Digite 0 para regresar al menú principal.';
+        agent.add(new Payload(agent.TELEGRAM, { text: message }));
+        await sendTelegramMessage(chatId, message);
+        agent.context.set({ name: 'notify_collect_phone', lifespan: 0 });
+        agent.context.set({ name: 'main_menu', lifespan: 5 });
+      }
+      return;
+    } catch (e) {
       const message =
-        'Notificación enviada.\n\n' +
-        `Resumen:\n` +
-        `- Nombre: ${ctx.parameters.name}\n` +
-        `- Identificación: ${ctx.parameters.identification}\n` +
-        `- Celular: ${phone}\n\n` +
+        'Ocurrió un problema inesperado al procesar tu solicitud. Intenta nuevamente más tarde.\n\n' +
         'Digite 0 para regresar al menú principal.';
       agent.add(new Payload(agent.TELEGRAM, { text: message }));
-      sendTelegramMessage(chatId, message);
+      await sendTelegramMessage(chatId, message);
       agent.context.set({ name: 'notify_collect_phone', lifespan: 0 });
       agent.context.set({ name: 'main_menu', lifespan: 5 });
-    }).catch(() => {
-      const message =
-        'Ocurrió un problema enviando la notificación por correo. Intenta nuevamente más tarde o usa los canales de contacto.\n\n' +
-        'Digite 0 para regresar al menú principal.';
-      agent.add(new Payload(agent.TELEGRAM, { text: message }));
-      sendTelegramMessage(chatId, message);
-      agent.context.set({ name: 'notify_collect_phone', lifespan: 0 });
-      agent.context.set({ name: 'main_menu', lifespan: 5 });
-    });
+      return;
+    }
   }
 
   function fallbackCollectPhone(agent) {
@@ -1155,8 +1163,6 @@ app.post('/', (req, res) => {
   intentMap.set('Fallback - Title Management Menu', titleManagementHandler);
 
   // === NUEVO: opción 6 ===
-  // Puedes reutilizar tu intent "Contact Assistance" para entrar al submenú
-  // o crear "Academic Assistance Submenu" tal como se detalla arriba.
   intentMap.set('Contact Assistance', academicAssistanceSubmenuHandler);
   intentMap.set('Academic Assistance Submenu', academicAssistanceSubmenuHandler);
   intentMap.set('Fallback - Academic Assistance Submenu', fallbackAcademicAssistanceSubmenu);
@@ -1170,7 +1176,7 @@ app.post('/', (req, res) => {
   intentMap.set('Collect Identification', collectUserIdHandler);
   intentMap.set('Fallback - Collect Identification', fallbackCollectId);
 
-  intentMap.set('Collect Phone', collectUserPhoneHandler);
+  intentMap.set('Collect Phone', collectUserPhoneHandler); // async
   intentMap.set('Fallback - Collect Phone', fallbackCollectPhone);
 
   agent.handleRequest(intentMap);
